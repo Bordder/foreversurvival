@@ -1378,6 +1378,8 @@ public class QuestScreen extends Screen {
 		settings.add(new Toggle("Hide vanilla advancement pop-ups",
 				() -> HudConfig.hideAdvancementToasts,
 				() -> HudConfig.hideAdvancementToasts = !HudConfig.hideAdvancementToasts));
+		settings.add(new Toggle("Durability on item tooltips", () -> HudConfig.showDurability,
+				() -> HudConfig.showDurability = !HudConfig.showDurability));
 
 		settings.add(new Header("Layout"));
 		settings.add(new Action("Move and resize...",

@@ -51,6 +51,9 @@ public final class HudConfig {
 	/** Swallow the vanilla "Advancement Made!" pop-up. */
 	public static boolean hideAdvancementToasts = true;
 
+	/** Add a "Durability: 57 / 100" line to damageable item tooltips. */
+	public static boolean showDurability = true;
+
 	/** Quest browser layout: false = list + detail, true = per-phase tree grid. */
 	public static boolean treeView = false;
 
@@ -112,6 +115,7 @@ public final class HudConfig {
 		textOpacity = clamp(integer(p, "textOpacity", 100), 20, 100);
 		pinnedQuestId = p.getProperty("pinnedQuestId", "");
 		hideAdvancementToasts = bool(p, "hideAdvancementToasts", true);
+		showDurability = bool(p, "showDurability", true);
 		treeView = bool(p, "treeView", false);
 
 		locatorEnabled = bool(p, "locatorEnabled", true);
@@ -140,6 +144,7 @@ public final class HudConfig {
 		p.setProperty("showIcon", Boolean.toString(showIcon));
 		p.setProperty("pinnedQuestId", pinnedQuestId == null ? "" : pinnedQuestId);
 		p.setProperty("hideAdvancementToasts", Boolean.toString(hideAdvancementToasts));
+		p.setProperty("showDurability", Boolean.toString(showDurability));
 		p.setProperty("treeView", Boolean.toString(treeView));
 
 		p.setProperty("locatorEnabled", Boolean.toString(locatorEnabled));
@@ -177,6 +182,7 @@ public final class HudConfig {
 		showIcon = true;
 		pinnedQuestId = "";
 		hideAdvancementToasts = true;
+		showDurability = true;
 		treeView = false;
 
 		locatorEnabled = true;

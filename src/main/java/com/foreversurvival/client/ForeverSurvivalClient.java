@@ -30,6 +30,7 @@ public class ForeverSurvivalClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		HudConfig.load();
 		QuestHud.register();
+		DurabilityTooltip.register();
 
 		// Both defaults are keys vanilla leaves unbound, and both show up in
 		// Options -> Controls -> ForeverSurvival for rebinding.
