@@ -7,15 +7,20 @@ import static com.foreversurvival.quest.QuestRegistry.RAW_FISH;
 import static com.foreversurvival.quest.QuestRegistry.WOOL;
 import static com.foreversurvival.quest.QuestRegistry.addMain;
 
-import com.foreversurvival.quest.task.CheckmarkTask;
+import static com.foreversurvival.quest.QuestRegistry.HOES;
+
 import com.foreversurvival.quest.task.CraftTask;
 import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
+import com.foreversurvival.quest.task.PositionTask;
+import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
+import com.foreversurvival.quest.task.UseTask;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
+import net.minecraft.stat.Stats;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
@@ -43,7 +48,7 @@ final class Phase2Quests {
 				.guide("An Iron Pickaxe is required for diamond, gold, redstone and emerald ore. "
 						+ "Anything weaker destroys them.")
 				.tools("Furnace", "Fuel")
-				.task(new ItemTask("ingots", "Smelt Iron Ingots", 10, Items.IRON_INGOT),
+				.task(new ItemTask("ingots", "Smelt Iron Ingots", 20, Items.IRON_INGOT),
 						new CraftTask("i_pick", "Craft an Iron Pickaxe", 1, Items.IRON_PICKAXE),
 						new CraftTask("i_sword", "Craft an Iron Sword", 1, Items.IRON_SWORD)));
 
@@ -87,9 +92,9 @@ final class Phase2Quests {
 				.guide("A 9x9 plot around one centre water block is the classic layout. Light it with "
 						+ "torches so crops keep growing at night and mobs cannot trample them.")
 				.tools("Hoe", "Water Bucket", "Torches")
-				.task(new ItemTask("wheat", "Harvest Wheat", 16, Items.WHEAT),
-						new CraftTask("bread", "Bake Bread", 5, Items.BREAD),
-						new CheckmarkTask("farm_built", "Build a lit, fenced wheat farm")));
+				.task(new UseTask("tilled", "Till Farmland", 40, HOES),
+						new ItemTask("wheat", "Harvest Wheat", 48, Items.WHEAT),
+						new CraftTask("bread", "Bake Bread", 16, Items.BREAD)));
 
 		addMain(Quest.builder("p2_06_green_thumb", QuestPhase.PHASE_2)
 				.title("Green Thumb")
@@ -98,8 +103,8 @@ final class Phase2Quests {
 				.guide("Carrots and potatoes come from village farms and rarely from zombies. "
 						+ "Melon and pumpkin stems need one free dirt block beside them to fruit.")
 				.tools("Hoe", "Water Bucket")
-				.task(new ItemTask("carrots", "Collect Carrots", 6, Items.CARROT),
-						new ItemTask("potatoes", "Collect Potatoes", 6, Items.POTATO),
+				.task(new ItemTask("carrots", "Collect Carrots", 16, Items.CARROT),
+						new ItemTask("potatoes", "Collect Potatoes", 16, Items.POTATO),
 						new ItemTask("gourd", "Collect a Pumpkin or Melon", 1,
 								Items.PUMPKIN, Items.MELON)));
 
@@ -111,8 +116,8 @@ final class Phase2Quests {
 						+ "the cheapest renewable food in the early game.")
 				.tools("Fishing Rod", "Water")
 				.task(new CraftTask("rod", "Craft a Fishing Rod", 1, Items.FISHING_ROD),
-						new ItemTask("fish", "Catch Fish", 8, RAW_FISH),
-						new ItemTask("cooked_fish", "Cook Fish", 4,
+						new ItemTask("fish", "Catch Fish", 16, RAW_FISH),
+						new ItemTask("cooked_fish", "Cook Fish", 8,
 								Items.COOKED_COD, Items.COOKED_SALMON)));
 
 		addMain(Quest.builder("p2_08_animal_husbandry", QuestPhase.PHASE_2)
@@ -122,9 +127,9 @@ final class Phase2Quests {
 				.guide("Wheat breeds cows and sheep, carrots breed pigs, seeds breed chickens. "
 						+ "Fence and light the pen or they get eaten overnight.")
 				.tools("Fences", "Wheat")
-				.task(new CraftTask("fence", "Craft Fences", 8, FENCES),
-						new CheckmarkTask("breed", "Breed two animals inside a fenced, lit pen"),
-						new CheckmarkTask("pen", "Pen cows, sheep, pigs and chickens")));
+				.task(new CraftTask("fence", "Craft Fences", 16, FENCES),
+						new StatTask("bred", "Breed Animals", 6, Stats.ANIMALS_BRED),
+						new ItemTask("leather", "Collect Leather", 12, Items.LEATHER)));
 
 		addMain(Quest.builder("p2_09_shear_delight", QuestPhase.PHASE_2)
 				.title("Shear Delight")
@@ -134,7 +139,7 @@ final class Phase2Quests {
 						+ "grass, so one small flock covers every bed and carpet you will ever need.")
 				.tools("2 Iron Ingots", "Sheep Pen")
 				.task(new CraftTask("shears", "Craft Shears", 1, Items.SHEARS),
-						new ItemTask("wool_stock", "Stockpile Wool", 16, WOOL)));
+						new ItemTask("wool_stock", "Stockpile Wool", 32, WOOL)));
 
 		addMain(Quest.builder("p2_10_neighbours", QuestPhase.PHASE_2)
 				.title("Neighbours")
@@ -145,8 +150,8 @@ final class Phase2Quests {
 				.tools("Crops to sell")
 				.task(new StructureTask("village", "Stand inside a Village", OVERWORLD,
 								StructureFeature.VILLAGE),
-						new CheckmarkTask("trade", "Trade with a villager"),
-						new ItemTask("emeralds", "Collect Emeralds", 5, Items.EMERALD)));
+						new StatTask("trade", "Trade with Villagers", 8, Stats.TRADED_WITH_VILLAGER),
+						new ItemTask("emeralds", "Collect Emeralds", 12, Items.EMERALD)));
 
 		addMain(Quest.builder("p2_11_set_sail", QuestPhase.PHASE_2)
 				.title("Set Sail")
@@ -156,7 +161,8 @@ final class Phase2Quests {
 						+ "They also let you carry an animal across an ocean.")
 				.tools("5 Planks")
 				.task(new CraftTask("boat", "Craft a Boat", 1, BOATS),
-						new CheckmarkTask("sailed", "Cross a large body of water by boat")));
+						new StatTask("sailed", "Travel by Boat (blocks)", 1000,
+								Stats.BOAT_ONE_CM, 100)));
 
 		addMain(Quest.builder("p2_12_the_stable", QuestPhase.PHASE_2)
 				.title("The Stable")
@@ -166,8 +172,8 @@ final class Phase2Quests {
 						+ "not craftable - they come from chests, fishing and Leatherworker trades.")
 				.tools("Saddle", "Lead", "Wheat or Apples")
 				.task(new ItemTask("saddle", "Obtain a Saddle", 1, Items.SADDLE),
-						new CheckmarkTask("tamed_horse", "Tame and saddle a horse"),
-						new CraftTask("lead", "Craft a Lead", 1, Items.LEAD)));
+						new UseTask("saddled", "Saddle a Horse", 1, Items.SADDLE),
+						new CraftTask("lead", "Craft Leads", 2, Items.LEAD)));
 
 		addMain(Quest.builder("p2_13_copper_rush", QuestPhase.PHASE_2)
 				.title("The Copper Rush")
@@ -176,7 +182,7 @@ final class Phase2Quests {
 				.guide("Copper peaks at Y=48 and is densest in Dripstone Caves. A Lightning Rod on "
 						+ "your roof stops the base burning down.")
 				.tools("Stone Pickaxe or better")
-				.task(new ItemTask("raw_copper", "Collect Raw Copper", 18, Items.RAW_COPPER),
+				.task(new ItemTask("raw_copper", "Collect Raw Copper", 40, Items.RAW_COPPER),
 						new CraftTask("copper_block", "Craft a Copper Block", 1, Items.COPPER_BLOCK),
 						new CraftTask("rod", "Craft a Lightning Rod", 1, Items.LIGHTNING_ROD)));
 
@@ -187,9 +193,10 @@ final class Phase2Quests {
 				.guide("Deepslate starts at Y=0 and runs to bedrock at Y=-64. It takes twice as long "
 						+ "to mine as stone, and open lava lakes are common near Y=-54.")
 				.tools("Iron Pickaxe", "Water Bucket", "Torches")
-				.task(new ItemTask("deepslate", "Collect Deepslate", 16,
+				.task(new ItemTask("deepslate", "Collect Deepslate", 48,
 								Items.DEEPSLATE, Items.COBBLED_DEEPSLATE),
-						new CheckmarkTask("bedrock", "Dig down and see bedrock at Y=-64")));
+						new PositionTask("bedrock", "Reach Y=-58, just above bedrock",
+								PositionTask.Kind.BELOW_Y, -58)));
 
 		addMain(Quest.builder("p2_15_deep_delving", QuestPhase.PHASE_2)
 				.title("Deep Delving")
@@ -198,9 +205,9 @@ final class Phase2Quests {
 				.guide("Gold peaks at Y=-16. Lapis peaks at Y=0. Redstone peaks at Y=-59 and gets "
 						+ "much denser below Y=-32.")
 				.tools("Iron Pickaxe", "Water Bucket", "Torches")
-				.task(new ItemTask("raw_gold", "Collect Raw Gold", 6, Items.RAW_GOLD),
-						new ItemTask("redstone", "Collect Redstone Dust", 12, Items.REDSTONE),
-						new ItemTask("lapis", "Collect Lapis Lazuli", 8, Items.LAPIS_LAZULI)));
+				.task(new ItemTask("raw_gold", "Collect Raw Gold", 16, Items.RAW_GOLD),
+						new ItemTask("redstone", "Collect Redstone Dust", 32, Items.REDSTONE),
+						new ItemTask("lapis", "Collect Lapis Lazuli", 20, Items.LAPIS_LAZULI)));
 
 		addMain(Quest.builder("p2_16_the_mineshaft", QuestPhase.PHASE_2)
 				.title("The Abandoned Mineshaft")
@@ -211,8 +218,8 @@ final class Phase2Quests {
 				.tools("Iron Sword", "Torches", "Milk Bucket")
 				.task(new StructureTask("mineshaft", "Find an Abandoned Mineshaft", OVERWORLD,
 								StructureFeature.MINESHAFT),
-						new ItemTask("string", "Collect String from cobwebs", 12, Items.STRING),
-						new KillTask("cave_spiders", "Kill Cave Spiders", 5, EntityType.CAVE_SPIDER)));
+						new ItemTask("string", "Collect String from cobwebs", 24, Items.STRING),
+						new KillTask("cave_spiders", "Kill Cave Spiders", 12, EntityType.CAVE_SPIDER)));
 
 		addMain(Quest.builder("p2_17_rails_and_carts", QuestPhase.PHASE_2)
 				.title("Rails and Minecarts")
@@ -222,20 +229,21 @@ final class Phase2Quests {
 						+ "keeps a cart at full speed; a chest minecart hauls your mining trip home.")
 				.tools("Iron Ingots", "Gold Ingots", "Redstone", "Sticks")
 				.task(new CraftTask("minecart", "Craft a Minecart", 1, Items.MINECART),
-						new CraftTask("rails", "Craft Rails", 32, Items.RAIL),
+						new CraftTask("rails", "Craft Rails", 64, Items.RAIL),
 						new CraftTask("powered", "Craft Powered Rails", 6, Items.POWERED_RAIL)));
 
 		addMain(Quest.builder("p2_18_the_spawner", QuestPhase.PHASE_2)
-				.title("The Dungeon")
+				.title("The Monster Spawner")
 				.desc("A mossy room, two chests, and something producing monsters.")
 				.icon(Items.SPAWNER)
-				.guide("Dungeons are mossy cobblestone rooms with a spawner and 1-2 chests. Light "
-						+ "the spawner to level 12 or higher to stop it, or build a farm around it - "
-						+ "it never runs out.")
+				.guide("Dungeons are mossy cobblestone rooms holding a Monster Spawner and 1-2 "
+						+ "chests. Light the spawner to level 12 or higher to stop it, or build a farm "
+						+ "around it - it never runs out.")
 				.tools("Iron Sword", "Torches", "Shield")
-				.task(new StructureTask("dungeon", "Find a Dungeon spawner", OVERWORLD,
+				.task(new StructureTask("dungeon", "Find a Monster Spawner room", OVERWORLD,
 								Blocks.SPAWNER, Blocks.MOSSY_COBBLESTONE),
-						new CheckmarkTask("looted", "Loot both dungeon chests")));
+						new ItemTask("rotten", "Collect Rotten Flesh", 32, Items.ROTTEN_FLESH),
+						new ItemTask("bones", "Collect Bones", 24, Items.BONE)));
 
 		addMain(Quest.builder("p2_19_redstone_basics", QuestPhase.PHASE_2)
 				.title("Redstone Basics")
@@ -256,7 +264,7 @@ final class Phase2Quests {
 				.guide("Sugar cane grows on sand or dirt next to water at any light level. 3 cane = "
 						+ "3 paper, 3 paper + 1 leather = 1 book. 15 bookshelves needs 45 of each.")
 				.tools("Sugar Cane Farm", "Cows")
-				.task(new ItemTask("cane", "Collect Sugar Cane", 24, Items.SUGAR_CANE),
+				.task(new ItemTask("cane", "Collect Sugar Cane", 48, Items.SUGAR_CANE),
 						new CraftTask("paper", "Craft Paper", 45, Items.PAPER),
 						new CraftTask("books", "Craft Books", 15, Items.BOOK)));
 
@@ -280,7 +288,7 @@ final class Phase2Quests {
 						+ "exposed to air, so branch mine through solid deepslate. Eight covers a "
 						+ "pickaxe, a sword and the enchanting table.")
 				.tools("Iron Pickaxe", "Water Bucket", "Torches")
-				.task(new ItemTask("diamonds", "Collect Diamonds", 8, Items.DIAMOND)));
+				.task(new ItemTask("diamonds", "Collect Diamonds", 14, Items.DIAMOND)));
 
 		addMain(Quest.builder("p2_23_diamond_standard", QuestPhase.PHASE_2)
 				.title("The Diamond Standard")
@@ -302,7 +310,7 @@ final class Phase2Quests {
 				.task(new ItemTask("obsidian", "Collect Obsidian", 4, Items.OBSIDIAN),
 						new CraftTask("table", "Craft an Enchanting Table", 1, Items.ENCHANTING_TABLE),
 						new CraftTask("shelves", "Craft Bookshelves", 15, Items.BOOKSHELF),
-						new CheckmarkTask("lvl30", "Reach a level 30 enchant slot")));
+						new StatTask("enchanted", "Enchant Items", 3, Stats.ENCHANT_ITEM)));
 
 		addMain(Quest.builder("p2_25_the_anvil", QuestPhase.PHASE_2)
 				.title("The Anvil")
@@ -313,6 +321,6 @@ final class Phase2Quests {
 						+ "so combine books before you put them on the tool.")
 				.tools("31 Iron Ingots", "Enchanting Table")
 				.task(new CraftTask("anvil", "Craft an Anvil", 1, Items.ANVIL),
-						new CheckmarkTask("repaired", "Repair or rename an item on the anvil")));
+						new StatTask("used_anvil", "Use an Anvil", 3, Stats.INTERACT_WITH_ANVIL)));
 	}
 }

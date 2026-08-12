@@ -10,15 +10,18 @@ import static com.foreversurvival.quest.QuestRegistry.SAPLINGS;
 import static com.foreversurvival.quest.QuestRegistry.WOOL;
 import static com.foreversurvival.quest.QuestRegistry.addMain;
 
-import com.foreversurvival.quest.task.CheckmarkTask;
 import com.foreversurvival.quest.task.CraftTask;
 import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
+import com.foreversurvival.quest.task.PositionTask;
+import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
+import com.foreversurvival.quest.task.UseTask;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
+import net.minecraft.stat.Stats;
 
 /**
  * PHASE 1 - THE STRUGGLE (18 quests).
@@ -38,7 +41,7 @@ final class Phase1Quests {
 				.icon(Items.OAK_LOG)
 				.guide("Hold left click on tree trunks until the logs pop out.")
 				.tools("Hands")
-				.task(new ItemTask("logs", "Collect Logs", 12, LOGS)));
+				.task(new ItemTask("logs", "Collect Logs", 24, LOGS)));
 
 		addMain(Quest.builder("p1_02_crafting_table", QuestPhase.PHASE_1)
 				.title("A Proper Workbench")
@@ -47,7 +50,7 @@ final class Phase1Quests {
 				.guide("1 log makes 4 planks. 2 stacked planks make 4 sticks. 4 planks in a square "
 						+ "make a Crafting Table.")
 				.tools("Logs")
-				.task(new CraftTask("planks", "Craft Planks", 16, PLANKS),
+				.task(new CraftTask("planks", "Craft Planks", 32, PLANKS),
 						new CraftTask("sticks", "Craft Sticks", 8, Items.STICK),
 						new CraftTask("table", "Craft a Crafting Table", 1, Items.CRAFTING_TABLE)));
 
@@ -56,10 +59,10 @@ final class Phase1Quests {
 				.desc("Wood breaks. Stone does not - at least, not as fast.")
 				.icon(Items.COBBLESTONE)
 				.guide("Stone is anywhere at Y=0 or above. Dig into a hillside, never straight down. "
-						+ "20 cobblestone covers a furnace and a full tool set.")
+						+ "A furnace and a full tool set costs about 20, so gather a spare stack.")
 				.tools("Wooden Pickaxe")
 				.task(new CraftTask("wood_pick", "Craft a Wooden Pickaxe", 1, Items.WOODEN_PICKAXE),
-						new ItemTask("cobble", "Collect Cobblestone", 20,
+						new ItemTask("cobble", "Collect Cobblestone", 48,
 								Items.COBBLESTONE, Items.COBBLED_DEEPSLATE)));
 
 		addMain(Quest.builder("p1_04_tools_of_the_trade", QuestPhase.PHASE_1)
@@ -81,10 +84,10 @@ final class Phase1Quests {
 				.guide("Cows, pigs, sheep and chickens all drop raw meat. Eating it raw works but "
 						+ "wastes most of the hunger it is worth.")
 				.tools("Stone Sword")
-				.task(new KillTask("animals", "Kill Animals", 5,
+				.task(new KillTask("animals", "Kill Animals", 10,
 								EntityType.COW, EntityType.PIG, EntityType.SHEEP,
 								EntityType.CHICKEN, EntityType.RABBIT),
-						new ItemTask("raw_meat", "Carry Raw Meat", 5, RAW_MEAT)));
+						new ItemTask("raw_meat", "Carry Raw Meat", 10, RAW_MEAT)));
 
 		addMain(Quest.builder("p1_06_a_warm_meal", QuestPhase.PHASE_1)
 				.title("A Warm Meal")
@@ -93,7 +96,7 @@ final class Phase1Quests {
 				.guide("8 cobblestone in a ring makes a Furnace. Fuel goes bottom-left, food top-left.")
 				.tools("Furnace", "Fuel")
 				.task(new CraftTask("furnace", "Craft a Furnace", 1, Items.FURNACE),
-						new ItemTask("cooked", "Carry Cooked Food", 5, COOKED_FOOD)));
+						new ItemTask("cooked", "Carry Cooked Food", 12, COOKED_FOOD)));
 
 		addMain(Quest.builder("p1_07_charcoal_burner", QuestPhase.PHASE_1)
 				.title("The Charcoal Burner")
@@ -102,7 +105,7 @@ final class Phase1Quests {
 				.guide("Smelt logs in a furnace to get Charcoal. It burns and crafts torches exactly "
 						+ "like coal, so a single tree makes you self-sufficient.")
 				.tools("Furnace", "Logs")
-				.task(new ItemTask("charcoal", "Smelt Charcoal", 8, Items.CHARCOAL),
+				.task(new ItemTask("charcoal", "Smelt Charcoal", 16, Items.CHARCOAL),
 						new CraftTask("campfire", "Craft a Campfire", 1, Items.CAMPFIRE)));
 
 		addMain(Quest.builder("p1_08_let_there_be_light", QuestPhase.PHASE_1)
@@ -112,8 +115,8 @@ final class Phase1Quests {
 				.guide("Coal is most common near Y=96 and sits exposed on mountain faces. "
 						+ "1 coal + 1 stick = 4 torches.")
 				.tools("Stone Pickaxe")
-				.task(new ItemTask("coal", "Collect Coal", 8, Items.COAL),
-						new CraftTask("torches", "Craft Torches", 24, Items.TORCH)));
+				.task(new ItemTask("coal", "Collect Coal", 16, Items.COAL),
+						new CraftTask("torches", "Craft Torches", 48, Items.TORCH)));
 
 		addMain(Quest.builder("p1_09_wool_gathering", QuestPhase.PHASE_1)
 				.title("Wool Gathering")
@@ -122,7 +125,7 @@ final class Phase1Quests {
 				.guide("3 wool of the same colour + 3 planks = Bed. Never sleep in the Nether or the "
 						+ "End - the bed explodes.")
 				.tools("Shears or any Sword")
-				.task(new ItemTask("wool", "Collect Wool", 3, WOOL),
+				.task(new ItemTask("wool", "Collect Wool", 6, WOOL),
 						new CraftTask("bed", "Craft a Bed", 1, BEDS)));
 
 		addMain(Quest.builder("p1_10_good_night", QuestPhase.PHASE_1)
@@ -132,7 +135,7 @@ final class Phase1Quests {
 				.guide("Place the bed and use it after dusk. Sleeping sets your respawn point and "
 						+ "clears Phantoms for three days.")
 				.tools("Bed", "A lit, enclosed room")
-				.task(new CheckmarkTask("slept", "Sleep through a full night in your own bed")));
+				.task(new StatTask("slept", "Sleep through a night", 1, Stats.SLEEP_IN_BED)));
 
 		addMain(Quest.builder("p1_11_four_walls", QuestPhase.PHASE_1)
 				.title("Four Walls and a Roof")
@@ -152,7 +155,7 @@ final class Phase1Quests {
 				.guide("Leather comes from cows. A full leather set is only 7 armour points but it is "
 						+ "the difference between surviving a creeper and not.")
 				.tools("Stone Sword", "Leather")
-				.task(new ItemTask("leather", "Collect Leather", 5, Items.LEATHER),
+				.task(new ItemTask("leather", "Collect Leather", 8, Items.LEATHER),
 						new CraftTask("l_chest", "Craft a Leather Chestplate", 1,
 								Items.LEATHER_CHESTPLATE),
 						new CraftTask("l_boots", "Craft Leather Boots", 1, Items.LEATHER_BOOTS)));
@@ -163,10 +166,10 @@ final class Phase1Quests {
 				.icon(Items.ROTTEN_FLESH)
 				.guide("Hit a creeper once and step back - it detonates 1.5 seconds after it hisses.")
 				.tools("Stone Sword", "Torches")
-				.task(new KillTask("zombies", "Kill Zombies", 6, EntityType.ZOMBIE),
-						new KillTask("skeletons", "Kill Skeletons", 4, EntityType.SKELETON),
-						new KillTask("spiders", "Kill Spiders", 3, EntityType.SPIDER),
-						new KillTask("creepers", "Kill Creepers", 2, EntityType.CREEPER)));
+				.task(new KillTask("zombies", "Kill Zombies", 15, EntityType.ZOMBIE),
+						new KillTask("skeletons", "Kill Skeletons", 12, EntityType.SKELETON),
+						new KillTask("spiders", "Kill Spiders", 8, EntityType.SPIDER),
+						new KillTask("creepers", "Kill Creepers", 5, EntityType.CREEPER)));
 
 		addMain(Quest.builder("p1_14_arrows_and_aim", QuestPhase.PHASE_1)
 				.title("Arrows and Aim")
@@ -175,9 +178,9 @@ final class Phase1Quests {
 				.guide("A bow is 3 sticks + 3 string from spiders. Arrows need flint, which drops "
 						+ "from about 1 gravel block in 10.")
 				.tools("String", "Flint", "Feathers")
-				.task(new ItemTask("flint", "Collect Flint", 4, Items.FLINT),
+				.task(new ItemTask("flint", "Collect Flint", 6, Items.FLINT),
 						new CraftTask("bow", "Craft a Bow", 1, Items.BOW),
-						new CraftTask("arrows", "Craft Arrows", 16, Items.ARROW)));
+						new CraftTask("arrows", "Craft Arrows", 32, Items.ARROW)));
 
 		addMain(Quest.builder("p1_15_seeds_and_soil", QuestPhase.PHASE_1)
 				.title("Seeds and Soil")
@@ -187,8 +190,8 @@ final class Phase1Quests {
 						+ "farmland stays hydrated within 4 blocks of a water source.")
 				.tools("Hoe", "Water nearby")
 				.task(new CraftTask("hoe", "Craft a Hoe", 1, HOES),
-						new ItemTask("seeds", "Collect Wheat Seeds", 8, Items.WHEAT_SEEDS),
-						new CheckmarkTask("planted", "Plant your first crop row")));
+						new ItemTask("seeds", "Collect Wheat Seeds", 12, Items.WHEAT_SEEDS),
+						new UseTask("tilled", "Till Farmland", 12, HOES)));
 
 		addMain(Quest.builder("p1_16_saplings", QuestPhase.PHASE_1)
 				.title("Renewable Wood")
@@ -197,8 +200,8 @@ final class Phase1Quests {
 				.guide("Leaves drop saplings when broken. Plant them with 1 block of space around "
 						+ "each and they grow back in a few minutes with light.")
 				.tools("Axe", "Saplings")
-				.task(new ItemTask("saplings", "Collect Saplings", 6, SAPLINGS),
-						new CheckmarkTask("tree_farm", "Plant a small tree farm near your base")));
+				.task(new ItemTask("saplings", "Collect Saplings", 8, SAPLINGS),
+						new UseTask("planted", "Plant Saplings", 8, SAPLINGS)));
 
 		addMain(Quest.builder("p1_17_into_the_dark", QuestPhase.PHASE_1)
 				.title("Into the Dark")
@@ -207,8 +210,9 @@ final class Phase1Quests {
 				.guide("Torch every corner behind you and place them on the RIGHT wall going in - "
 						+ "then follow the left wall to get out. Never dig straight down.")
 				.tools("Stone Pickaxe", "Torches", "Cooked Food", "Sword")
-				.task(new ItemTask("more_coal", "Collect Coal", 16, Items.COAL),
-						new CheckmarkTask("cave", "Explore a cave and get back out alive")));
+				.task(new ItemTask("more_coal", "Collect Coal", 24, Items.COAL),
+						new PositionTask("deep", "Descend to Y=20 or lower",
+								PositionTask.Kind.BELOW_Y, 20)));
 
 		addMain(Quest.builder("p1_18_down_the_rabbit_hole", QuestPhase.PHASE_1)
 				.title("Down the Rabbit Hole")
@@ -217,6 +221,6 @@ final class Phase1Quests {
 				.guide("Iron has two bands: underground peaking at Y=16, and mountains peaking at "
 						+ "Y=232 where it is often on the surface in Jagged Peaks.")
 				.tools("Stone Pickaxe", "Torches", "Food")
-				.task(new ItemTask("raw_iron", "Collect Raw Iron", 12, Items.RAW_IRON)));
+				.task(new ItemTask("raw_iron", "Collect Raw Iron", 24, Items.RAW_IRON)));
 	}
 }
