@@ -15,14 +15,19 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 
 /**
  * The on-screen objective overlay.
  *
- * Shows the current main quest and its outstanding objectives with a checkbox
- * each. A pinned quest can be appended: a side challenge gets its own objective
- * list, while a pinned main-line quest is only ever a single line of text, since
- * the main line is already on screen above it.
+ * The panel is laid out to an explicit width from {@link HudConfig}: everything
+ * WRAPS to that width and nothing is ever truncated, so a long objective is
+ * always readable in full. Height grows to fit the content, and can be padded
+ * out to a configured minimum.
+ *
+ * A pinned side challenge gets its own objective list; a pinned main-line quest
+ * is only a line of text, since the main line is already on screen above it.
  *
  * This is a UI panel, not a world marker: it never points at anything, never
  * draws in the world, and never reveals a locked quest.
@@ -30,10 +35,9 @@ import net.minecraft.client.util.math.MatrixStack;
 public final class QuestHud extends DrawableHelper {
 
 	private static final int PADDING = 5;
-	private static final int LINE_HEIGHT = 11;
-	private static final int MIN_WIDTH = 110;
-	private static final int MAX_WIDTH = 220;
-	private static final int MAX_TASK_ROWS = 6;
+	private static final int LINE = 10;
+	private static final int ICON = 20;
+	private static final int CHECKBOX = 12;
 
 	private static final int RGB_HEADER = 0xFFD24A;
 	private static final int RGB_TITLE = 0xFFFFFF;
@@ -56,15 +60,31 @@ public final class QuestHud extends DrawableHelper {
 	public static void register() {
 		HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
 			INSTANCE.render(matrices);
-			LocatorBar.get().render(matrices);
+			LocatorBar.get().renderFree(matrices);
 		});
+	}
+
+	/** One laid-out line. A checkbox is drawn on the first line of a task only. */
+	private static final class Row {
+
+		final OrderedText text;
+		final int rgb;
+		final int indent;
+		/** -1 none, 0 empty box, 1 ticked. */
+		final int checkbox;
+
+		Row(OrderedText text, int rgb, int indent, int checkbox) {
+			this.text = text;
+			this.rgb = rgb;
+			this.indent = indent;
+			this.checkbox = checkbox;
+		}
 	}
 
 	// ------------------------------------------------------------------
 	// Content
 	// ------------------------------------------------------------------
 
-	/** The pinned quest, or null if nothing is pinned or it is already shown. */
 	@Nullable
 	public static Quest getPinnedQuest(@Nullable Quest current) {
 		String id = HudConfig.pinnedQuestId;
@@ -82,13 +102,22 @@ public final class QuestHud extends DrawableHelper {
 		return pinned;
 	}
 
-	private List<String> taskLabels(@Nullable Quest quest, List<Boolean> doneOut) {
-		List<String> labels = new ArrayList<>();
-		if (quest == null) {
-			return labels;
+	private void addWrapped(List<Row> out, TextRenderer font, String text, int width, int rgb,
+			int indent, int checkbox) {
+		if (text == null || text.isEmpty()) {
+			return;
 		}
 
+		List<OrderedText> lines = font.wrapLines(new LiteralText(text), Math.max(20, width));
+		for (int i = 0; i < lines.size(); i++) {
+			// Only the first line of a block carries the checkbox.
+			out.add(new Row(lines.get(i), rgb, indent, i == 0 ? checkbox : -1));
+		}
+	}
+
+	private void addTaskRows(List<Row> out, TextRenderer font, Quest quest, int textWidth) {
 		PlayerQuestData data = ClientQuestState.get();
+
 		for (QuestTask task : quest.getTasks()) {
 			int progress = Math.min(task.getRequired(), data.getProgress(quest.getId(), task.getId()));
 			boolean done = progress >= task.getRequired();
@@ -98,64 +127,58 @@ public final class QuestHud extends DrawableHelper {
 				label = label + "  " + progress + "/" + task.getRequired();
 			}
 
-			labels.add(label);
-			doneOut.add(done);
-
-			if (labels.size() >= MAX_TASK_ROWS) {
-				break;
-			}
+			addWrapped(out, font, label, textWidth - CHECKBOX, done ? RGB_TASK_DONE : RGB_TASK,
+					CHECKBOX, done ? 1 : 0);
 		}
-		return labels;
 	}
 
-	// ------------------------------------------------------------------
-	// Layout
-	// ------------------------------------------------------------------
-
-	/** Unscaled panel size for the current quest, as {width, height}. */
-	public int[] measure(@Nullable Quest quest) {
+	/** The whole panel as a flat list of laid-out lines. */
+	private List<Row> layout(@Nullable Quest quest) {
 		TextRenderer font = MinecraftClient.getInstance().textRenderer;
+		int textWidth = HudConfig.hudWidth - PADDING * 2;
+		int headerWidth = textWidth - (HudConfig.showIcon ? ICON : 0);
 
-		String header = "Current Objective";
-		String title = quest == null ? "All quests complete" : quest.getTitle();
-		String phase = quest == null ? "" : quest.getPhase().getDisplayName();
+		List<Row> rows = new ArrayList<>();
 
-		List<Boolean> done = new ArrayList<>();
-		List<String> labels = HudConfig.showObjectives ? taskLabels(quest, done) : List.of();
+		int headerIndent = HudConfig.showIcon ? ICON : 0;
+		addWrapped(rows, font, "Current Objective", headerWidth, RGB_HEADER, headerIndent, -1);
+		addWrapped(rows, font, quest == null ? "All quests complete" : quest.getTitle(),
+				headerWidth, RGB_TITLE, headerIndent, -1);
 
-		int textLeftOffset = HudConfig.showIcon ? 20 : 0;
-		int width = Math.max(MIN_WIDTH, font.getWidth(header) + textLeftOffset);
-		width = Math.max(width, font.getWidth(title) + textLeftOffset);
-		width = Math.max(width, font.getWidth(phase));
-		for (String label : labels) {
-			width = Math.max(width, font.getWidth(label) + 14);
-		}
+		if (quest != null) {
+			addWrapped(rows, font, quest.getPhase().getDisplayName(), textWidth, RGB_PHASE, 0, -1);
 
-		int headerHeight = HudConfig.showIcon ? 20 : LINE_HEIGHT * 2;
-		int height = PADDING * 2 + headerHeight + LINE_HEIGHT;
-		if (!labels.isEmpty()) {
-			height += 3 + labels.size() * LINE_HEIGHT;
-		}
-
-		// Pinned block
-		Quest pinned = getPinnedQuest(quest);
-		if (pinned != null) {
-			String pinnedTitle = "Pinned: " + pinned.getTitle();
-			width = Math.max(width, font.getWidth(pinnedTitle));
-			height += 5 + LINE_HEIGHT;
-
-			if (pinned.getPhase().isSide() && HudConfig.showObjectives) {
-				List<Boolean> pinnedDone = new ArrayList<>();
-				List<String> pinnedLabels = taskLabels(pinned, pinnedDone);
-				for (String label : pinnedLabels) {
-					width = Math.max(width, font.getWidth(label) + 14);
-				}
-				height += pinnedLabels.size() * LINE_HEIGHT;
+			if (HudConfig.showObjectives) {
+				addTaskRows(rows, font, quest, textWidth);
 			}
 		}
 
-		width = Math.min(MAX_WIDTH, width) + PADDING * 2;
-		return new int[] { width, height };
+		Quest pinned = getPinnedQuest(quest);
+		if (pinned != null) {
+			// Blank spacer row stands in for the separator line.
+			rows.add(new Row(null, 0, 0, -1));
+			addWrapped(rows, font, "Pinned: " + pinned.getTitle(), textWidth, RGB_PINNED, 0, -1);
+
+			// Only a real side challenge lists its objectives; a pinned main
+			// quest stays one line, because the main line is already above.
+			if (pinned.getPhase().isSide() && HudConfig.showObjectives) {
+				addTaskRows(rows, font, pinned, textWidth);
+			}
+		}
+
+		return rows;
+	}
+
+	/** Unscaled panel size as {width, height}. */
+	public int[] measure(@Nullable Quest quest) {
+		List<Row> rows = layout(quest);
+
+		int textHeight = rows.size() * LINE;
+		// The icon block is 20px tall; make sure the header never overlaps it.
+		int minimum = HudConfig.showIcon ? ICON : 0;
+		int height = PADDING * 2 + Math.max(textHeight, minimum);
+
+		return new int[] { HudConfig.hudWidth, Math.max(height, HudConfig.hudMinHeight) };
 	}
 
 	// ------------------------------------------------------------------
@@ -199,13 +222,7 @@ public final class QuestHud extends DrawableHelper {
 		MinecraftClient client = MinecraftClient.getInstance();
 		TextRenderer font = client.textRenderer;
 
-		String header = "Current Objective";
-		String title = quest == null ? "All quests complete" : quest.getTitle();
-		String phase = quest == null ? "" : quest.getPhase().getDisplayName();
-
-		List<Boolean> done = new ArrayList<>();
-		List<String> labels = HudConfig.showObjectives ? taskLabels(quest, done) : List.of();
-
+		List<Row> rows = layout(quest);
 		int[] size = measure(quest);
 		int width = size[0];
 		int height = size[1];
@@ -220,72 +237,29 @@ public final class QuestHud extends DrawableHelper {
 			fill(matrices, width - 1, 0, width, height, border);
 		}
 
-		int textLeftOffset = HudConfig.showIcon ? 20 : 0;
-		int textX = PADDING + textLeftOffset;
-		int cursorY = PADDING;
-
 		if (HudConfig.showIcon && quest != null) {
-			client.getItemRenderer().renderInGuiWithOverrides(quest.getIconStack(), PADDING, cursorY + 1);
+			client.getItemRenderer().renderInGuiWithOverrides(quest.getIconStack(), PADDING, PADDING + 1);
 		}
 
-		font.draw(matrices, header, textX, cursorY, HudConfig.applyTextAlpha(RGB_HEADER));
-		font.draw(matrices, trim(font, title, width - PADDING * 2 - textLeftOffset),
-				textX, cursorY + 10, HudConfig.applyTextAlpha(RGB_TITLE));
-		cursorY += HudConfig.showIcon ? 20 : LINE_HEIGHT * 2;
+		int y = PADDING;
+		for (Row row : rows) {
+			if (row.text == null) {
+				// Spacer: draw the separator rule in the middle of the gap.
+				fill(matrices, PADDING, y + LINE / 2, width - PADDING, y + LINE / 2 + 1,
+						HudConfig.backgroundColor(RGB_BORDER));
+				y += LINE;
+				continue;
+			}
 
-		if (!phase.isEmpty()) {
-			font.draw(matrices, trim(font, phase, width - PADDING * 2), PADDING, cursorY,
-					HudConfig.applyTextAlpha(RGB_PHASE));
+			int x = PADDING + row.indent;
+			font.draw(matrices, row.text, x, y, HudConfig.applyTextAlpha(row.rgb));
+
+			if (row.checkbox >= 0) {
+				drawCheckbox(matrices, PADDING, y - 1, row.checkbox == 1);
+			}
+
+			y += LINE;
 		}
-		cursorY += LINE_HEIGHT;
-
-		cursorY = drawTaskRows(matrices, font, labels, done, width, cursorY);
-
-		// ---- Pinned quest ----
-		Quest pinned = getPinnedQuest(quest);
-		if (pinned == null) {
-			return;
-		}
-
-		cursorY += 2;
-		fill(matrices, PADDING, cursorY, width - PADDING, cursorY + 1,
-				HudConfig.backgroundColor(RGB_BORDER));
-		cursorY += 3;
-
-		String pinnedTitle = "Pinned: " + pinned.getTitle();
-		font.draw(matrices, trim(font, pinnedTitle, width - PADDING * 2), PADDING, cursorY,
-				HudConfig.applyTextAlpha(RGB_PINNED));
-		cursorY += LINE_HEIGHT;
-
-		// Only a real side challenge gets its objectives listed; a pinned main
-		// quest stays a single line, because the main line is already above.
-		if (pinned.getPhase().isSide() && HudConfig.showObjectives) {
-			List<Boolean> pinnedDone = new ArrayList<>();
-			List<String> pinnedLabels = taskLabels(pinned, pinnedDone);
-			drawTaskRows(matrices, font, pinnedLabels, pinnedDone, width, cursorY - 3);
-		}
-	}
-
-	private int drawTaskRows(MatrixStack matrices, TextRenderer font, List<String> labels,
-			List<Boolean> done, int width, int cursorY) {
-		if (labels.isEmpty()) {
-			return cursorY;
-		}
-
-		cursorY += 3;
-		int checkboxX = width - PADDING - 9;
-
-		for (int i = 0; i < labels.size(); i++) {
-			boolean complete = done.get(i);
-			String label = trim(font, labels.get(i), width - PADDING * 2 - 14);
-
-			font.draw(matrices, label, PADDING, cursorY,
-					HudConfig.applyTextAlpha(complete ? RGB_TASK_DONE : RGB_TASK));
-			drawCheckbox(matrices, checkboxX, cursorY - 1, complete);
-
-			cursorY += LINE_HEIGHT;
-		}
-		return cursorY;
 	}
 
 	/** Small square, filled green once the objective is satisfied. */
@@ -302,12 +276,5 @@ public final class QuestHud extends DrawableHelper {
 			fill(matrices, x + 2, y + 2, x + size - 2, y + size - 2,
 					HudConfig.applyTextAlpha(RGB_TASK_DONE));
 		}
-	}
-
-	private static String trim(TextRenderer font, String text, int maxWidth) {
-		if (font.getWidth(text) <= maxWidth) {
-			return text;
-		}
-		return font.trimToWidth(text, Math.max(0, maxWidth - font.getWidth("..."))) + "...";
 	}
 }

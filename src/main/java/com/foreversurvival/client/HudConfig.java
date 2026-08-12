@@ -14,8 +14,11 @@ import net.fabricmc.loader.api.FabricLoader;
 /**
  * Client-side display settings for the objective overlay and the locator bar.
  *
- * Positions are stored as a fraction of the screen (0.0 - 1.0) rather than in
- * pixels, so a layout set up on one resolution still looks right on another.
+ * Positions are stored as a fraction of the screen (0.0 - 1.0) so a layout set
+ * up at one resolution still looks right at another. Sizes are stored as GUI
+ * pixels, with width and height independent of each other - the drag handles in
+ * {@link HudEditScreen} stretch the box freely, while the separate scale slider
+ * zooms the whole thing.
  *
  * Purely cosmetic and purely local - none of this is synced or saved into the
  * world. Written to config/foreversurvival.properties whenever a value changes.
@@ -30,7 +33,12 @@ public final class HudConfig {
 	/** Top-left corner of the panel, as a fraction of the screen. */
 	public static double hudX = 0.72D;
 	public static double hudY = 0.02D;
+	/** Overall zoom applied on top of the width/height box. */
 	public static double hudScale = 1.0D;
+	/** Panel content width in GUI pixels. Text wraps to this. */
+	public static int hudWidth = 150;
+	/** Minimum panel height. The panel still grows if the content needs more. */
+	public static int hudMinHeight = 0;
 	/** Panel background alpha, 0-100. 0 means text only, no panel. */
 	public static int backgroundOpacity = 60;
 	/** Text alpha, 20-100. Floored so it can never become invisible. */
@@ -51,12 +59,22 @@ public final class HudConfig {
 	// ------------------------------------------------------------------
 
 	public static boolean locatorEnabled = true;
-	/** Centre of the bar, as a fraction of the screen. */
+	/**
+	 * true  = sit in the XP bar slot and alternate with it, the way the vanilla
+	 *         1.21.6 bar and most locator mods do it.
+	 * false = float at a free position set in the layout editor.
+	 */
+	public static boolean locatorXpBarMode = true;
+	/** Seconds each of the XP bar and the locator bar holds the slot. */
+	public static int locatorSwapSeconds = 8;
+	/** Centre of the bar in free mode, as a fraction of the screen. */
 	public static double locatorX = 0.5D;
 	public static double locatorY = 0.04D;
 	public static double locatorScale = 1.0D;
 	/** Bar width in GUI pixels before scaling. */
-	public static int locatorWidth = 180;
+	public static int locatorWidth = 182;
+	/** Bar thickness in GUI pixels. */
+	public static int locatorHeight = 9;
 	/** Half-angle of the arc the bar covers, in degrees. */
 	public static int locatorFov = 90;
 	public static boolean locatorShowDistance = true;
@@ -88,6 +106,8 @@ public final class HudConfig {
 		hudX = clamp(dbl(p, "hudX", 0.72D), 0.0D, 1.0D);
 		hudY = clamp(dbl(p, "hudY", 0.02D), 0.0D, 1.0D);
 		hudScale = clamp(dbl(p, "hudScale", 1.0D), 0.5D, 2.0D);
+		hudWidth = clamp(integer(p, "hudWidth", 150), MIN_HUD_WIDTH, MAX_HUD_WIDTH);
+		hudMinHeight = clamp(integer(p, "hudMinHeight", 0), 0, MAX_HUD_HEIGHT);
 		backgroundOpacity = clamp(integer(p, "backgroundOpacity", 60), 0, 100);
 		textOpacity = clamp(integer(p, "textOpacity", 100), 20, 100);
 		pinnedQuestId = p.getProperty("pinnedQuestId", "");
@@ -95,10 +115,13 @@ public final class HudConfig {
 		treeView = bool(p, "treeView", false);
 
 		locatorEnabled = bool(p, "locatorEnabled", true);
+		locatorXpBarMode = bool(p, "locatorXpBarMode", true);
+		locatorSwapSeconds = clamp(integer(p, "locatorSwapSeconds", 8), 2, 60);
 		locatorX = clamp(dbl(p, "locatorX", 0.5D), 0.0D, 1.0D);
 		locatorY = clamp(dbl(p, "locatorY", 0.04D), 0.0D, 1.0D);
 		locatorScale = clamp(dbl(p, "locatorScale", 1.0D), 0.5D, 2.0D);
-		locatorWidth = clamp(integer(p, "locatorWidth", 180), 80, 400);
+		locatorWidth = clamp(integer(p, "locatorWidth", 182), MIN_BAR_WIDTH, MAX_BAR_WIDTH);
+		locatorHeight = clamp(integer(p, "locatorHeight", 9), MIN_BAR_HEIGHT, MAX_BAR_HEIGHT);
 		locatorFov = clamp(integer(p, "locatorFov", 90), 30, 180);
 		locatorShowDistance = bool(p, "locatorShowDistance", true);
 	}
@@ -109,6 +132,8 @@ public final class HudConfig {
 		p.setProperty("hudX", Double.toString(round(hudX)));
 		p.setProperty("hudY", Double.toString(round(hudY)));
 		p.setProperty("hudScale", Double.toString(round(hudScale)));
+		p.setProperty("hudWidth", Integer.toString(hudWidth));
+		p.setProperty("hudMinHeight", Integer.toString(hudMinHeight));
 		p.setProperty("backgroundOpacity", Integer.toString(backgroundOpacity));
 		p.setProperty("textOpacity", Integer.toString(textOpacity));
 		p.setProperty("showObjectives", Boolean.toString(showObjectives));
@@ -118,10 +143,13 @@ public final class HudConfig {
 		p.setProperty("treeView", Boolean.toString(treeView));
 
 		p.setProperty("locatorEnabled", Boolean.toString(locatorEnabled));
+		p.setProperty("locatorXpBarMode", Boolean.toString(locatorXpBarMode));
+		p.setProperty("locatorSwapSeconds", Integer.toString(locatorSwapSeconds));
 		p.setProperty("locatorX", Double.toString(round(locatorX)));
 		p.setProperty("locatorY", Double.toString(round(locatorY)));
 		p.setProperty("locatorScale", Double.toString(round(locatorScale)));
 		p.setProperty("locatorWidth", Integer.toString(locatorWidth));
+		p.setProperty("locatorHeight", Integer.toString(locatorHeight));
 		p.setProperty("locatorFov", Integer.toString(locatorFov));
 		p.setProperty("locatorShowDistance", Boolean.toString(locatorShowDistance));
 
@@ -141,6 +169,8 @@ public final class HudConfig {
 		hudX = 0.72D;
 		hudY = 0.02D;
 		hudScale = 1.0D;
+		hudWidth = 150;
+		hudMinHeight = 0;
 		backgroundOpacity = 60;
 		textOpacity = 100;
 		showObjectives = true;
@@ -150,14 +180,26 @@ public final class HudConfig {
 		treeView = false;
 
 		locatorEnabled = true;
+		locatorXpBarMode = true;
+		locatorSwapSeconds = 8;
 		locatorX = 0.5D;
 		locatorY = 0.04D;
 		locatorScale = 1.0D;
-		locatorWidth = 180;
+		locatorWidth = 182;
+		locatorHeight = 9;
 		locatorFov = 90;
 		locatorShowDistance = true;
 		save();
 	}
+
+	// Size bounds, shared with the layout editor and the settings sliders.
+	public static final int MIN_HUD_WIDTH = 90;
+	public static final int MAX_HUD_WIDTH = 400;
+	public static final int MAX_HUD_HEIGHT = 300;
+	public static final int MIN_BAR_WIDTH = 60;
+	public static final int MAX_BAR_WIDTH = 400;
+	public static final int MIN_BAR_HEIGHT = 6;
+	public static final int MAX_BAR_HEIGHT = 24;
 
 	/** Applies the text opacity setting to an 0xRRGGBB colour. */
 	public static int applyTextAlpha(int rgb) {

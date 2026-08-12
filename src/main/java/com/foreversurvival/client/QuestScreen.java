@@ -468,6 +468,11 @@ public class QuestScreen extends Screen {
 			QuestPhase.PHASE_4, QuestPhase.PHASE_5, QuestPhase.PHASE_6
 	};
 
+	/** Current page, clamped - the arrows stop at the ends rather than wrapping. */
+	private int phaseIndex() {
+		return HudConfig.clamp(treePhaseIndex, 0, PHASE_PAGES.length - 1);
+	}
+
 	/** The quests on the current tree page, in chain order. */
 	private List<Quest> treeQuests(boolean side) {
 		List<Quest> out = new ArrayList<>();
@@ -481,7 +486,7 @@ public class QuestScreen extends Screen {
 			return out;
 		}
 
-		QuestPhase phase = PHASE_PAGES[Math.floorMod(treePhaseIndex, PHASE_PAGES.length)];
+		QuestPhase phase = PHASE_PAGES[phaseIndex()];
 		for (Quest quest : QuestManager.get().getMainQuests()) {
 			if (quest.getPhase() == phase && matchesSearch(quest)) {
 				out.add(quest);
@@ -520,8 +525,9 @@ public class QuestScreen extends Screen {
 		return new int[] { left + PADDING + 6, contentTop + 2, left + PADDING + 20, contentTop + 16 };
 	}
 
+	/** Sits clear of the List/Tree button, which owns the last 34px + a 6px gap. */
 	private int[] treeArrowRight() {
-		int x = left + panelWidth - PADDING - 44;
+		int x = left + panelWidth - PADDING - 58;
 		return new int[] { x, contentTop + 2, x + 14, contentTop + 16 };
 	}
 
@@ -547,25 +553,35 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		String title = side ? "Side Challenges"
-				: PHASE_PAGES[Math.floorMod(treePhaseIndex, PHASE_PAGES.length)].getDisplayName();
+		String title = side ? "Side Challenges" : PHASE_PAGES[phaseIndex()].getDisplayName();
 		int titleColor = side ? colorOf(QuestPhase.SIDE.getColor())
-				: colorOf(PHASE_PAGES[Math.floorMod(treePhaseIndex, PHASE_PAGES.length)].getColor());
+				: colorOf(PHASE_PAGES[phaseIndex()].getColor());
 
 		fill(matrices, panelLeft, contentTop, panelRight, contentTop + TREE_HEADER, COLOR_HEADER_ROW);
 
-		if (!side) {
-			drawArrow(matrices, treeArrowLeft(), true, mouseX, mouseY);
-			drawArrow(matrices, treeArrowRight(), false, mouseX, mouseY);
-		}
-
-		textRenderer.draw(matrices, title, panelLeft + 26, contentTop + 5, titleColor);
-		String counts = quests.size() + " quests - " + done + " done";
-		textRenderer.draw(matrices, counts, panelRight - 48 - textRenderer.getWidth(counts) - 8,
-				contentTop + 5, TEXT_DIM);
-
+		// Right-to-left layout so nothing can ever overlap: the List/Tree button
+		// owns the far right, then the next arrow, then the counter, and the
+		// title takes whatever is left.
 		drawViewToggle(matrices, panelRight - 38, contentTop + 2, panelRight - 4, contentTop + 16,
 				mouseX, mouseY);
+
+		int rightLimit = panelRight - 38 - 6;
+		if (!side) {
+			int[] leftArrow = treeArrowLeft();
+			int[] rightArrow = treeArrowRight();
+			drawArrow(matrices, leftArrow, true, mouseX, mouseY, phaseIndex() > 0);
+			drawArrow(matrices, rightArrow, false, mouseX, mouseY,
+					phaseIndex() < PHASE_PAGES.length - 1);
+			rightLimit = rightArrow[0] - 6;
+		}
+
+		String counts = quests.size() + " quests - " + done + " done";
+		int countsX = rightLimit - textRenderer.getWidth(counts);
+		textRenderer.draw(matrices, counts, countsX, contentTop + 5, TEXT_DIM);
+
+		int titleX = panelLeft + (side ? 8 : 26);
+		textRenderer.draw(matrices, trim(title, Math.max(20, countsX - titleX - 8)),
+				titleX, contentTop + 5, titleColor);
 
 		// ---- Grid ----
 		int cols = treeCols();
@@ -718,18 +734,21 @@ public class QuestScreen extends Screen {
 		}
 	}
 
-	private void drawArrow(MatrixStack matrices, int[] rect, boolean pointLeft, int mouseX, int mouseY) {
-		boolean hovered = mouseX >= rect[0] && mouseX <= rect[2]
+	private void drawArrow(MatrixStack matrices, int[] rect, boolean pointLeft, int mouseX, int mouseY,
+			boolean enabled) {
+		boolean hovered = enabled && mouseX >= rect[0] && mouseX <= rect[2]
 				&& mouseY >= rect[1] && mouseY <= rect[3];
+
 		fill(matrices, rect[0], rect[1], rect[2], rect[3],
-				hovered ? COLOR_ROW_SELECTED : COLOR_TAB_ACTIVE);
+				!enabled ? COLOR_TAB_IDLE : (hovered ? COLOR_ROW_SELECTED : COLOR_TAB_ACTIVE));
 		drawBorder(matrices, rect[0], rect[1], rect[2], rect[3]);
 
+		int colour = enabled ? TEXT_TITLE : TEXT_LOCKED;
 		int cx = (rect[0] + rect[2]) / 2;
 		int cy = (rect[1] + rect[3]) / 2;
 		for (int i = 0; i < 4; i++) {
 			int dx = pointLeft ? i : -i;
-			fill(matrices, cx + dx - 1, cy - i, cx + dx, cy + i + 1, TEXT_TITLE);
+			fill(matrices, cx + dx - 1, cy - i, cx + dx, cy + i + 1, colour);
 		}
 	}
 
@@ -1279,26 +1298,40 @@ public class QuestScreen extends Screen {
 				() -> HudConfig.backgroundOpacity, v -> HudConfig.backgroundOpacity = v, "%"));
 		settings.add(new Slider("Text opacity", 20, 100,
 				() -> HudConfig.textOpacity, v -> HudConfig.textOpacity = v, "%"));
-		settings.add(new Slider("Panel size", 50, 200,
+		settings.add(new Slider("Panel width", HudConfig.MIN_HUD_WIDTH, HudConfig.MAX_HUD_WIDTH,
+				() -> HudConfig.hudWidth, v -> HudConfig.hudWidth = v, "px"));
+		settings.add(new Slider("Panel min height", 0, HudConfig.MAX_HUD_HEIGHT,
+				() -> HudConfig.hudMinHeight, v -> HudConfig.hudMinHeight = v, "px"));
+		settings.add(new Slider("Panel zoom", 50, 200,
 				() -> (int) Math.round(HudConfig.hudScale * 100),
 				v -> HudConfig.hudScale = v / 100.0D, "%"));
 
 		settings.add(new Header("Locator bar"));
 		settings.add(new Toggle("Show locator bar", () -> HudConfig.locatorEnabled,
 				() -> HudConfig.locatorEnabled = !HudConfig.locatorEnabled));
+		settings.add(new Toggle("In XP bar slot (off = free)", () -> HudConfig.locatorXpBarMode,
+				() -> HudConfig.locatorXpBarMode = !HudConfig.locatorXpBarMode));
+		settings.add(new Slider("Swap every", 2, 60,
+				() -> HudConfig.locatorSwapSeconds, v -> HudConfig.locatorSwapSeconds = v, "s"));
 		settings.add(new Toggle("Show distance", () -> HudConfig.locatorShowDistance,
 				() -> HudConfig.locatorShowDistance = !HudConfig.locatorShowDistance));
-		settings.add(new Slider("Bar width", 80, 400,
+		settings.add(new Slider("Bar width", HudConfig.MIN_BAR_WIDTH, HudConfig.MAX_BAR_WIDTH,
 				() -> HudConfig.locatorWidth, v -> HudConfig.locatorWidth = v, "px"));
+		settings.add(new Slider("Bar height", HudConfig.MIN_BAR_HEIGHT, HudConfig.MAX_BAR_HEIGHT,
+				() -> HudConfig.locatorHeight, v -> HudConfig.locatorHeight = v, "px"));
 		settings.add(new Slider("Bar arc", 30, 180,
 				() -> HudConfig.locatorFov, v -> HudConfig.locatorFov = v, " deg"));
-		settings.add(new Slider("Bar size", 50, 200,
+		settings.add(new Slider("Bar zoom", 50, 200,
 				() -> (int) Math.round(HudConfig.locatorScale * 100),
 				v -> HudConfig.locatorScale = v / 100.0D, "%"));
 
 		settings.add(new Header("Quest browser"));
 		settings.add(new Toggle("Tree view (off = list)", () -> HudConfig.treeView,
-				() -> HudConfig.treeView = !HudConfig.treeView));
+				() -> {
+					HudConfig.treeView = !HudConfig.treeView;
+					searchQuery = "";
+					searchActive = false;
+				}));
 
 		settings.add(new Header("Game"));
 		settings.add(new Toggle("Hide vanilla advancement pop-ups",
@@ -1469,7 +1502,10 @@ public class QuestScreen extends Screen {
 					&& mouseY >= viewToggleY1 && mouseY <= viewToggleY2) {
 				HudConfig.treeView = !HudConfig.treeView;
 				HudConfig.save();
+				// Clear the filter on switch: the tree has no search box, and a
+				// filter still applied there would hide quests with no clue why.
 				searchActive = false;
+				searchQuery = "";
 				treeScroll = 0;
 				listScroll = 0;
 				return true;
@@ -1551,10 +1587,11 @@ public class QuestScreen extends Screen {
 
 	private boolean handleTreeClick(double mouseX, double mouseY, boolean side) {
 		if (!side) {
+			// Clamped, not wrapping: phase 6 is the end of the line.
 			int[] leftArrow = treeArrowLeft();
 			if (mouseX >= leftArrow[0] && mouseX <= leftArrow[2]
 					&& mouseY >= leftArrow[1] && mouseY <= leftArrow[3]) {
-				treePhaseIndex = Math.floorMod(treePhaseIndex - 1, PHASE_PAGES.length);
+				treePhaseIndex = Math.max(0, phaseIndex() - 1);
 				treeScroll = 0;
 				return true;
 			}
@@ -1562,7 +1599,7 @@ public class QuestScreen extends Screen {
 			int[] rightArrow = treeArrowRight();
 			if (mouseX >= rightArrow[0] && mouseX <= rightArrow[2]
 					&& mouseY >= rightArrow[1] && mouseY <= rightArrow[3]) {
-				treePhaseIndex = Math.floorMod(treePhaseIndex + 1, PHASE_PAGES.length);
+				treePhaseIndex = Math.min(PHASE_PAGES.length - 1, phaseIndex() + 1);
 				treeScroll = 0;
 				return true;
 			}

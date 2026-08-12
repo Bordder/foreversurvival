@@ -15,16 +15,24 @@ import net.minecraft.util.math.MathHelper;
  * A compass-style bar showing where the other players are.
  *
  * Each player is a tick mark placed by the angle between where you are looking
- * and where they actually are. Look straight at someone and their name (and
- * distance) appears under the bar. Players outside the bar's arc are clamped to
- * the nearest edge and drawn dimmer, so you always know which way to turn.
+ * and where they actually are. Look straight at someone and their name and
+ * distance appear. Players outside the bar's arc clamp to the nearest edge and
+ * draw dimmer, so you always know which way to turn.
  *
- * Only players in your own dimension are shown - a direction to someone in the
- * Nether while you are in the Overworld would be meaningless.
+ * Two placements, chosen in Config:
+ *
+ *  - XP BAR SLOT (default). The bar shares the experience bar's slot above the
+ *    hotbar and the two alternate every few seconds, the way the vanilla 1.21.6
+ *    locator bar and most locator mods do it. When nobody else is online - or
+ *    nobody is in your dimension - it never takes the slot at all, so single
+ *    player looks exactly like vanilla.
+ *  - FREE. Floats wherever you drag it in the layout editor.
+ *
+ * Only players in your own dimension are shown; a bearing to someone in the
+ * Nether while you are in the Overworld would mean nothing.
  */
 public final class LocatorBar extends DrawableHelper {
 
-	private static final int BAR_HEIGHT = 9;
 	private static final int MARKER_WIDTH = 3;
 	/** Within this many degrees of centre, the player's name is shown. */
 	private static final double NAME_ANGLE = 8.0D;
@@ -35,13 +43,15 @@ public final class LocatorBar extends DrawableHelper {
 	private static final int RGB_NAME = 0xFFFFFF;
 	private static final int RGB_DISTANCE = 0xA0A0B0;
 
-	/** Distinct, readable marker colours, picked per player by name. */
 	private static final int[] PALETTE = {
 			0xFF5555, 0x55FF55, 0x5599FF, 0xFFFF55,
 			0xFF55FF, 0x55FFFF, 0xFFAA00, 0xAA77FF
 	};
 
 	private static final LocatorBar INSTANCE = new LocatorBar();
+
+	/** Set by the mixin each frame the vanilla XP bar method actually runs. */
+	private boolean xpSlotOffered;
 
 	private LocatorBar() {
 	}
@@ -50,100 +60,145 @@ public final class LocatorBar extends DrawableHelper {
 		return INSTANCE;
 	}
 
-	public void render(MatrixStack matrices) {
-		if (!HudConfig.locatorEnabled) {
-			return;
-		}
+	// ------------------------------------------------------------------
+	// Visibility
+	// ------------------------------------------------------------------
 
-		MinecraftClient client = MinecraftClient.getInstance();
-		ClientPlayerEntity self = client.player;
-		if (self == null || client.options.hudHidden || client.options.debugEnabled) {
-			return;
-		}
+	private boolean hudUsable(MinecraftClient client) {
+		return HudConfig.locatorEnabled
+				&& client.player != null
+				&& !client.options.hudHidden
+				&& !client.options.debugEnabled;
+	}
 
-		List<PlayerLocation> locations = ClientLocatorState.get();
-		if (locations.isEmpty()) {
-			return;
-		}
-
+	/** True when at least one other player is in the same dimension as you. */
+	private boolean hasCompany(ClientPlayerEntity self) {
 		String selfName = self.getGameProfile().getName();
-		String selfDimension = self.world.getRegistryKey().getValue().toString();
+		String dimension = self.world.getRegistryKey().getValue().toString();
 
-		int width = HudConfig.locatorWidth;
+		for (PlayerLocation other : ClientLocatorState.get()) {
+			if (!other.getName().equals(selfName) && other.getDimension().equals(dimension)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The alternation. Each of the XP bar and the locator bar holds the slot for
+	 * {@code locatorSwapSeconds}, so a full cycle is twice that.
+	 */
+	private boolean rotationFavoursLocator() {
+		long period = Math.max(2, HudConfig.locatorSwapSeconds) * 1000L;
+		return ((System.currentTimeMillis() / period) & 1L) == 1L;
+	}
+
+	/** Asked by the mixin: should the locator bar replace the XP bar right now? */
+	public boolean shouldTakeXpSlot() {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (!HudConfig.locatorXpBarMode || !hudUsable(client)) {
+			return false;
+		}
+		if (!hasCompany(client.player)) {
+			// Nobody to point at - leave the XP bar completely alone.
+			return false;
+		}
+		return rotationFavoursLocator();
+	}
+
+	public void markXpSlotOffered() {
+		this.xpSlotOffered = true;
+	}
+
+	// ------------------------------------------------------------------
+	// Entry points
+	// ------------------------------------------------------------------
+
+	/**
+	 * Free-position rendering, driven by the HUD callback.
+	 *
+	 * Also covers the case where the vanilla XP bar was never drawn this frame -
+	 * creative mode, or while riding a mount, where vanilla swaps the slot for
+	 * the jump/health bar - so XP-slot mode still shows something there.
+	 */
+	public void renderFree(MatrixStack matrices) {
+		MinecraftClient client = MinecraftClient.getInstance();
+
+		if (HudConfig.locatorXpBarMode) {
+			boolean offered = xpSlotOffered;
+			xpSlotOffered = false;
+
+			if (!offered && shouldTakeXpSlot()) {
+				int screenWidth = client.getWindow().getScaledWidth();
+				renderXpSlot(matrices, screenWidth / 2 - 91);
+			}
+			return;
+		}
+
+		if (!hudUsable(client)) {
+			return;
+		}
+
 		int screenWidth = client.getWindow().getScaledWidth();
 		int screenHeight = client.getWindow().getScaledHeight();
+		int width = HudConfig.locatorWidth;
 
 		double originX = HudConfig.locatorX * screenWidth - (width * HudConfig.locatorScale) / 2.0D;
 		double originY = HudConfig.locatorY * screenHeight;
 
 		HudRender.push(originX, originY, HudConfig.locatorScale);
 		try {
-			drawBar(matrices, client.textRenderer, self, selfName, selfDimension, locations, width);
+			drawBar(matrices, client, 0, 0, width, HudConfig.locatorHeight);
 		} finally {
 			HudRender.pop();
 		}
-	}
-
-	/** Unscaled size of the bar, as {width, height}. */
-	public int[] measure() {
-		return new int[] { HudConfig.locatorWidth, BAR_HEIGHT };
 	}
 
 	/**
-	 * Static stand-in used by the layout editor, where there is no live player
-	 * data to draw. Same geometry as the real bar so dragging it is accurate.
+	 * Draws into the experience bar's slot. {@code xpBarX} is the left edge
+	 * vanilla would have used, so the bar lines up with the hotbar.
 	 */
-	public void renderPreviewAt(MatrixStack matrices, double originX, double originY, double scale) {
-		HudRender.push(originX, originY, scale);
-		try {
-			TextRenderer font = MinecraftClient.getInstance().textRenderer;
-			int width = HudConfig.locatorWidth;
-
-			fill(matrices, 0, 0, width, BAR_HEIGHT, HudConfig.backgroundColor(RGB_BAR));
-			int border = HudConfig.backgroundColor(RGB_BORDER);
-			fill(matrices, 0, 0, width, 1, border);
-			fill(matrices, 0, BAR_HEIGHT - 1, width, BAR_HEIGHT, border);
-			fill(matrices, 0, 0, 1, BAR_HEIGHT, border);
-			fill(matrices, width - 1, 0, width, BAR_HEIGHT, border);
-
-			int centre = width / 2;
-			fill(matrices, centre, 1, centre + 1, BAR_HEIGHT - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
-
-			// Three sample markers so the bar reads as a bar while editing.
-			int[] offsets = { -width / 3, 4, width / 4 };
-			for (int i = 0; i < offsets.length; i++) {
-				int x = MathHelper.clamp(centre + offsets[i], 1, width - MARKER_WIDTH - 1);
-				fill(matrices, x, 2, x + MARKER_WIDTH, BAR_HEIGHT - 2,
-						HudConfig.applyTextAlpha(PALETTE[i]));
-			}
-
-			String label = "Player";
-			font.draw(matrices, label, centre - font.getWidth(label) / 2, BAR_HEIGHT + 2,
-					HudConfig.applyTextAlpha(RGB_NAME));
-			if (HudConfig.locatorShowDistance) {
-				String distance = "128m";
-				font.draw(matrices, distance, centre - font.getWidth(distance) / 2, BAR_HEIGHT + 12,
-						HudConfig.applyTextAlpha(RGB_DISTANCE));
-			}
-		} finally {
-			HudRender.pop();
+	public void renderXpSlot(MatrixStack matrices, int xpBarX) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.player == null) {
+			return;
 		}
+
+		int screenHeight = client.getWindow().getScaledHeight();
+		int width = HudConfig.locatorWidth;
+		int height = HudConfig.locatorHeight;
+
+		// Vanilla puts the XP bar at scaledHeight - 32 + 3.
+		int x = xpBarX + (182 - width) / 2;
+		int y = screenHeight - 32 + 3;
+
+		drawBar(matrices, client, x, y, width, height);
 	}
 
-	private void drawBar(MatrixStack matrices, TextRenderer font, ClientPlayerEntity self,
-			String selfName, String selfDimension, List<PlayerLocation> locations, int width) {
+	// ------------------------------------------------------------------
+	// Drawing
+	// ------------------------------------------------------------------
 
-		// Backing strip
-		fill(matrices, 0, 0, width, BAR_HEIGHT, HudConfig.backgroundColor(RGB_BAR));
+	private void drawBar(MatrixStack matrices, MinecraftClient client, int x, int y,
+			int width, int height) {
+		ClientPlayerEntity self = client.player;
+		if (self == null) {
+			return;
+		}
+
+		TextRenderer font = client.textRenderer;
+		String selfName = self.getGameProfile().getName();
+		String selfDimension = self.world.getRegistryKey().getValue().toString();
+
+		fill(matrices, x, y, x + width, y + height, HudConfig.backgroundColor(RGB_BAR));
 		int border = HudConfig.backgroundColor(RGB_BORDER);
-		fill(matrices, 0, 0, width, 1, border);
-		fill(matrices, 0, BAR_HEIGHT - 1, width, BAR_HEIGHT, border);
-		fill(matrices, 0, 0, 1, BAR_HEIGHT, border);
-		fill(matrices, width - 1, 0, width, BAR_HEIGHT, border);
+		fill(matrices, x, y, x + width, y + 1, border);
+		fill(matrices, x, y + height - 1, x + width, y + height, border);
+		fill(matrices, x, y, x + 1, y + height, border);
+		fill(matrices, x + width - 1, y, x + width, y + height, border);
 
-		// Centre notch - the direction you are actually facing.
-		int centre = width / 2;
-		fill(matrices, centre, 1, centre + 1, BAR_HEIGHT - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
+		int centre = x + width / 2;
+		fill(matrices, centre, y + 1, centre + 1, y + height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
 
 		double selfYaw = MathHelper.wrapDegrees(self.getYaw());
 		double halfFov = HudConfig.locatorFov;
@@ -153,6 +208,7 @@ public final class LocatorBar extends DrawableHelper {
 		double hoveredDistance = 0.0D;
 		double bestAngle = Double.MAX_VALUE;
 
+		List<PlayerLocation> locations = ClientLocatorState.get();
 		for (PlayerLocation other : locations) {
 			if (other.getName().equals(selfName) || !other.getDimension().equals(selfDimension)) {
 				continue;
@@ -168,14 +224,14 @@ public final class LocatorBar extends DrawableHelper {
 			boolean offEdge = Math.abs(relative) > halfFov;
 			double clamped = MathHelper.clamp(relative, -halfFov, halfFov);
 			int markerX = centre + (int) Math.round(clamped / halfFov * half);
-			markerX = MathHelper.clamp(markerX, 1, width - MARKER_WIDTH - 1);
+			markerX = MathHelper.clamp(markerX, x + 1, x + width - MARKER_WIDTH - 1);
 
 			int rgb = PALETTE[Math.floorMod(other.getName().hashCode(), PALETTE.length)];
 			int colour = offEdge
 					? (HudConfig.applyTextAlpha(rgb) & 0x60FFFFFF)
 					: HudConfig.applyTextAlpha(rgb);
 
-			fill(matrices, markerX, 2, markerX + MARKER_WIDTH, BAR_HEIGHT - 2, colour);
+			fill(matrices, markerX, y + 2, markerX + MARKER_WIDTH, y + height - 2, colour);
 
 			double angle = Math.abs(relative);
 			if (!offEdge && angle <= NAME_ANGLE && angle < bestAngle) {
@@ -187,18 +243,62 @@ public final class LocatorBar extends DrawableHelper {
 			}
 		}
 
-		// Name of whoever you are looking closest to.
 		if (hoveredName != null) {
-			String label = hoveredName;
-			int labelX = centre - font.getWidth(label) / 2;
-			font.draw(matrices, label, labelX, BAR_HEIGHT + 2, HudConfig.applyTextAlpha(RGB_NAME));
+			// In the XP slot there is no room underneath, so labels go above.
+			boolean above = HudConfig.locatorXpBarMode;
+			int labelY = above ? y - 20 : y + height + 2;
+			int distanceY = above ? y - 10 : y + height + 12;
+
+			font.draw(matrices, hoveredName, centre - font.getWidth(hoveredName) / 2, labelY,
+					HudConfig.applyTextAlpha(RGB_NAME));
 
 			if (HudConfig.locatorShowDistance) {
 				String distance = Math.round(hoveredDistance) + "m";
-				int distanceX = centre - font.getWidth(distance) / 2;
-				font.draw(matrices, distance, distanceX, BAR_HEIGHT + 12,
+				font.draw(matrices, distance, centre - font.getWidth(distance) / 2, distanceY,
 						HudConfig.applyTextAlpha(RGB_DISTANCE));
 			}
+		}
+	}
+
+	// ------------------------------------------------------------------
+	// Layout editor support
+	// ------------------------------------------------------------------
+
+	/** Unscaled size of the bar, as {width, height}. */
+	public int[] measure() {
+		return new int[] { HudConfig.locatorWidth, HudConfig.locatorHeight };
+	}
+
+	/** Static stand-in used by the layout editor, where there is no live data. */
+	public void renderPreviewAt(MatrixStack matrices, double originX, double originY, double scale) {
+		HudRender.push(originX, originY, scale);
+		try {
+			TextRenderer font = MinecraftClient.getInstance().textRenderer;
+			int width = HudConfig.locatorWidth;
+			int height = HudConfig.locatorHeight;
+
+			fill(matrices, 0, 0, width, height, HudConfig.backgroundColor(RGB_BAR));
+			int border = HudConfig.backgroundColor(RGB_BORDER);
+			fill(matrices, 0, 0, width, 1, border);
+			fill(matrices, 0, height - 1, width, height, border);
+			fill(matrices, 0, 0, 1, height, border);
+			fill(matrices, width - 1, 0, width, height, border);
+
+			int centre = width / 2;
+			fill(matrices, centre, 1, centre + 1, height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
+
+			int[] offsets = { -width / 3, 4, width / 4 };
+			for (int i = 0; i < offsets.length; i++) {
+				int px = MathHelper.clamp(centre + offsets[i], 1, width - MARKER_WIDTH - 1);
+				fill(matrices, px, 2, px + MARKER_WIDTH, height - 2,
+						HudConfig.applyTextAlpha(PALETTE[i]));
+			}
+
+			String label = "Player";
+			font.draw(matrices, label, centre - font.getWidth(label) / 2, height + 2,
+					HudConfig.applyTextAlpha(RGB_NAME));
+		} finally {
+			HudRender.pop();
 		}
 	}
 }
