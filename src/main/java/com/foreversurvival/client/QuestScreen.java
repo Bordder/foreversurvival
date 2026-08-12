@@ -152,6 +152,37 @@ public class QuestScreen extends Screen {
 	private int viewToggleY1;
 	private int viewToggleY2;
 
+	// Scrollbars
+	private static final int SB_LIST = 0;
+	private static final int SB_DETAIL = 1;
+	private static final int SB_DEATHS = 2;
+	private static final int SB_SETTINGS = 3;
+	private static final int SB_TREE = 4;
+	private static final int SB_WIDTH = 5;
+	private static final int SB_MIN_THUMB = 14;
+
+	/** Geometry of each scroll region, recorded during render for hit-testing. */
+	private static final class Bar {
+
+		int x;
+		int y1;
+		int y2;
+		int contentHeight;
+		int viewHeight;
+		boolean active;
+	}
+
+	private final Bar[] scrollBars = new Bar[5];
+	private int scrollDrag = -1;
+	/** Cursor offset inside the thumb when the drag started. */
+	private double scrollGrab;
+
+	{
+		for (int i = 0; i < scrollBars.length; i++) {
+			scrollBars[i] = new Bar();
+		}
+	}
+
 	/** Index into the death list being inspected, or -1 for the list view. */
 	private int viewingDeath = -1;
 
@@ -227,6 +258,7 @@ public class QuestScreen extends Screen {
 		checkmarkTaskId = null;
 		pinButtonShown = false;
 		manualHits.clear();
+		clearScrollbars();
 
 		switch (tab) {
 			case MAIN -> {
@@ -440,22 +472,25 @@ public class QuestScreen extends Screen {
 					rowTop + 3, titleColor);
 
 			if (quest.getId().equals(HudConfig.pinnedQuestId)) {
-				drawPin(matrices, listRight - 24, rowTop + 5, TEXT_GUIDE);
+				drawPin(matrices, listRight - 32, rowTop + 5, TEXT_GUIDE);
 			}
 
+			// Right-hand badges sit clear of the scrollbar track.
 			if (completed) {
-				drawTick(matrices, listRight - 12, rowTop + 6, TEXT_DONE);
+				drawTick(matrices, listRight - 20, rowTop + 6, TEXT_DONE);
 				textRenderer.draw(matrices, "Complete", listLeft + 22, rowTop + 12, TEXT_DONE);
 			} else if (unlocked) {
-				drawProgressBar(matrices, listLeft + 22, rowTop + 13, LIST_WIDTH - 30,
+				drawProgressBar(matrices, listLeft + 22, rowTop + 13, LIST_WIDTH - 38,
 						questProgress(data, quest), questTotal(quest));
 			} else {
-				drawLock(matrices, listRight - 12, rowTop + 5, TEXT_LOCKED);
+				drawLock(matrices, listRight - 20, rowTop + 5, TEXT_LOCKED);
 				textRenderer.draw(matrices, "Locked - preview", listLeft + 22, rowTop + 12, TEXT_LOCKED);
 			}
 		}
 
 		disableScissor();
+		drawScrollbar(matrices, SB_LIST, listRight, top + 1, contentBottom - 1, totalHeight,
+				mouseX, mouseY);
 		drawBorder(matrices, listLeft, top, listRight, contentBottom);
 	}
 
@@ -629,6 +664,8 @@ public class QuestScreen extends Screen {
 		}
 
 		disableScissor();
+		drawScrollbar(matrices, SB_TREE, panelRight, treeGridTop(), treeGridBottom(), contentHeight,
+				mouseX, mouseY);
 
 		// ---- Footer ----
 		fill(matrices, panelLeft, contentBottom - TREE_FOOTER, panelRight, contentBottom - TREE_FOOTER + 1,
@@ -878,6 +915,8 @@ public class QuestScreen extends Screen {
 
 		int documentHeight = y - startY + 6;
 		detailScroll = clampScroll(detailScroll, documentHeight, bodyBottom - contentTop);
+		drawScrollbar(matrices, SB_DETAIL, detailRight, contentTop + 1, bodyBottom - 1,
+				documentHeight, mouseX, mouseY);
 
 		if (showFooter) {
 			checkmarkTaskId = pendingManualTaskId;
@@ -949,20 +988,22 @@ public class QuestScreen extends Screen {
 			String line = "Death #" + (i + 1) + ": "
 					+ record.getX() + ", " + record.getY() + ", " + record.getZ()
 					+ " [" + record.getDimensionDisplayName() + "]";
-			textRenderer.draw(matrices, trim(line, panelRight - panelLeft - 12), panelLeft + 6, y,
+			textRenderer.draw(matrices, trim(line, panelRight - panelLeft - 22), panelLeft + 6, y,
 					TEXT_DEATH);
 
 			String cause = record.getCause().isEmpty() ? "Unknown cause" : record.getCause();
 			if (!record.hasInventory()) {
 				cause = cause + "  (inventory not kept)";
 			}
-			textRenderer.draw(matrices, trim(cause, panelRight - panelLeft - 12), panelLeft + 6, y + 10,
+			textRenderer.draw(matrices, trim(cause, panelRight - panelLeft - 22), panelLeft + 6, y + 10,
 					TEXT_DIM);
 
 			y += rowHeight;
 		}
 
 		disableScissor();
+		drawScrollbar(matrices, SB_DEATHS, panelRight, contentTop + 1, contentBottom - 1, totalHeight,
+				mouseX, mouseY);
 		drawBorder(matrices, panelLeft, contentTop, panelRight, contentBottom);
 	}
 
@@ -1303,7 +1344,7 @@ public class QuestScreen extends Screen {
 		settings.add(new Slider("Panel width", HudConfig.MIN_HUD_WIDTH, HudConfig.MAX_HUD_WIDTH,
 				() -> HudConfig.hudWidth, v -> HudConfig.hudWidth = v, "px"));
 		settings.add(new Slider("Panel min height", 0, HudConfig.MAX_HUD_HEIGHT,
-				() -> HudConfig.hudMinHeight, v -> HudConfig.hudMinHeight = v, "px"));
+				() -> HudConfig.hudHeight, v -> HudConfig.hudHeight = v, "px"));
 		settings.add(new Slider("Panel zoom", 50, 200,
 				() -> (int) Math.round(HudConfig.hudScale * 100),
 				v -> HudConfig.hudScale = v / 100.0D, "%"));
@@ -1429,6 +1470,8 @@ public class QuestScreen extends Screen {
 		}
 
 		disableScissor();
+		drawScrollbar(matrices, SB_SETTINGS, panelRight, contentTop + 1, contentBottom - 1,
+				totalHeight, mouseX, mouseY);
 		drawBorder(matrices, panelLeft, contentTop, panelRight, contentBottom);
 	}
 
@@ -1449,6 +1492,11 @@ public class QuestScreen extends Screen {
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (button != 0) {
 			return super.mouseClicked(mouseX, mouseY, button);
+		}
+
+		// Scrollbars win over everything underneath them.
+		if (scrollbarClicked(mouseX, mouseY)) {
+			return true;
 		}
 
 		if (mouseY >= top && mouseY < top + TAB_HEIGHT
@@ -1664,6 +1712,11 @@ public class QuestScreen extends Screen {
 
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+		if (scrollDrag >= 0) {
+			dragScrollbar(scrollDrag, mouseY);
+			return true;
+		}
+
 		if (tab == Tab.SETTINGS && draggingSlider >= 0) {
 			List<Setting> settings = buildSettings();
 			if (draggingSlider < settings.size()
@@ -1677,6 +1730,11 @@ public class QuestScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+		if (scrollDrag >= 0) {
+			scrollDrag = -1;
+			return true;
+		}
+
 		if (draggingSlider >= 0) {
 			draggingSlider = -1;
 			HudConfig.save();
@@ -1759,6 +1817,124 @@ public class QuestScreen extends Screen {
 	// ------------------------------------------------------------------
 	// Drawing helpers
 	// ------------------------------------------------------------------
+
+	// ------------------------------------------------------------------
+	// Scrollbars
+	// ------------------------------------------------------------------
+
+	private double getScroll(int id) {
+		return switch (id) {
+			case SB_LIST -> listScroll;
+			case SB_DETAIL -> detailScroll;
+			case SB_DEATHS -> deathScroll;
+			case SB_SETTINGS -> settingsScroll;
+			default -> treeScroll;
+		};
+	}
+
+	private void setScroll(int id, double value) {
+		switch (id) {
+			case SB_LIST -> listScroll = value;
+			case SB_DETAIL -> detailScroll = value;
+			case SB_DEATHS -> deathScroll = value;
+			case SB_SETTINGS -> settingsScroll = value;
+			default -> treeScroll = value;
+		}
+	}
+
+	/**
+	 * Draws a vertical scrollbar down the right edge of a region and records its
+	 * geometry so it can be grabbed. Draws nothing when everything already fits.
+	 */
+	private void drawScrollbar(MatrixStack matrices, int id, int rightEdge, int y1, int y2,
+			int contentHeight, int mouseX, int mouseY) {
+		Bar bar = scrollBars[id];
+		int viewHeight = y2 - y1;
+
+		bar.x = rightEdge - SB_WIDTH - 1;
+		bar.y1 = y1;
+		bar.y2 = y2;
+		bar.contentHeight = contentHeight;
+		bar.viewHeight = viewHeight;
+		bar.active = contentHeight > viewHeight && viewHeight > SB_MIN_THUMB;
+
+		if (!bar.active) {
+			return;
+		}
+
+		fill(matrices, bar.x, y1, bar.x + SB_WIDTH, y2, COLOR_TRACK);
+
+		int thumbHeight = Math.max(SB_MIN_THUMB,
+				(int) ((long) viewHeight * viewHeight / contentHeight));
+		int travel = viewHeight - thumbHeight;
+		int maxScroll = contentHeight - viewHeight;
+		double fraction = maxScroll <= 0 ? 0 : getScroll(id) / maxScroll;
+		int thumbTop = y1 + (int) Math.round(travel * Math.max(0, Math.min(1, fraction)));
+
+		boolean hovered = mouseX >= bar.x && mouseX <= bar.x + SB_WIDTH
+				&& mouseY >= y1 && mouseY <= y2;
+		int colour = (scrollDrag == id || hovered) ? COLOR_KNOB : 0xFF5A5A6E;
+
+		fill(matrices, bar.x, thumbTop, bar.x + SB_WIDTH, thumbTop + thumbHeight, colour);
+	}
+
+	/** Maps a cursor position on the track to a scroll offset. */
+	private void dragScrollbar(int id, double mouseY) {
+		Bar bar = scrollBars[id];
+		if (!bar.active) {
+			return;
+		}
+
+		int thumbHeight = Math.max(SB_MIN_THUMB,
+				(int) ((long) bar.viewHeight * bar.viewHeight / bar.contentHeight));
+		int travel = bar.viewHeight - thumbHeight;
+		if (travel <= 0) {
+			return;
+		}
+
+		double top = mouseY - scrollGrab - bar.y1;
+		double fraction = Math.max(0.0D, Math.min(1.0D, top / travel));
+		setScroll(id, fraction * (bar.contentHeight - bar.viewHeight));
+	}
+
+	/** @return true when the click was consumed by a scrollbar. */
+	private boolean scrollbarClicked(double mouseX, double mouseY) {
+		for (int id = 0; id < scrollBars.length; id++) {
+			Bar bar = scrollBars[id];
+			if (!bar.active) {
+				continue;
+			}
+			if (mouseX < bar.x || mouseX > bar.x + SB_WIDTH
+					|| mouseY < bar.y1 || mouseY > bar.y2) {
+				continue;
+			}
+
+			int thumbHeight = Math.max(SB_MIN_THUMB,
+					(int) ((long) bar.viewHeight * bar.viewHeight / bar.contentHeight));
+			int travel = bar.viewHeight - thumbHeight;
+			int maxScroll = bar.contentHeight - bar.viewHeight;
+			double fraction = maxScroll <= 0 ? 0 : getScroll(id) / maxScroll;
+			int thumbTop = bar.y1 + (int) Math.round(travel * Math.max(0, Math.min(1, fraction)));
+
+			scrollDrag = id;
+			if (mouseY >= thumbTop && mouseY <= thumbTop + thumbHeight) {
+				// Grabbed the thumb: keep the same point under the cursor.
+				scrollGrab = mouseY - thumbTop;
+			} else {
+				// Clicked the track: centre the thumb on the cursor and follow.
+				scrollGrab = thumbHeight / 2.0D;
+				dragScrollbar(id, mouseY);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private void clearScrollbars() {
+		for (Bar bar : scrollBars) {
+			bar.active = false;
+		}
+	}
 
 	private void enableScissor(int x1, int y1, int x2, int y2) {
 		Window window = MinecraftClient.getInstance().getWindow();

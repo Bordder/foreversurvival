@@ -23,8 +23,9 @@ import net.minecraft.text.OrderedText;
  *
  * The panel is laid out to an explicit width from {@link HudConfig}: everything
  * WRAPS to that width and nothing is ever truncated, so a long objective is
- * always readable in full. Height grows to fit the content, and can be padded
- * out to a configured minimum.
+ * always readable in full. Height is either automatic (sized to the content) or
+ * pinned to an explicit value, in which case surplus rows are dropped whole and
+ * counted as "+N more..." rather than being clipped mid-line.
  *
  * A pinned side challenge gets its own objective list; a pinned main-line quest
  * is only a line of text, since the main line is already on screen above it.
@@ -166,19 +167,41 @@ public final class QuestHud extends DrawableHelper {
 			}
 		}
 
+		// An explicit height caps how many rows are shown. Lines are dropped
+		// whole - a line is never half-drawn and text is never truncated - and
+		// the overflow is counted so nothing silently disappears.
+		if (HudConfig.hudHeight > 0) {
+			int maxRows = Math.max(1, (HudConfig.hudHeight - PADDING * 2) / LINE);
+			if (rows.size() > maxRows) {
+				TextRenderer font2 = MinecraftClient.getInstance().textRenderer;
+				int hidden = rows.size() - (maxRows - 1);
+				List<Row> trimmed = new ArrayList<>(rows.subList(0, Math.max(0, maxRows - 1)));
+				addWrapped(trimmed, font2, "+" + hidden + " more...",
+						HudConfig.hudWidth - PADDING * 2, RGB_PHASE, 0, -1);
+				return trimmed;
+			}
+		}
+
 		return rows;
 	}
 
-	/** Unscaled panel size as {width, height}. */
+	/**
+	 * Unscaled panel size as {width, height}.
+	 *
+	 * With an explicit height the panel is exactly that tall, so dragging the
+	 * bottom edge moves it one-for-one. At height 0 it sizes to its content.
+	 */
 	public int[] measure(@Nullable Quest quest) {
-		List<Row> rows = layout(quest);
+		if (HudConfig.hudHeight > 0) {
+			return new int[] { HudConfig.hudWidth, HudConfig.hudHeight };
+		}
 
+		List<Row> rows = layout(quest);
 		int textHeight = rows.size() * LINE;
 		// The icon block is 20px tall; make sure the header never overlaps it.
 		int minimum = HudConfig.showIcon ? ICON : 0;
-		int height = PADDING * 2 + Math.max(textHeight, minimum);
 
-		return new int[] { HudConfig.hudWidth, Math.max(height, HudConfig.hudMinHeight) };
+		return new int[] { HudConfig.hudWidth, PADDING * 2 + Math.max(textHeight, minimum) };
 	}
 
 	// ------------------------------------------------------------------

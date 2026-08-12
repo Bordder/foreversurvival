@@ -38,7 +38,7 @@ public final class HudConfig {
 	/** Panel content width in GUI pixels. Text wraps to this. */
 	public static int hudWidth = 150;
 	/** Minimum panel height. The panel still grows if the content needs more. */
-	public static int hudMinHeight = 0;
+	public static int hudHeight = 0;
 	/** Panel background alpha, 0-100. 0 means text only, no panel. */
 	public static int backgroundOpacity = 60;
 	/** Text alpha, 20-100. Floored so it can never become invisible. */
@@ -107,7 +107,7 @@ public final class HudConfig {
 		hudY = clamp(dbl(p, "hudY", 0.02D), 0.0D, 1.0D);
 		hudScale = clamp(dbl(p, "hudScale", 1.0D), 0.5D, 2.0D);
 		hudWidth = clamp(integer(p, "hudWidth", 150), MIN_HUD_WIDTH, MAX_HUD_WIDTH);
-		hudMinHeight = clamp(integer(p, "hudMinHeight", 0), 0, MAX_HUD_HEIGHT);
+		hudHeight = clamp(integer(p, "hudHeight", 0), 0, MAX_HUD_HEIGHT);
 		backgroundOpacity = clamp(integer(p, "backgroundOpacity", 60), 0, 100);
 		textOpacity = clamp(integer(p, "textOpacity", 100), 20, 100);
 		pinnedQuestId = p.getProperty("pinnedQuestId", "");
@@ -133,7 +133,7 @@ public final class HudConfig {
 		p.setProperty("hudY", Double.toString(round(hudY)));
 		p.setProperty("hudScale", Double.toString(round(hudScale)));
 		p.setProperty("hudWidth", Integer.toString(hudWidth));
-		p.setProperty("hudMinHeight", Integer.toString(hudMinHeight));
+		p.setProperty("hudHeight", Integer.toString(hudHeight));
 		p.setProperty("backgroundOpacity", Integer.toString(backgroundOpacity));
 		p.setProperty("textOpacity", Integer.toString(textOpacity));
 		p.setProperty("showObjectives", Boolean.toString(showObjectives));
@@ -170,7 +170,7 @@ public final class HudConfig {
 		hudY = 0.02D;
 		hudScale = 1.0D;
 		hudWidth = 150;
-		hudMinHeight = 0;
+		hudHeight = 0;
 		backgroundOpacity = 60;
 		textOpacity = 100;
 		showObjectives = true;

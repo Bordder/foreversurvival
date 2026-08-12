@@ -10,10 +10,14 @@ import net.minecraft.text.LiteralText;
 /**
  * Layout editor.
  *
- * Drag an element's body to move it. Drag its RIGHT edge to change width, its
- * BOTTOM edge to change height, or the corner grip to change both - width and
- * height are independent, so the box can be stretched as far as you like in
- * either direction without distorting the text.
+ * Grab the body to move. Grab the RIGHT edge for width, the BOTTOM edge for
+ * height, or the corner for both - the two axes are completely independent, so
+ * the box stretches as far as you like in either direction and the text simply
+ * re-wraps. Nothing is scaled or distorted.
+ *
+ * Grab zones are deliberately generous and the handles are drawn on the frame,
+ * so there is no hunting for a one-pixel corner. Arrow keys nudge the selected
+ * element a pixel at a time (hold shift for ten) once you have clicked it.
  *
  * Positions are written back as screen fractions and sizes as GUI pixels, so a
  * layout arranged here survives a resolution change.
@@ -33,18 +37,23 @@ public class HudEditScreen extends Screen {
 		RESIZE_BOTH
 	}
 
-	private static final int GRIP = 8;
-	private static final int EDGE = 4;
+	/** How far outside an edge still counts as grabbing it. */
+	private static final int EDGE = 6;
+	private static final int CORNER = 12;
+	private static final int MIN_PANEL_HEIGHT = 40;
+
 	private static final int COLOR_OUTLINE = 0xFF5A7BD0;
 	private static final int COLOR_OUTLINE_ACTIVE = 0xFFFFD24A;
-	private static final int COLOR_GRIP = 0xFFFFD24A;
-	private static final int COLOR_EDGE = 0xAAFFD24A;
+	private static final int COLOR_HANDLE = 0xFFFFD24A;
+	private static final int COLOR_HANDLE_DIM = 0x99FFD24A;
+	private static final int COLOR_TIP_BG = 0xE0101018;
 	private static final int TEXT_HINT = 0xFFCFCFDA;
 	private static final int TEXT_DIM = 0xFF7A7A8A;
 
 	private final Screen parent;
 
 	private Element active;
+	private Element selected = Element.QUEST;
 	private Mode mode = Mode.NONE;
 	private double grabX;
 	private double grabY;
@@ -56,35 +65,39 @@ public class HudEditScreen extends Screen {
 
 	@Override
 	protected void init() {
-		int y = this.height - 28;
+		int y = this.height - 26;
 
-		addDrawableChild(new ButtonWidget(this.width / 2 - 154, y, 100, 20,
+		addDrawableChild(new ButtonWidget(this.width / 2 - 180, y, 84, 20,
+				new LiteralText("Auto height"), button -> {
+					HudConfig.hudHeight = 0;
+					HudConfig.save();
+				}));
+
+		addDrawableChild(new ButtonWidget(this.width / 2 - 92, y, 84, 20,
 				new LiteralText("Reset layout"), button -> {
 					HudConfig.hudX = 0.72D;
 					HudConfig.hudY = 0.02D;
-					HudConfig.hudScale = 1.0D;
 					HudConfig.hudWidth = 150;
-					HudConfig.hudMinHeight = 0;
+					HudConfig.hudHeight = 0;
 					HudConfig.locatorX = 0.5D;
 					HudConfig.locatorY = 0.04D;
-					HudConfig.locatorScale = 1.0D;
 					HudConfig.locatorWidth = 182;
 					HudConfig.locatorHeight = 9;
 					HudConfig.save();
 				}));
 
-		addDrawableChild(new ButtonWidget(this.width / 2 - 50, y, 100, 20,
-				new LiteralText("Done"), button -> {
-					HudConfig.save();
-					this.client.setScreen(parent);
-				}));
-
-		addDrawableChild(new ButtonWidget(this.width / 2 + 54, y, 100, 20,
+		addDrawableChild(new ButtonWidget(this.width / 2 - 4, y, 96, 20,
 				new LiteralText(HudConfig.locatorXpBarMode ? "Bar: XP slot" : "Bar: free"),
 				button -> {
 					HudConfig.locatorXpBarMode = !HudConfig.locatorXpBarMode;
 					HudConfig.save();
 					this.client.setScreen(new HudEditScreen(parent));
+				}));
+
+		addDrawableChild(new ButtonWidget(this.width / 2 + 96, y, 84, 20,
+				new LiteralText("Done"), button -> {
+					HudConfig.save();
+					this.client.setScreen(parent);
 				}));
 	}
 
@@ -93,23 +106,23 @@ public class HudEditScreen extends Screen {
 		return false;
 	}
 
-	/** The locator can only be dragged when it is not pinned to the XP slot. */
 	private boolean locatorMovable() {
 		return HudConfig.locatorEnabled && !HudConfig.locatorXpBarMode;
 	}
 
 	// ------------------------------------------------------------------
-	// Geometry
+	// Geometry - everything is 1:1 with screen pixels, no scaling involved
 	// ------------------------------------------------------------------
 
+	/** Zoom, applied on top of the width/height box exactly as in-game. */
 	private double scaleOf(Element element) {
 		return element == Element.QUEST ? HudConfig.hudScale : HudConfig.locatorScale;
 	}
 
+	/** Unscaled box size. */
 	private int[] sizeOf(Element element) {
 		if (element == Element.QUEST) {
-			Quest quest = ClientQuestState.getCurrentMainQuest();
-			return QuestHud.get().measure(quest);
+			return QuestHud.get().measure(ClientQuestState.getCurrentMainQuest());
 		}
 		int[] size = LocatorBar.get().measure();
 		return new int[] { size[0], size[1] + 12 };
@@ -121,9 +134,8 @@ public class HudEditScreen extends Screen {
 		}
 
 		int[] size = sizeOf(element);
-		double scale = scaleOf(element);
 		return new double[] {
-				HudConfig.locatorX * this.width - (size[0] * scale) / 2.0D,
+				HudConfig.locatorX * this.width - (size[0] * scaleOf(element)) / 2.0D,
 				HudConfig.locatorY * this.height
 		};
 	}
@@ -132,8 +144,8 @@ public class HudEditScreen extends Screen {
 		int[] size = sizeOf(element);
 		double scale = scaleOf(element);
 
-		pixelX = HudConfig.clamp(pixelX, -size[0] * scale + 8, (double) this.width - 8);
-		pixelY = HudConfig.clamp(pixelY, 0.0D, (double) this.height - 8);
+		pixelX = HudConfig.clamp(pixelX, -size[0] * scale + 16.0D, (double) this.width - 16.0D);
+		pixelY = HudConfig.clamp(pixelY, 0.0D, (double) this.height - 16.0D);
 
 		if (element == Element.QUEST) {
 			HudConfig.hudX = HudConfig.clamp(pixelX / this.width, 0.0D, 1.0D);
@@ -145,7 +157,13 @@ public class HudEditScreen extends Screen {
 		}
 	}
 
+	private void nudge(Element element, int dx, int dy) {
+		double[] origin = originOf(element);
+		setOrigin(element, origin[0] + dx, origin[1] + dy);
+	}
+
 	private void setWidth(Element element, double pixels) {
+		// Divide by the zoom so the dragged edge tracks the cursor on screen.
 		int value = (int) Math.round(pixels / scaleOf(element));
 		if (element == Element.QUEST) {
 			HudConfig.hudWidth = HudConfig.clamp(value, HudConfig.MIN_HUD_WIDTH, HudConfig.MAX_HUD_WIDTH);
@@ -158,8 +176,7 @@ public class HudEditScreen extends Screen {
 	private void setHeight(Element element, double pixels) {
 		int value = (int) Math.round(pixels / scaleOf(element));
 		if (element == Element.QUEST) {
-			// Height is a floor: the panel still grows to fit its content.
-			HudConfig.hudMinHeight = HudConfig.clamp(value, 0, HudConfig.MAX_HUD_HEIGHT);
+			HudConfig.hudHeight = HudConfig.clamp(value, MIN_PANEL_HEIGHT, HudConfig.MAX_HUD_HEIGHT);
 		} else {
 			HudConfig.locatorHeight = HudConfig.clamp(value - 12, HudConfig.MIN_BAR_HEIGHT,
 					HudConfig.MAX_BAR_HEIGHT);
@@ -178,16 +195,16 @@ public class HudEditScreen extends Screen {
 
 	private Mode hitTest(Element element, double mouseX, double mouseY) {
 		double[] b = boundsOf(element);
-		boolean inside = mouseX >= b[0] - EDGE && mouseX <= b[2] + EDGE
-				&& mouseY >= b[1] - EDGE && mouseY <= b[3] + EDGE;
-		if (!inside) {
+		if (mouseX < b[0] - EDGE || mouseX > b[2] + EDGE
+				|| mouseY < b[1] - EDGE || mouseY > b[3] + EDGE) {
 			return Mode.NONE;
 		}
 
 		boolean nearRight = mouseX >= b[2] - EDGE;
 		boolean nearBottom = mouseY >= b[3] - EDGE;
+		boolean cornerish = mouseX >= b[2] - CORNER && mouseY >= b[3] - CORNER;
 
-		if (nearRight && nearBottom) {
+		if (cornerish && nearRight && nearBottom) {
 			return Mode.RESIZE_BOTH;
 		}
 		if (nearRight) {
@@ -196,10 +213,7 @@ public class HudEditScreen extends Screen {
 		if (nearBottom) {
 			return Mode.RESIZE_HEIGHT;
 		}
-		if (mouseX <= b[2] && mouseY <= b[3]) {
-			return Mode.MOVING;
-		}
-		return Mode.NONE;
+		return Mode.MOVING;
 	}
 
 	// ------------------------------------------------------------------
@@ -222,21 +236,33 @@ public class HudEditScreen extends Screen {
 			drawFrame(matrices, Element.LOCATOR, mouseX, mouseY);
 		}
 
-		String hint = "Drag to move  -  drag the right edge for width, the bottom edge for height";
-		textRenderer.draw(matrices, hint, (this.width - textRenderer.getWidth(hint)) / 2.0F, 10.0F,
+		String hint = "Drag the body to move  -  right edge = width  -  bottom edge = height "
+				+ " -  corner = both";
+		textRenderer.draw(matrices, hint, (this.width - textRenderer.getWidth(hint)) / 2.0F, 8.0F,
 				TEXT_HINT);
 
-		String detail = "Panel " + HudConfig.hudWidth + " x "
-				+ (HudConfig.hudMinHeight == 0 ? "auto" : String.valueOf(HudConfig.hudMinHeight))
-				+ "     Bar " + HudConfig.locatorWidth + " x " + HudConfig.locatorHeight;
-		textRenderer.draw(matrices, detail, (this.width - textRenderer.getWidth(detail)) / 2.0F, 22.0F,
+		String keys = "Arrow keys nudge the selected box (hold Shift for 10px)";
+		textRenderer.draw(matrices, keys, (this.width - textRenderer.getWidth(keys)) / 2.0F, 20.0F,
 				TEXT_DIM);
 
 		if (HudConfig.locatorEnabled && HudConfig.locatorXpBarMode) {
-			String note = "Locator bar sits in the XP bar slot - switch it to free "
-					+ "placement to move it here";
-			textRenderer.draw(matrices, note, (this.width - textRenderer.getWidth(note)) / 2.0F, 34.0F,
+			String note = "Locator bar is in the XP bar slot - set it to free placement to move it";
+			textRenderer.draw(matrices, note, (this.width - textRenderer.getWidth(note)) / 2.0F, 32.0F,
 					TEXT_DIM);
+		}
+
+		// Live size readout, pinned near the cursor while dragging.
+		if (active != null && mode != Mode.NONE) {
+			String label = active == Element.QUEST
+					? (HudConfig.hudWidth + " x "
+							+ (HudConfig.hudHeight == 0 ? "auto" : String.valueOf(HudConfig.hudHeight)))
+					: (HudConfig.locatorWidth + " x " + HudConfig.locatorHeight);
+
+			int w = textRenderer.getWidth(label) + 8;
+			int tipX = Math.min(mouseX + 10, this.width - w - 2);
+			int tipY = Math.max(2, mouseY - 16);
+			fill(matrices, tipX, tipY, tipX + w, tipY + 13, COLOR_TIP_BG);
+			textRenderer.draw(matrices, label, tipX + 4, tipY + 3, COLOR_HANDLE);
 		}
 
 		super.render(matrices, mouseX, mouseY, delta);
@@ -258,10 +284,16 @@ public class HudEditScreen extends Screen {
 		fill(matrices, x1, y1, x1 + 1, y2, colour);
 		fill(matrices, x2 - 1, y1, x2, y2, colour);
 
-		// Edge grips: right for width, bottom for height, corner for both.
-		fill(matrices, x2 - 2, y1 + GRIP, x2, y2 - GRIP, COLOR_EDGE);
-		fill(matrices, x1 + GRIP, y2 - 2, x2 - GRIP, y2, COLOR_EDGE);
-		fill(matrices, x2 - GRIP, y2 - GRIP, x2, y2, COLOR_GRIP);
+		// Handles light up individually so it is obvious what is grabbable.
+		boolean widthHot = hover == Mode.RESIZE_WIDTH || hover == Mode.RESIZE_BOTH;
+		boolean heightHot = hover == Mode.RESIZE_HEIGHT || hover == Mode.RESIZE_BOTH;
+
+		fill(matrices, x2 - 3, y1 + CORNER, x2, y2 - CORNER,
+				widthHot ? COLOR_HANDLE : COLOR_HANDLE_DIM);
+		fill(matrices, x1 + CORNER, y2 - 3, x2 - CORNER, y2,
+				heightHot ? COLOR_HANDLE : COLOR_HANDLE_DIM);
+		fill(matrices, x2 - CORNER, y2 - CORNER, x2, y2,
+				hover == Mode.RESIZE_BOTH ? COLOR_HANDLE : COLOR_HANDLE_DIM);
 	}
 
 	// ------------------------------------------------------------------
@@ -282,6 +314,7 @@ public class HudEditScreen extends Screen {
 				}
 
 				active = element;
+				selected = element;
 				mode = hit;
 
 				double[] origin = originOf(element);
@@ -330,6 +363,32 @@ public class HudEditScreen extends Screen {
 			return true;
 		}
 		return super.mouseReleased(mouseX, mouseY, button);
+	}
+
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		Element target = selected;
+		if (target == Element.LOCATOR && !locatorMovable()) {
+			target = Element.QUEST;
+		}
+
+		int step = hasShiftDown() ? 10 : 1;
+		boolean moved = true;
+
+		// 263 left, 262 right, 265 up, 264 down
+		switch (keyCode) {
+			case 263 -> nudge(target, -step, 0);
+			case 262 -> nudge(target, step, 0);
+			case 265 -> nudge(target, 0, -step);
+			case 264 -> nudge(target, 0, step);
+			default -> moved = false;
+		}
+
+		if (moved) {
+			HudConfig.save();
+			return true;
+		}
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	@Override
