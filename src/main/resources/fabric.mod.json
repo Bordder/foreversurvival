@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "foreversurvival",
+	"version": "${version}",
+	"name": "ForeverSurvival",
+	"description": "A completely self-contained, strictly-locked, months-long guided survival progression for Minecraft 1.18.2. Includes its own questing system, GUI, static guides, balanced rewards, optional side challenges and a death coordinate log. Requires no other questing mod.",
+	"authors": [
+		"ForeverSurvival"
+	],
+	"contact": {},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.foreversurvival.ForeverSurvival"
+		],
+		"client": [
+			"com.foreversurvival.client.ForeverSurvivalClient"
+		]
+	},
+	"mixins": [
+		"foreversurvival.mixins.json",
+		{
+			"config": "foreversurvival.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.14.0",
+		"fabric": "*",
+		"minecraft": "1.18.2",
+		"java": ">=17"
+	}
+}

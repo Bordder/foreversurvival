@@ -1,0 +1,64 @@
+[
+  {
+    "id": "custom_windmill",
+    "phase": "SIDE",
+    "title": "Build a Windmill",
+    "description": "Because you can.",
+    "icon": "minecraft:oak_planks",
+    "guide": "White wool sails read best against a dark oak frame. Put it on a hill.",
+    "tools": ["Axe", "Scaffolding", "Wool"],
+    "tasks": [
+      {
+        "type": "item",
+        "id": "planks",
+        "description": "Collect Planks",
+        "count": 64,
+        "items": ["minecraft:oak_planks", "minecraft:dark_oak_planks"]
+      },
+      {
+        "type": "craft",
+        "id": "scaffold",
+        "description": "Craft Scaffolding",
+        "count": 16,
+        "items": ["minecraft:scaffolding"]
+      },
+      {
+        "type": "checkmark",
+        "id": "built",
+        "description": "Finish the windmill"
+      }
+    ]
+  },
+  {
+    "id": "custom_outpost",
+    "phase": "SIDE",
+    "title": "The Pillager Outpost",
+    "description": "A tower full of crossbows.",
+    "icon": "minecraft:crossbow",
+    "guide": "Outposts spawn near villages. The captain drops Bad Omen when killed, so clear it before you go home.",
+    "tools": ["Shield", "Bow", "Armour"],
+    "tasks": [
+      {
+        "type": "structure",
+        "id": "outpost",
+        "description": "Find a Pillager Outpost",
+        "dimension": "minecraft:overworld",
+        "structure": "minecraft:pillager_outpost"
+      },
+      {
+        "type": "kill",
+        "id": "pillagers",
+        "description": "Kill Pillagers",
+        "count": 12,
+        "entities": ["minecraft:pillager"]
+      },
+      {
+        "type": "item",
+        "id": "crossbow",
+        "description": "Loot a Crossbow",
+        "count": 1,
+        "items": ["minecraft:crossbow"]
+      }
+    ]
+  }
+]
