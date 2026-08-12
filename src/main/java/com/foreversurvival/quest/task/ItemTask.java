@@ -7,14 +7,16 @@ import java.util.Set;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.stat.Stats;
 
 /**
- * "Collect" task. Counts the matching items currently carried by the player
- * (inventory + armour + offhand).
+ * "Collect" task. Progress is the higher of what the player is carrying
+ * (inventory + armour + offhand) and what they have ever picked up.
  *
- * Because {@code PlayerQuestData} keeps the highest value ever recorded, the
- * objective stays complete even after the items are spent - you are never
- * punished for using what you gathered.
+ * The carried count covers things that never touch the floor - smelting output,
+ * chest loot - while the picked-up statistic covers everything gathered and then
+ * spent. Between them you can never be stranded partway through a gathering
+ * objective by using the materials as you go.
  *
  * When several items are supplied they are summed, so "any 16 logs" works with
  * a mixed stack of oak and birch.
@@ -31,16 +33,25 @@ public class ItemTask extends QuestTask {
 	@Override
 	public int computeProgress(TaskContext ctx) {
 		ServerPlayerEntity player = ctx.getPlayer();
-		int count = 0;
 
+		int carried = 0;
 		for (int slot = 0; slot < player.getInventory().size(); slot++) {
 			ItemStack stack = player.getInventory().getStack(slot);
 			if (!stack.isEmpty() && items.contains(stack.getItem())) {
-				count += stack.getCount();
+				carried += stack.getCount();
 			}
 		}
 
-		return count;
+		// Carrying alone is not enough: spending the items as you gather them
+		// (harvesting wheat while baking bread, say) means you might never hold
+		// the full amount at once. The vanilla "picked up" statistic is
+		// cumulative and never falls, so whichever is higher wins.
+		int gathered = 0;
+		for (Item item : items) {
+			gathered += player.getStatHandler().getStat(Stats.PICKED_UP.getOrCreateStat(item));
+		}
+
+		return Math.max(carried, gathered);
 	}
 
 	@Override

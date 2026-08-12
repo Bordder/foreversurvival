@@ -53,6 +53,12 @@ public final class LocatorBar extends DrawableHelper {
 	/** Set by the mixin each frame the vanilla XP bar method actually runs. */
 	private boolean xpSlotOffered;
 
+	// Distance readout smoothing. A player in a boat rocks back and forth by
+	// most of a block, which makes a plain rounded distance flicker between two
+	// numbers. Only move the shown value once it is a full metre out.
+	private String shownFor;
+	private double shownDistance;
+
 	private LocatorBar() {
 	}
 
@@ -253,10 +259,17 @@ public final class LocatorBar extends DrawableHelper {
 					HudConfig.applyTextAlpha(RGB_NAME));
 
 			if (HudConfig.locatorShowDistance) {
-				String distance = Math.round(hoveredDistance) + "m";
+				if (!hoveredName.equals(shownFor) || Math.abs(hoveredDistance - shownDistance) >= 1.0D) {
+					shownFor = hoveredName;
+					shownDistance = hoveredDistance;
+				}
+
+				String distance = Math.round(shownDistance) + "m";
 				font.draw(matrices, distance, centre - font.getWidth(distance) / 2, distanceY,
 						HudConfig.applyTextAlpha(RGB_DISTANCE));
 			}
+		} else {
+			shownFor = null;
 		}
 	}
 

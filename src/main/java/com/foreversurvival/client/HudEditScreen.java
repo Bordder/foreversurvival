@@ -41,6 +41,13 @@ public class HudEditScreen extends Screen {
 	private static final int EDGE = 6;
 	private static final int CORNER = 12;
 	private static final int MIN_PANEL_HEIGHT = 40;
+	/** Snap grid in GUI pixels, and how near a guide has to be to grab you. */
+	private static final int GRID = 8;
+	private static final int SNAP_RANGE = 6;
+	private static final int MARGIN = 4;
+
+	/** Held shift disables snapping for fine positioning. */
+	private boolean snapping = true;
 
 	private static final int COLOR_OUTLINE = 0xFF5A7BD0;
 	private static final int COLOR_OUTLINE_ACTIVE = 0xFFFFD24A;
@@ -140,12 +147,36 @@ public class HudEditScreen extends Screen {
 		};
 	}
 
+	/** Snaps a value to the grid, or to a guide line when one is close. */
+	private double snap(double value, double guide) {
+		if (Math.abs(value - guide) <= SNAP_RANGE) {
+			return guide;
+		}
+		return Math.round(value / GRID) * (double) GRID;
+	}
+
 	private void setOrigin(Element element, double pixelX, double pixelY) {
 		int[] size = sizeOf(element);
 		double scale = scaleOf(element);
+		double boxWidth = size[0] * scale;
+		double boxHeight = size[1] * scale;
 
-		pixelX = HudConfig.clamp(pixelX, -size[0] * scale + 16.0D, (double) this.width - 16.0D);
-		pixelY = HudConfig.clamp(pixelY, 0.0D, (double) this.height - 16.0D);
+		if (snapping) {
+			// Guides: centred on screen, and flush against each edge.
+			pixelX = snap(pixelX, (this.width - boxWidth) / 2.0D);
+			pixelX = Math.abs(pixelX - MARGIN) <= SNAP_RANGE ? MARGIN : pixelX;
+			pixelX = Math.abs(pixelX - (this.width - boxWidth - MARGIN)) <= SNAP_RANGE
+					? this.width - boxWidth - MARGIN : pixelX;
+
+			pixelY = snap(pixelY, (this.height - boxHeight) / 2.0D);
+			pixelY = Math.abs(pixelY - MARGIN) <= SNAP_RANGE ? MARGIN : pixelY;
+			pixelY = Math.abs(pixelY - (this.height - boxHeight - MARGIN)) <= SNAP_RANGE
+					? this.height - boxHeight - MARGIN : pixelY;
+		}
+
+		// Keep the whole box on screen - dragging it half off is never useful.
+		pixelX = HudConfig.clamp(pixelX, 0.0D, Math.max(0.0D, this.width - boxWidth));
+		pixelY = HudConfig.clamp(pixelY, 0.0D, Math.max(0.0D, this.height - boxHeight));
 
 		if (element == Element.QUEST) {
 			HudConfig.hudX = HudConfig.clamp(pixelX / this.width, 0.0D, 1.0D);
@@ -241,9 +272,18 @@ public class HudEditScreen extends Screen {
 		textRenderer.draw(matrices, hint, (this.width - textRenderer.getWidth(hint)) / 2.0F, 8.0F,
 				TEXT_HINT);
 
-		String keys = "Arrow keys nudge the selected box (hold Shift for 10px)";
+		String keys = "Snaps to an 8px grid, screen centre and edges  -  hold Shift to snap freely."
+				+ "  Arrow keys nudge (Shift = 10px)";
 		textRenderer.draw(matrices, keys, (this.width - textRenderer.getWidth(keys)) / 2.0F, 20.0F,
 				TEXT_DIM);
+
+		// Centre guides, shown while dragging so the snap targets are visible.
+		if (active != null && mode == Mode.MOVING && snapping) {
+			int cx = this.width / 2;
+			int cy = this.height / 2;
+			fill(matrices, cx, 0, cx + 1, this.height, 0x33FFD24A);
+			fill(matrices, 0, cy, this.width, cy + 1, 0x33FFD24A);
+		}
 
 		if (HudConfig.locatorEnabled && HudConfig.locatorXpBarMode) {
 			String note = "Locator bar is in the XP bar slot - set it to free placement to move it";
@@ -338,6 +378,9 @@ public class HudEditScreen extends Screen {
 		if (active == null || mode == Mode.NONE) {
 			return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
 		}
+
+		// Shift is the usual "ignore snapping" modifier.
+		snapping = !hasShiftDown();
 
 		switch (mode) {
 			case MOVING -> setOrigin(active, mouseX - grabX, mouseY - grabY);

@@ -1041,6 +1041,8 @@ public class QuestScreen extends Screen {
 		}
 
 		// Armour and offhand off to the right.
+		// Armour stacks vertically with the off-hand underneath it, so the two
+		// labels can never run into each other however wide the font is.
 		int sideLeft = gridLeft + 9 * 18 + 12;
 		textRenderer.draw(matrices, "Armour", sideLeft, gridTop - 10, TEXT_DIM);
 		// Vanilla stores armour boots-first (slot 100 = boots, 103 = helmet), so
@@ -1048,8 +1050,10 @@ public class QuestScreen extends Screen {
 		for (int i = 0; i < 4; i++) {
 			drawSlot(matrices, sideLeft, gridTop + i * 18, slots[39 - i]);
 		}
-		textRenderer.draw(matrices, "Off", sideLeft + 22, gridTop - 10, TEXT_DIM);
-		drawSlot(matrices, sideLeft + 22, gridTop, slots[40]);
+
+		int offhandTop = gridTop + 4 * 18 + 12;
+		textRenderer.draw(matrices, "Off-hand", sideLeft, offhandTop - 10, TEXT_DIM);
+		drawSlot(matrices, sideLeft, offhandTop, slots[40]);
 	}
 
 	/**
@@ -1131,19 +1135,13 @@ public class QuestScreen extends Screen {
 		}
 
 		int playTicks = stats.getInt("PlayTime");
-		double hours = playTicks / 20.0D / 3600.0D;
 
 		y = stat(matrices, x, y, "Playtime", formatDuration(playTicks));
 		y = stat(matrices, x, y, "Quests completed", mainDone + " main, " + sideDone + " side");
-		if (hours > 0.05D) {
-			y = stat(matrices, x, y, "Quests per hour",
-					String.format(Locale.ROOT, "%.1f", (mainDone + sideDone) / hours));
-		}
 		y = stat(matrices, x, y, "Since last death", formatDuration(stats.getInt("SinceDeath")));
 		y += 6;
 
 		y = stat(matrices, x, y, "Deaths", Integer.toString(stats.getInt("Deaths")));
-		y = stat(matrices, x, y, "Deaths logged", Integer.toString(data.getDeaths().size()));
 		y = stat(matrices, x, y, "Mobs killed", Integer.toString(stats.getInt("MobKills")));
 		y = stat(matrices, x, y, "Damage taken",
 				String.format(Locale.ROOT, "%.1f hearts", stats.getInt("DamageTaken") / 20.0D));
