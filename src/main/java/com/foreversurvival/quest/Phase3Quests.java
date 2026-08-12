@@ -15,11 +15,14 @@ import net.minecraft.item.Items;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
- * PHASE 3 - THE EXPANSION (21 quests, MAJOR).
+ * PHASE 3 - THE EXPANSION (22 quests, MAJOR).
  *
- * The Nether, biome by biome. Everything here is a place a survival player
- * actually goes: the five Nether biomes, both structures, brewing, and the
- * portal network that makes the Overworld small.
+ * The Nether, biome by biome.
+ *
+ * ORDER MATTERS: the safe work comes first. Magma cream is gathered in the
+ * Nether Wastes, then the fortress gives blaze rods, then brewing, then Fire
+ * Resistance - and only after that do the quests that genuinely need it
+ * (glowstone over lava, the Basalt Deltas, striders, bastions, debris mining).
  */
 final class Phase3Quests {
 
@@ -61,17 +64,18 @@ final class Phase3Quests {
 						new CraftTask("detector", "Craft a Daylight Detector", 1,
 								Items.DAYLIGHT_DETECTOR)));
 
-		addMain(Quest.builder("p3_04_glowstone", QuestPhase.PHASE_3)
-				.title("Ceiling Light")
-				.desc("The brightest block in the game, hanging over lava.")
-				.icon(Items.GLOWSTONE)
-				.guide("Glowstone clusters hang from the Nether ceiling and from cave roofs. Break "
-						+ "one and the dust scatters - place a slab underneath first or you lose it "
-						+ "to the lava.")
-				.tools("Blocks to bridge", "Fire Resistance Potion", "Slabs")
-				.task(new ItemTask("glowstone", "Collect Glowstone Dust", 16, Items.GLOWSTONE_DUST),
-						new CraftTask("blocks", "Craft Glowstone Blocks", 4, Items.GLOWSTONE),
-						new CraftTask("lantern", "Craft a Lantern", 1, Items.LANTERN)));
+		addMain(Quest.builder("p3_04_ghasts_and_magma", QuestPhase.PHASE_3)
+				.title("Ghasts and Magma")
+				.desc("One screams at you from 100 blocks. The other bounces.")
+				.icon(Items.GHAST_TEAR)
+				.guide("Both spawn in the open Nether Wastes. Punch or shoot a ghast fireball back "
+						+ "at it for a one-hit kill. Magma cubes split when killed - deal with the "
+						+ "small ones first. Their cream is what Fire Resistance is brewed from.")
+				.tools("Bow", "Shield", "Diamond Armour")
+				.task(new KillTask("ghasts", "Kill Ghasts", 3, EntityType.GHAST),
+						new ItemTask("tears", "Collect Ghast Tears", 2, Items.GHAST_TEAR),
+						new KillTask("magma", "Kill Magma Cubes", 8, EntityType.MAGMA_CUBE),
+						new ItemTask("cream", "Collect Magma Cream", 4, Items.MAGMA_CREAM)));
 
 		addMain(Quest.builder("p3_05_crimson_forest", QuestPhase.PHASE_3)
 				.title("The Crimson Forest")
@@ -109,52 +113,29 @@ final class Phase3Quests {
 						new ItemTask("bones", "Collect Bone Blocks", 8, Items.BONE_BLOCK),
 						new CraftTask("soul_torch", "Craft Soul Torches", 8, Items.SOUL_TORCH)));
 
-		addMain(Quest.builder("p3_08_basalt_deltas", QuestPhase.PHASE_3)
-				.title("The Basalt Deltas")
-				.desc("Sharp, black, and on fire in every direction.")
-				.icon(Items.BASALT)
-				.guide("The most dangerous Nether biome: magma cubes everywhere, lava lakes, and "
-						+ "blackstone that looks exactly like the floor. Blackstone replaces "
-						+ "cobblestone in every recipe.")
-				.tools("Fire Resistance Potion", "Netherite or Diamond Armour", "Blocks")
-				.task(new ItemTask("basalt", "Collect Basalt", 16, Items.BASALT),
-						new ItemTask("blackstone", "Collect Blackstone", 16, Items.BLACKSTONE),
-						new KillTask("magma", "Kill Magma Cubes", 8, EntityType.MAGMA_CUBE)));
-
-		addMain(Quest.builder("p3_09_striders", QuestPhase.PHASE_3)
-				.title("Riding the Lava")
-				.desc("A lava lake is a highway if you have the right mount.")
-				.icon(Items.WARPED_FUNGUS_ON_A_STICK)
-				.guide("Saddle a strider and steer it with a Warped Fungus on a Stick. They walk on "
-						+ "lava at full speed and are the only safe way across an open lava sea.")
-				.tools("Saddle", "Warped Fungus", "Fire Resistance Potion")
-				.task(new CraftTask("fungus_stick", "Craft a Warped Fungus on a Stick", 1,
-								Items.WARPED_FUNGUS_ON_A_STICK),
-						new CheckmarkTask("rode", "Ride a strider across a lava lake")));
-
-		addMain(Quest.builder("p3_10_fortress_hunt", QuestPhase.PHASE_3)
+		addMain(Quest.builder("p3_08_fortress_hunt", QuestPhase.PHASE_3)
 				.title("The Fortress Hunt")
 				.desc("Blaze rods only come from one place.")
 				.icon(Items.NETHER_BRICKS)
 				.guide("Fortresses run in long straight corridors - travel in a straight line to cross "
 						+ "one. Blazes spawn in fortresses only, never bastions.")
-				.tools("Diamond Armour", "Fire Resistance Potions", "Bow")
+				.tools("Diamond Armour", "Bow", "Shield")
 				.task(new StructureTask("fortress", "Find a Nether Fortress", NETHER,
 								StructureFeature.FORTRESS),
 						new ItemTask("nether_brick", "Collect Nether Bricks", 16,
 								Items.NETHER_BRICKS)));
 
-		addMain(Quest.builder("p3_11_blaze_of_glory", QuestPhase.PHASE_3)
+		addMain(Quest.builder("p3_09_blaze_of_glory", QuestPhase.PHASE_3)
 				.title("A Blaze of Glory")
 				.desc("Every potion you will ever brew starts here.")
 				.icon(Items.BLAZE_ROD)
 				.guide("Fight from behind a wall with a 1 block gap. Snowballs damage them. "
 						+ "Expect about 2 kills per rod; 7 rods covers a stand and 12 eyes.")
-				.tools("Diamond Sword", "Fire Resistance Potion", "Shield")
+				.tools("Diamond Sword", "Shield", "Diamond Armour")
 				.task(new KillTask("blazes", "Kill Blazes", 12, EntityType.BLAZE),
 						new ItemTask("rods", "Collect Blaze Rods", 7, Items.BLAZE_ROD)));
 
-		addMain(Quest.builder("p3_12_nether_wart", QuestPhase.PHASE_3)
+		addMain(Quest.builder("p3_10_nether_wart", QuestPhase.PHASE_3)
 				.title("The Wart Farm")
 				.desc("Take the crop home before you take anything else.")
 				.icon(Items.NETHER_WART)
@@ -165,7 +146,7 @@ final class Phase3Quests {
 				.task(new ItemTask("wart", "Collect Nether Wart", 6, Items.NETHER_WART),
 						new CheckmarkTask("wart_farm", "Plant a nether wart farm at your base")));
 
-		addMain(Quest.builder("p3_13_potion_master", QuestPhase.PHASE_3)
+		addMain(Quest.builder("p3_11_potion_master", QuestPhase.PHASE_3)
 				.title("The Potion Master")
 				.desc("Brewing is the difference between hard and trivial.")
 				.icon(Items.BREWING_STAND)
@@ -176,25 +157,48 @@ final class Phase3Quests {
 						new CraftTask("bottles", "Craft Glass Bottles", 6, Items.GLASS_BOTTLE),
 						new ItemTask("potions", "Carry Brewed Potions", 3, Items.POTION)));
 
-		addMain(Quest.builder("p3_14_fire_resistance", QuestPhase.PHASE_3)
+		addMain(Quest.builder("p3_12_fire_resistance", QuestPhase.PHASE_3)
 				.title("Fireproof")
 				.desc("The potion that turns the Nether from lethal to tedious.")
 				.icon(Items.MAGMA_CREAM)
 				.guide("Awkward Potion + Magma Cream = Fire Resistance. Add redstone for 8 minutes. "
-						+ "Magma cream is a slimeball plus blaze powder, or a magma cube drop.")
+						+ "Brew a few before you go anywhere near the Basalt Deltas or a bastion.")
 				.tools("Brewing Stand", "Magma Cream", "Redstone")
-				.task(new ItemTask("cream", "Collect Magma Cream", 4, Items.MAGMA_CREAM),
-						new CheckmarkTask("brewed_fire_res", "Brew a Potion of Fire Resistance")));
+				.task(new CheckmarkTask("brewed_fire_res", "Brew a Potion of Fire Resistance"),
+						new ItemTask("stock", "Carry Brewed Potions", 5, Items.POTION)));
 
-		addMain(Quest.builder("p3_15_ghasts", QuestPhase.PHASE_3)
-				.title("The Screaming Sky")
-				.desc("Nine blocks wide, and it saw you first.")
-				.icon(Items.GHAST_TEAR)
-				.guide("Punch or shoot a ghast fireball back at it for a one-hit kill. Ghast tears "
-						+ "are the only ingredient for Regeneration potions and End Crystals.")
-				.tools("Bow", "Shield", "Fire Resistance Potion")
-				.task(new KillTask("ghasts", "Kill Ghasts", 3, EntityType.GHAST),
-						new ItemTask("tears", "Collect Ghast Tears", 2, Items.GHAST_TEAR)));
+		addMain(Quest.builder("p3_13_glowstone", QuestPhase.PHASE_3)
+				.title("Ceiling Light")
+				.desc("The brightest block in the game, hanging over lava.")
+				.icon(Items.GLOWSTONE)
+				.guide("Glowstone clusters hang from the Nether ceiling. Break one and the dust "
+						+ "scatters - place a slab underneath first or you lose it to the lava.")
+				.tools("Fire Resistance Potion", "Blocks to bridge", "Slabs")
+				.task(new ItemTask("glowstone", "Collect Glowstone Dust", 16, Items.GLOWSTONE_DUST),
+						new CraftTask("blocks", "Craft Glowstone Blocks", 4, Items.GLOWSTONE),
+						new CraftTask("lantern", "Craft a Lantern", 1, Items.LANTERN)));
+
+		addMain(Quest.builder("p3_14_basalt_deltas", QuestPhase.PHASE_3)
+				.title("The Basalt Deltas")
+				.desc("Sharp, black, and on fire in every direction.")
+				.icon(Items.BASALT)
+				.guide("The most dangerous Nether biome: magma cubes everywhere, lava lakes, and "
+						+ "blackstone that looks exactly like the floor. Blackstone replaces "
+						+ "cobblestone in every recipe. Do not come here without Fire Resistance.")
+				.tools("Fire Resistance Potion", "Diamond Armour", "Blocks")
+				.task(new ItemTask("basalt", "Collect Basalt", 16, Items.BASALT),
+						new ItemTask("blackstone", "Collect Blackstone", 16, Items.BLACKSTONE)));
+
+		addMain(Quest.builder("p3_15_striders", QuestPhase.PHASE_3)
+				.title("Riding the Lava")
+				.desc("A lava lake is a highway if you have the right mount.")
+				.icon(Items.WARPED_FUNGUS_ON_A_STICK)
+				.guide("Saddle a strider and steer it with a Warped Fungus on a Stick. They walk on "
+						+ "lava at full speed and are the only safe way across an open lava sea.")
+				.tools("Saddle", "Warped Fungus", "Fire Resistance Potion")
+				.task(new CraftTask("fungus_stick", "Craft a Warped Fungus on a Stick", 1,
+								Items.WARPED_FUNGUS_ON_A_STICK),
+						new CheckmarkTask("rode", "Ride a strider across a lava lake")));
 
 		addMain(Quest.builder("p3_16_pearl_diver", QuestPhase.PHASE_3)
 				.title("The Pearl Diver")

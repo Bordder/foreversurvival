@@ -19,7 +19,7 @@ import net.minecraft.item.Items;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
- * PHASE 2 - THE ESTABLISHMENT (24 quests).
+ * PHASE 2 - THE ESTABLISHMENT (25 quests).
  *
  * The first few weeks: iron, food security, a village, the deep caves,
  * diamonds, and an enchanting setup. This is the phase where a temporary
@@ -202,19 +202,7 @@ final class Phase2Quests {
 						new ItemTask("redstone", "Collect Redstone Dust", 12, Items.REDSTONE),
 						new ItemTask("lapis", "Collect Lapis Lazuli", 8, Items.LAPIS_LAZULI)));
 
-		addMain(Quest.builder("p2_16_cartography", QuestPhase.PHASE_2)
-				.title("Know Where You Are")
-				.desc("A compass, a map, and the end of getting lost.")
-				.icon(Items.COMPASS)
-				.guide("A compass is 4 iron plus 1 redstone and always points at your world spawn, "
-						+ "not your bed. Maps fill in as you walk; put one in an item frame to make a "
-						+ "wall map that keeps updating.")
-				.tools("4 Iron Ingots", "1 Redstone", "Paper")
-				.task(new CraftTask("compass", "Craft a Compass", 1, Items.COMPASS),
-						new CraftTask("map", "Craft a Map", 1, Items.MAP),
-						new ItemTask("filled", "Carry a Filled Map", 1, Items.FILLED_MAP)));
-
-		addMain(Quest.builder("p2_17_the_mineshaft", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_16_the_mineshaft", QuestPhase.PHASE_2)
 				.title("The Abandoned Mineshaft")
 				.desc("Someone dug here first. It did not end well for them.")
 				.icon(Items.RAIL)
@@ -226,7 +214,7 @@ final class Phase2Quests {
 						new ItemTask("string", "Collect String from cobwebs", 12, Items.STRING),
 						new KillTask("cave_spiders", "Kill Cave Spiders", 5, EntityType.CAVE_SPIDER)));
 
-		addMain(Quest.builder("p2_18_rails_and_carts", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_17_rails_and_carts", QuestPhase.PHASE_2)
 				.title("Rails and Minecarts")
 				.desc("Mineshafts hand you the rails. Use them.")
 				.icon(Items.MINECART)
@@ -237,7 +225,7 @@ final class Phase2Quests {
 						new CraftTask("rails", "Craft Rails", 32, Items.RAIL),
 						new CraftTask("powered", "Craft Powered Rails", 6, Items.POWERED_RAIL)));
 
-		addMain(Quest.builder("p2_19_the_spawner", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_18_the_spawner", QuestPhase.PHASE_2)
 				.title("The Dungeon")
 				.desc("A mossy room, two chests, and something producing monsters.")
 				.icon(Items.SPAWNER)
@@ -249,7 +237,7 @@ final class Phase2Quests {
 								Blocks.SPAWNER, Blocks.MOSSY_COBBLESTONE),
 						new CheckmarkTask("looted", "Loot both dungeon chests")));
 
-		addMain(Quest.builder("p2_20_redstone_basics", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_19_redstone_basics", QuestPhase.PHASE_2)
 				.title("Redstone Basics")
 				.desc("The half of the game most players never touch.")
 				.icon(Items.REDSTONE)
@@ -261,7 +249,7 @@ final class Phase2Quests {
 						new CraftTask("piston", "Craft a Piston", 1, Items.PISTON),
 						new CraftTask("repeater", "Craft a Repeater", 1, Items.REPEATER)));
 
-		addMain(Quest.builder("p2_21_paper_trail", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_20_paper_trail", QuestPhase.PHASE_2)
 				.title("Paper Trail")
 				.desc("Forty-five books is a lot of cows and a lot of cane.")
 				.icon(Items.BOOK)
@@ -272,16 +260,39 @@ final class Phase2Quests {
 						new CraftTask("paper", "Craft Paper", 45, Items.PAPER),
 						new CraftTask("books", "Craft Books", 15, Items.BOOK)));
 
+		addMain(Quest.builder("p2_21_cartography", QuestPhase.PHASE_2)
+				.title("Know Where You Are")
+				.desc("A compass, a map, and the end of getting lost.")
+				.icon(Items.COMPASS)
+				.guide("A compass is 4 iron plus 1 redstone; a map is 8 paper around it. The compass "
+						+ "points at your world spawn, not your bed. Maps fill in as you walk, and one "
+						+ "in an item frame becomes a wall map that keeps updating.")
+				.tools("4 Iron Ingots", "1 Redstone", "8 Paper")
+				.task(new CraftTask("compass", "Craft a Compass", 1, Items.COMPASS),
+						new CraftTask("map", "Craft a Map", 1, Items.MAP),
+						new ItemTask("filled", "Carry a Filled Map", 1, Items.FILLED_MAP)));
+
 		addMain(Quest.builder("p2_22_diamonds_are_forever", QuestPhase.PHASE_2)
 				.title("Diamonds Are Forever")
 				.desc("The line between surviving and thriving.")
 				.icon(Items.DIAMOND)
 				.guide("Diamond peaks at Y=-59 and never spawns above Y=16. In 1.18 it is rarer when "
-						+ "exposed to air, so branch mine through solid deepslate.")
+						+ "exposed to air, so branch mine through solid deepslate. Eight covers a "
+						+ "pickaxe, a sword and the enchanting table.")
 				.tools("Iron Pickaxe", "Water Bucket", "Torches")
-				.task(new ItemTask("diamonds", "Collect Diamonds", 5, Items.DIAMOND)));
+				.task(new ItemTask("diamonds", "Collect Diamonds", 8, Items.DIAMOND)));
 
-		addMain(Quest.builder("p2_23_the_enchanter", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_23_diamond_standard", QuestPhase.PHASE_2)
+				.title("The Diamond Standard")
+				.desc("The pickaxe that opens the Nether.")
+				.icon(Items.DIAMOND_PICKAXE)
+				.guide("A Diamond Pickaxe is the only way to mine obsidian - for the enchanting "
+						+ "table first, and the Nether portal after it.")
+				.tools("5 Diamonds", "Sticks")
+				.task(new CraftTask("d_pick", "Craft a Diamond Pickaxe", 1, Items.DIAMOND_PICKAXE),
+						new CraftTask("d_sword", "Craft a Diamond Sword", 1, Items.DIAMOND_SWORD)));
+
+		addMain(Quest.builder("p2_24_the_enchanter", QuestPhase.PHASE_2)
 				.title("The Enchanter")
 				.desc("Levels are worthless until you have somewhere to spend them.")
 				.icon(Items.ENCHANTING_TABLE)
@@ -293,7 +304,7 @@ final class Phase2Quests {
 						new CraftTask("shelves", "Craft Bookshelves", 15, Items.BOOKSHELF),
 						new CheckmarkTask("lvl30", "Reach a level 30 enchant slot")));
 
-		addMain(Quest.builder("p2_24_the_anvil", QuestPhase.PHASE_2)
+		addMain(Quest.builder("p2_25_the_anvil", QuestPhase.PHASE_2)
 				.title("The Anvil")
 				.desc("Thirty-one iron ingots so your favourite pickaxe never dies.")
 				.icon(Items.ANVIL)
@@ -302,8 +313,6 @@ final class Phase2Quests {
 						+ "so combine books before you put them on the tool.")
 				.tools("31 Iron Ingots", "Enchanting Table")
 				.task(new CraftTask("anvil", "Craft an Anvil", 1, Items.ANVIL),
-						new CheckmarkTask("repaired", "Repair or rename an item on the anvil"),
-						new CraftTask("d_pick", "Craft a Diamond Pickaxe", 1, Items.DIAMOND_PICKAXE),
-						new CraftTask("d_sword", "Craft a Diamond Sword", 1, Items.DIAMOND_SWORD)));
+						new CheckmarkTask("repaired", "Repair or rename an item on the anvil")));
 	}
 }

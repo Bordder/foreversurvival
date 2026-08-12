@@ -97,7 +97,7 @@ final class Phase5Quests {
 				.guide("Build a platform on the main End island above Y=100 - endermen spawn on end "
 						+ "stone in complete darkness at enormous rates. Lure them with an endermite "
 						+ "in a minecart and let them fall 43 blocks.")
-				.tools("Building Blocks", "Carved Pumpkin", "Water Bucket", "Elytra")
+				.tools("Building Blocks", "Carved Pumpkin", "Water Bucket", "Ender Pearls")
 				.task(new KillTask("endermen", "Kill Endermen", 100, EntityType.ENDERMAN),
 						new ItemTask("pearls", "Stockpile Ender Pearls", 32, Items.ENDER_PEARL),
 						new CheckmarkTask("xp_farm", "Build an enderman XP farm")));

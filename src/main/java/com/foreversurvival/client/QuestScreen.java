@@ -1002,8 +1002,10 @@ public class QuestScreen extends Screen {
 		// Armour and offhand off to the right.
 		int sideLeft = gridLeft + 9 * 18 + 12;
 		textRenderer.draw(matrices, "Armour", sideLeft, gridTop - 10, TEXT_DIM);
+		// Vanilla stores armour boots-first (slot 100 = boots, 103 = helmet), so
+		// walk it backwards to match how the inventory screen stacks it.
 		for (int i = 0; i < 4; i++) {
-			drawSlot(matrices, sideLeft, gridTop + i * 18, slots[36 + i]);
+			drawSlot(matrices, sideLeft, gridTop + i * 18, slots[39 - i]);
 		}
 		textRenderer.draw(matrices, "Off", sideLeft + 22, gridTop - 10, TEXT_DIM);
 		drawSlot(matrices, sideLeft + 22, gridTop, slots[40]);

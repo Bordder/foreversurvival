@@ -170,7 +170,7 @@ final class Phase4Quests {
 				.guide("Build a platform in the Nether roof or over a lava sea, out of any non-nylium "
 						+ "block, and let zombified piglins spawn and fall. It gives gold, XP and "
 						+ "the rotten flesh for villager trades.")
-				.tools("Building Blocks", "Fire Resistance", "Elytra")
+				.tools("Building Blocks", "Fire Resistance Potions", "Blocks to bridge")
 				.task(new KillTask("zpigs", "Kill Zombified Piglins", 60,
 								EntityType.ZOMBIFIED_PIGLIN),
 						new CraftTask("gold_blocks", "Craft Gold Blocks", 8, Items.GOLD_BLOCK),
@@ -243,7 +243,7 @@ final class Phase4Quests {
 				.icon(Items.NETHER_STAR)
 				.guide("4 soul sand in a T, then the 3 skulls on top LAST. Fight it in a sealed "
 						+ "obsidian box. Withered targets cannot regenerate - carry milk.")
-				.tools("Netherite Armour", "Enchanted Sword", "Golden Apples", "Milk Bucket", "Obsidian")
+				.tools("Diamond Armour", "Enchanted Sword", "Golden Apples", "Milk Bucket", "Obsidian")
 				.task(new ItemTask("soul_sand", "Collect Soul Sand", 6, Items.SOUL_SAND),
 						new KillTask("wither", "Defeat the Wither", 1, EntityType.WITHER),
 						new ItemTask("star", "Collect a Nether Star", 1, Items.NETHER_STAR)));
@@ -279,7 +279,7 @@ final class Phase4Quests {
 				.guide("Buy a Woodland Explorer Map from a Cartographer - finding one by hand can take "
 						+ "a real day. Vindicators hit for 13 and Evokers summon vexes that pass "
 						+ "through walls. Fight in doorways.")
-				.tools("Woodland Explorer Map", "Netherite Armour", "Golden Apples", "Elytra")
+				.tools("Woodland Explorer Map", "Diamond Armour", "Golden Apples", "Horse or Boat")
 				.task(new KillTask("vindicators", "Kill Vindicators", 10, EntityType.VINDICATOR),
 						new ItemTask("notch", "Loot an Enchanted Golden Apple", 1,
 								Items.ENCHANTED_GOLDEN_APPLE),
@@ -291,7 +291,7 @@ final class Phase4Quests {
 				.icon(Items.TOTEM_OF_UNDYING)
 				.guide("Kill the pillager with the banner on its head for Bad Omen, then enter a "
 						+ "village. Evokers drop the totem - hold it in your OFF-HAND.")
-				.tools("Netherite Armour", "Enchanted Sword", "Shield", "Golden Apples")
+				.tools("Diamond Armour", "Enchanted Sword", "Shield", "Golden Apples")
 				.task(new KillTask("pillagers", "Kill Pillagers", 20, EntityType.PILLAGER),
 						new KillTask("ravagers", "Kill Ravagers", 2, EntityType.RAVAGER),
 						new KillTask("evokers", "Kill Evokers", 2, EntityType.EVOKER),
