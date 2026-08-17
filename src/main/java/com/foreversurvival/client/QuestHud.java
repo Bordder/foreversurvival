@@ -186,22 +186,50 @@ public final class QuestHud extends DrawableHelper {
 	}
 
 	/**
-	 * Unscaled panel size as {width, height}.
-	 *
-	 * With an explicit height the panel is exactly that tall, so dragging the
-	 * bottom edge moves it one-for-one. At height 0 it sizes to its content.
+	 * Width the panel actually needs to hold its content, so the border hugs the
+	 * text instead of floating out at the full configured width. {@code hudWidth}
+	 * is the cap (and the wrap point); a short objective shrinks the box, a long
+	 * one fills it.
 	 */
-	public int[] measure(@Nullable Quest quest) {
-		if (HudConfig.hudHeight > 0) {
-			return new int[] { HudConfig.hudWidth, HudConfig.hudHeight };
+	private int fittedWidth(List<Row> rows) {
+		TextRenderer font = MinecraftClient.getInstance().textRenderer;
+
+		int widest = 0;
+		for (Row row : rows) {
+			if (row.text == null) {
+				continue;
+			}
+			// Checkbox rows reserve a fixed strip on the right for the box.
+			int reserve = row.checkbox >= 0 ? CHECKBOX : 0;
+			widest = Math.max(widest, row.indent + font.getWidth(row.text) + reserve);
 		}
 
+		// Never narrower than the icon, or a sane floor, and never past the cap.
+		int floor = HudConfig.showIcon ? ICON + 40 : 60;
+		int needed = PADDING * 2 + Math.max(widest, floor);
+		return Math.min(HudConfig.hudWidth, needed);
+	}
+
+	/**
+	 * Unscaled panel size as {width, height}.
+	 *
+	 * Width hugs the content up to {@code hudWidth}. With an explicit height the
+	 * panel is exactly that tall (drag the bottom edge one-for-one); at height 0
+	 * it sizes to its content.
+	 */
+	public int[] measure(@Nullable Quest quest) {
 		List<Row> rows = layout(quest);
+		int width = fittedWidth(rows);
+
+		if (HudConfig.hudHeight > 0) {
+			return new int[] { width, HudConfig.hudHeight };
+		}
+
 		int textHeight = rows.size() * LINE;
 		// The icon block is 20px tall; make sure the header never overlaps it.
 		int minimum = HudConfig.showIcon ? ICON : 0;
 
-		return new int[] { HudConfig.hudWidth, PADDING * 2 + Math.max(textHeight, minimum) };
+		return new int[] { width, PADDING * 2 + Math.max(textHeight, minimum) };
 	}
 
 	// ------------------------------------------------------------------

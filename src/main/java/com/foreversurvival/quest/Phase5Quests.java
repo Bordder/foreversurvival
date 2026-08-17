@@ -48,11 +48,11 @@ final class Phase5Quests {
 
 		addMain(Quest.builder("p5_03_stronghold", QuestPhase.PHASE_5)
 				.title("The Stronghold")
-				.desc("Buried, mossy, and guarded by a silverfish spawner.")
+				.desc("Buried, mossy, and guarded by a silverfish Monster Spawner.")
 				.icon(Items.END_PORTAL_FRAME)
 				.guide("Underground, the first ring roughly 1280-2816 blocks from spawn. Throw an eye, "
 						+ "walk to where it lands, repeat - when one flies downward you are on top of "
-						+ "it. Break the silverfish spawner immediately.")
+						+ "it. Break the silverfish Monster Spawner immediately.")
 				.tools("Eyes of Ender", "Torches", "Pickaxe")
 				.task(new StructureTask("stronghold", "Find a Stronghold", OVERWORLD,
 								StructureFeature.STRONGHOLD),
