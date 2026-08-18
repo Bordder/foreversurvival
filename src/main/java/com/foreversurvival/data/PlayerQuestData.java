@@ -54,6 +54,9 @@ public class PlayerQuestData {
 	/** Death log, oldest first. */
 	private final List<DeathRecord> deaths = new ArrayList<>();
 
+	/** entityTypeId -> total raw damage this player has dealt to that mob type. */
+	private final Map<String, Float> damageDealt = new HashMap<>();
+
 	/** Server-side only: set when something changed and the client needs a resync. */
 	private transient boolean dirty = true;
 
@@ -165,6 +168,23 @@ public class PlayerQuestData {
 	}
 
 	// ------------------------------------------------------------------
+	// Combat log
+	// ------------------------------------------------------------------
+
+	public void addDamageDealt(String entityTypeId, float amount) {
+		if (amount <= 0) {
+			return;
+		}
+		damageDealt.merge(entityTypeId, amount, Float::sum);
+		markDirty();
+	}
+
+	/** Live view: entityTypeId -> total raw damage dealt. */
+	public Map<String, Float> getDamageDealt() {
+		return damageDealt;
+	}
+
+	// ------------------------------------------------------------------
 	// Dirty flag (server side sync throttling)
 	// ------------------------------------------------------------------
 
@@ -221,6 +241,12 @@ public class PlayerQuestData {
 		}
 		root.put("CompletionTimes", timesNbt);
 
+		NbtCompound damageNbt = new NbtCompound();
+		for (Map.Entry<String, Float> entry : damageDealt.entrySet()) {
+			damageNbt.putFloat(entry.getKey(), entry.getValue());
+		}
+		root.put("DamageDealt", damageNbt);
+
 		return root;
 	}
 
@@ -230,6 +256,7 @@ public class PlayerQuestData {
 		celebratedPhases.clear();
 		deaths.clear();
 		completionPlayTicks.clear();
+		damageDealt.clear();
 
 		NbtList completedList = root.getList("Completed", NbtElement.STRING_TYPE);
 		for (int i = 0; i < completedList.size(); i++) {
@@ -259,6 +286,11 @@ public class PlayerQuestData {
 		NbtCompound timesNbt = root.getCompound("CompletionTimes");
 		for (String questId : timesNbt.getKeys()) {
 			completionPlayTicks.put(questId, timesNbt.getInt(questId));
+		}
+
+		NbtCompound damageNbt = root.getCompound("DamageDealt");
+		for (String typeId : damageNbt.getKeys()) {
+			damageDealt.put(typeId, damageNbt.getFloat(typeId));
 		}
 
 		markDirty();

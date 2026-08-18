@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
@@ -138,8 +139,9 @@ public class QuestScreen extends Screen {
 	private double settingsScroll;
 	private double statsScroll;
 
-	/** "Time per quest" dropdown open in the Stats tab. */
+	/** Dropdowns in the Stats tab. */
 	private boolean statsTimesOpen;
+	private boolean statsCombatOpen;
 
 	private int draggingSlider = -1;
 
@@ -1169,8 +1171,9 @@ public class QuestScreen extends Screen {
 	// Stats
 	// ------------------------------------------------------------------
 
-	/** Y of the "Time per quest" toggle row, recorded for click hit-testing. */
+	/** Y of each Stats dropdown toggle row, recorded for click hit-testing. */
 	private int statsToggleY = -1;
+	private int statsCombatToggleY = -1;
 
 	private void renderStats(MatrixStack matrices, int mouseX, int mouseY) {
 		int panelLeft = left + PADDING;
@@ -1256,6 +1259,37 @@ public class QuestScreen extends Screen {
 			}
 		}
 
+		y += 4;
+
+		// ---- Combat log dropdown ----
+		statsCombatToggleY = y;
+		fill(matrices, panelLeft + 4, y - 2, panelRight - 4, y + 11, COLOR_HEADER_ROW);
+		drawFoldArrow(matrices, panelLeft + 8, y + 1, !statsCombatOpen, TEXT_TITLE);
+		textRenderer.draw(matrices, "Damage dealt per mob", panelLeft + 18, y, TEXT_TITLE);
+		String chint = statsCombatOpen ? "click to hide" : "click to show";
+		textRenderer.draw(matrices, chint, panelRight - 8 - textRenderer.getWidth(chint), y, TEXT_DIM);
+		y += 15;
+
+		if (statsCombatOpen) {
+			java.util.List<Map.Entry<String, Float>> rows =
+					new ArrayList<>(data.getDamageDealt().entrySet());
+			rows.sort((a, b) -> Float.compare(b.getValue(), a.getValue()));
+
+			if (rows.isEmpty()) {
+				textRenderer.draw(matrices, "No damage dealt yet.", x + 4, y, TEXT_DIM);
+				y += 11;
+			} else {
+				for (Map.Entry<String, Float> entry : rows) {
+					String name = prettyEntityName(entry.getKey());
+					String value = Math.round(entry.getValue()) + " dmg";
+					textRenderer.draw(matrices, trim(name, 160), x + 4, y, TEXT_BODY);
+					textRenderer.draw(matrices, value,
+							panelRight - 8 - textRenderer.getWidth(value), y, TEXT_DEATH);
+					y += 11;
+				}
+			}
+		}
+
 		disableScissor();
 
 		int contentHeight = (y - startY) + 8;
@@ -1269,6 +1303,26 @@ public class QuestScreen extends Screen {
 		textRenderer.draw(matrices, label, x, y, TEXT_DIM);
 		textRenderer.draw(matrices, value, x + 150, y, TEXT_BODY);
 		return y + 11;
+	}
+
+	/** "minecraft:cave_spider" -> "Cave Spider". */
+	private static String prettyEntityName(String id) {
+		String name = id;
+		int colon = name.indexOf(':');
+		if (colon >= 0) {
+			name = name.substring(colon + 1);
+		}
+		StringBuilder out = new StringBuilder();
+		for (String part : name.split("_")) {
+			if (part.isEmpty()) {
+				continue;
+			}
+			if (out.length() > 0) {
+				out.append(' ');
+			}
+			out.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+		}
+		return out.toString();
 	}
 
 	private static String formatDuration(int ticks) {
@@ -1655,10 +1709,15 @@ public class QuestScreen extends Screen {
 		}
 
 		if (tab == Tab.STATS) {
-			// The "Time per quest" toggle row.
-			if (statsToggleY >= 0 && mouseX >= left + PADDING + 4 && mouseX <= left + panelWidth - PADDING - 4
+			int rowL = left + PADDING + 4;
+			int rowR = left + panelWidth - PADDING - 4;
+			if (statsToggleY >= 0 && mouseX >= rowL && mouseX <= rowR
 					&& mouseY >= statsToggleY - 2 && mouseY <= statsToggleY + 11) {
 				statsTimesOpen = !statsTimesOpen;
+				statsScroll = 0;
+			} else if (statsCombatToggleY >= 0 && mouseX >= rowL && mouseX <= rowR
+					&& mouseY >= statsCombatToggleY - 2 && mouseY <= statsCombatToggleY + 11) {
+				statsCombatOpen = !statsCombatOpen;
 				statsScroll = 0;
 			}
 			return true;
