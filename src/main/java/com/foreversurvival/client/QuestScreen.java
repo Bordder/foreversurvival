@@ -146,8 +146,8 @@ public class QuestScreen extends Screen {
 	private static final Set<QuestPhase> collapsedPhases = EnumSet.noneOf(QuestPhase.class);
 
 	// Tree view state
-	private static final int NODE = 20;
-	private static final int NODE_STEP = 26;
+	private static final int NODE = 30;
+	private static final int NODE_STEP = 40;
 	private static final int TREE_HEADER = 18;
 	private static final int TREE_FOOTER = 40;
 	private int treePhaseIndex;
@@ -221,8 +221,10 @@ public class QuestScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.panelWidth = Math.min(this.width - 20, 460);
-		this.panelHeight = Math.min(this.height - 20, 260);
+		// Tree view wants room to breathe, so the book is a bit larger now; it
+		// still shrinks to fit small windows via the min().
+		this.panelWidth = Math.min(this.width - 32, 540);
+		this.panelHeight = Math.min(this.height - 32, 300);
 		this.left = (this.width - panelWidth) / 2;
 		this.top = (this.height - panelHeight) / 2;
 
@@ -556,8 +558,30 @@ public class QuestScreen extends Screen {
 		return out;
 	}
 
+	/** Set at the start of every tree render / click so the layout is consistent. */
+	private int treeNodeCount = 1;
+
+	/**
+	 * A roughly square grid, so ~20 quests fill the panel instead of sitting in
+	 * one thin row. Columns are capped by what fits horizontally; anything taller
+	 * than the panel scrolls.
+	 */
 	private int treeCols() {
-		return Math.max(1, (panelWidth - 24) / NODE_STEP);
+		int maxByWidth = Math.max(1, (panelWidth - 24) / NODE_STEP);
+		int square = Math.max(1, (int) Math.round(Math.sqrt(treeNodeCount)));
+		return Math.min(square, maxByWidth);
+	}
+
+	private int treeRows() {
+		int cols = treeCols();
+		return Math.max(1, (treeNodeCount + cols - 1) / cols);
+	}
+
+	/** Left edge of the node grid, centred so the block sits mid-panel. */
+	private int treeGridLeft() {
+		int cols = treeCols();
+		int blockWidth = (cols - 1) * NODE_STEP + NODE;
+		return left + Math.max(PADDING + 8, (panelWidth - blockWidth) / 2);
 	}
 
 	private int treeGridTop() {
@@ -566,6 +590,13 @@ public class QuestScreen extends Screen {
 
 	private int treeGridBottom() {
 		return contentBottom - TREE_FOOTER;
+	}
+
+	/** Vertical slack shared above and below when the grid is shorter than the area. */
+	private int treeGridVOffset() {
+		int available = treeGridBottom() - treeGridTop();
+		int used = treeRows() * NODE_STEP;
+		return Math.max(0, (available - used) / 2);
 	}
 
 	/** Snake layout: rows alternate direction so the chain reads continuously. */
@@ -577,8 +608,8 @@ public class QuestScreen extends Screen {
 			col = cols - 1 - col;
 		}
 		return new int[] {
-				left + PADDING + 8 + col * NODE_STEP,
-				treeGridTop() + row * NODE_STEP - (int) treeScroll
+				treeGridLeft() + col * NODE_STEP,
+				treeGridTop() + treeGridVOffset() + row * NODE_STEP - (int) treeScroll
 		};
 	}
 
@@ -604,6 +635,7 @@ public class QuestScreen extends Screen {
 
 		PlayerQuestData data = ClientQuestState.get();
 		List<Quest> quests = treeQuests(side);
+		treeNodeCount = Math.max(1, quests.size());
 		Quest current = ClientQuestState.getCurrentMainQuest();
 
 		// ---- Header ----
@@ -782,14 +814,15 @@ public class QuestScreen extends Screen {
 		fill(matrices, x, y, x + 1, y + NODE, border);
 		fill(matrices, x + NODE - 1, y, x + NODE, y + NODE, border);
 
+		// 16px item icon centred in the 30px node.
 		MinecraftClient.getInstance().getItemRenderer()
-				.renderInGuiWithOverrides(quest.getIconStack(), x + 2, y + 2);
+				.renderInGuiWithOverrides(quest.getIconStack(), x + 7, y + 7);
 
 		if (!unlocked) {
 			fill(matrices, x + 1, y + 1, x + NODE - 1, y + NODE - 1, 0xAA12121A);
-			drawLock(matrices, x + 6, y + 5, TEXT_LOCKED);
+			drawLock(matrices, x + 11, y + 10, TEXT_LOCKED);
 		} else if (complete) {
-			drawTick(matrices, x + NODE - 9, y + NODE - 9, TEXT_DONE);
+			drawTick(matrices, x + NODE - 10, y + NODE - 10, TEXT_DONE);
 		}
 
 		if (quest.getId().equals(HudConfig.pinnedQuestId)) {
@@ -1701,6 +1734,7 @@ public class QuestScreen extends Screen {
 		}
 
 		List<Quest> quests = treeQuests(side);
+		treeNodeCount = Math.max(1, quests.size());
 		for (int i = 0; i < quests.size(); i++) {
 			int[] pos = nodePos(i);
 			if (mouseX >= pos[0] && mouseX < pos[0] + NODE
