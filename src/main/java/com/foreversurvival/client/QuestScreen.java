@@ -1,8 +1,10 @@
 package com.foreversurvival.client;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
@@ -139,6 +141,9 @@ public class QuestScreen extends Screen {
 
 	private boolean searchActive;
 	private String searchQuery = "";
+
+	/** Phases folded shut in the list. Static so it survives closing the book. */
+	private static final Set<QuestPhase> collapsedPhases = EnumSet.noneOf(QuestPhase.class);
 
 	// Tree view state
 	private static final int NODE = 20;
@@ -395,6 +400,11 @@ public class QuestScreen extends Screen {
 				current = quest.getPhase();
 				entries.add(new Entry(current));
 			}
+			// A collapsed phase keeps its header but hides its quests. A live
+			// search overrides collapse so matches are never hidden.
+			if (searchQuery.isEmpty() && collapsedPhases.contains(current)) {
+				continue;
+			}
 			entries.add(new Entry(quest));
 		}
 		return entries;
@@ -442,9 +452,25 @@ public class QuestScreen extends Screen {
 			}
 
 			if (entry.header != null) {
-				fill(matrices, listLeft, rowTop, listRight, rowBottom, COLOR_HEADER_ROW);
-				textRenderer.draw(matrices, trim(entry.header.getDisplayName(), LIST_WIDTH - 8),
-						listLeft + 4, rowTop + 3, colorOf(entry.header.getColor()));
+				boolean headerHover = mouseX >= listLeft && mouseX < listRight
+						&& mouseY >= Math.max(rowTop, top) && mouseY < Math.min(rowBottom, contentBottom);
+				fill(matrices, listLeft, rowTop, listRight, rowBottom,
+						headerHover ? COLOR_ROW_HOVER : COLOR_HEADER_ROW);
+
+				boolean collapsed = collapsedPhases.contains(entry.header);
+				int colour = colorOf(entry.header.getColor());
+				drawFoldArrow(matrices, listLeft + 4, rowTop + 4, collapsed, colour);
+
+				String label = trim(entry.header.getDisplayName(), LIST_WIDTH - 40);
+				textRenderer.draw(matrices, label, listLeft + 13, rowTop + 3, colour);
+
+				// When folded, show how many quests are hidden.
+				if (collapsed) {
+					int count = phaseQuestCount(entry.header);
+					String badge = "(" + count + ")";
+					textRenderer.draw(matrices, badge, listRight - 6 - textRenderer.getWidth(badge),
+							rowTop + 3, TEXT_DIM);
+				}
 				continue;
 			}
 
@@ -1616,8 +1642,19 @@ public class QuestScreen extends Screen {
 					int rowBottom = y + entry.height;
 					y = rowBottom;
 
-					if (mouseY < rowTop || mouseY >= rowBottom || entry.quest == null) {
+					if (mouseY < rowTop || mouseY >= rowBottom) {
 						continue;
+					}
+
+					// Header row: fold/unfold the phase.
+					if (entry.header != null) {
+						if (collapsedPhases.contains(entry.header)) {
+							collapsedPhases.remove(entry.header);
+						} else {
+							collapsedPhases.add(entry.header);
+						}
+						listScroll = 0;
+						return true;
 					}
 
 					if (tab == Tab.MAIN) {
@@ -1979,6 +2016,33 @@ public class QuestScreen extends Screen {
 		fill(matrices, x + 2, y, x + 5, y + 5, color);
 		fill(matrices, x, y + 5, x + 7, y + 6, color);
 		fill(matrices, x + 3, y + 6, x + 4, y + 10, color);
+	}
+
+	/** Fold indicator: a right-pointing triangle when collapsed, down when open. */
+	private void drawFoldArrow(MatrixStack matrices, int x, int y, boolean collapsed, int color) {
+		if (collapsed) {
+			// Points right: a column that shrinks top and bottom as it goes right.
+			for (int i = 0; i < 4; i++) {
+				fill(matrices, x + i, y + i, x + i + 1, y + 7 - i, color);
+			}
+		} else {
+			// Points down.
+			for (int i = 0; i < 4; i++) {
+				fill(matrices, x + i, y + i, x + 7 - i, y + i + 1, color);
+			}
+		}
+	}
+
+	private int phaseQuestCount(QuestPhase phase) {
+		int count = 0;
+		List<Quest> quests = phase.isSide()
+				? QuestManager.get().getSideQuests() : QuestManager.get().getMainQuests();
+		for (Quest quest : quests) {
+			if (quest.getPhase() == phase) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	private int drawLine(MatrixStack matrices, String text, int x, int y, int color) {
