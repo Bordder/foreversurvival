@@ -6,13 +6,17 @@ import static com.foreversurvival.quest.QuestRegistry.addMain;
 
 import com.foreversurvival.quest.task.CheckmarkTask;
 import com.foreversurvival.quest.task.CraftTask;
+import com.foreversurvival.quest.task.EnchantTask;
 import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
+import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
+import net.minecraft.stat.Stats;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
@@ -99,8 +103,7 @@ final class Phase5Quests {
 						+ "in a minecart and let them fall 43 blocks.")
 				.tools("Building Blocks", "Carved Pumpkin", "Water Bucket", "Ender Pearls")
 				.task(new KillTask("endermen", "Kill Endermen", 100, EntityType.ENDERMAN),
-						new ItemTask("pearls", "Stockpile Ender Pearls", 32, Items.ENDER_PEARL),
-						new CheckmarkTask("xp_farm", "Build an enderman XP farm")));
+						new ItemTask("pearls", "Stockpile Ender Pearls", 32, Items.ENDER_PEARL)));
 
 		addMain(Quest.builder("p5_08_end_city", QuestPhase.PHASE_5)
 				.title("The Outer Islands")
@@ -136,7 +139,8 @@ final class Phase5Quests {
 						+ "and put Unbreaking III and Mending on them.")
 				.tools("Ender Pearls", "Water Bucket", "Building Blocks", "Bow")
 				.task(new ItemTask("elytra", "Obtain Elytra", 1, Items.ELYTRA),
-						new CheckmarkTask("repaired", "Put Mending or Unbreaking on your Elytra")));
+						new EnchantTask("repaired", "Enchant Elytra (Mending or Unbreaking)", 1, 1,
+								Enchantments.MENDING, Enchantments.UNBREAKING)));
 
 		addMain(Quest.builder("p5_11_rocket_science", QuestPhase.PHASE_5)
 				.title("Rocket Science")
@@ -147,7 +151,8 @@ final class Phase5Quests {
 				.tools("Gunpowder", "Paper", "Elytra")
 				.task(new ItemTask("gunpowder", "Collect Gunpowder", 12, Items.GUNPOWDER),
 						new CraftTask("rockets", "Craft Firework Rockets", 24, Items.FIREWORK_ROCKET),
-						new CheckmarkTask("flight", "Fly 1000 blocks in one continuous flight")));
+						new StatTask("flight", "Fly 1000 blocks with Elytra", 1000,
+								Stats.AVIATE_ONE_CM, 100)));
 
 		addMain(Quest.builder("p5_12_shulker_boxes", QuestPhase.PHASE_5)
 				.title("Portable Storage")
@@ -182,8 +187,7 @@ final class Phase5Quests {
 				.tools("Building Blocks", "Elytra", "Looting III Sword")
 				.task(new ItemTask("many_shells", "Stockpile Shulker Shells", 16,
 								Items.SHULKER_SHELL),
-						new CraftTask("many_boxes", "Craft Shulker Boxes", 8, Items.SHULKER_BOX),
-						new CheckmarkTask("shulker_farm", "Build a shulker duplication farm")));
+						new CraftTask("many_boxes", "Craft Shulker Boxes", 8, Items.SHULKER_BOX)));
 
 		addMain(Quest.builder("p5_15_full_netherite", QuestPhase.PHASE_5)
 				.title("Ascended")

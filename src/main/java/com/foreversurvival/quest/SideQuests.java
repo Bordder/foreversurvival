@@ -7,13 +7,18 @@ import static com.foreversurvival.quest.QuestRegistry.addSide;
 
 import com.foreversurvival.quest.task.CheckmarkTask;
 import com.foreversurvival.quest.task.CraftTask;
+import com.foreversurvival.quest.task.EnchantTask;
 import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
+import com.foreversurvival.quest.task.PositionTask;
+import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
+import net.minecraft.stat.Stats;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
@@ -70,7 +75,9 @@ final class SideQuests {
 						+ "12 damage. Use doorways and keep the shield up.")
 				.tools("Wooden Sword", "Shield", "Nerve")
 				.task(new CraftTask("wood_sword", "Craft a Wooden Sword", 1, Items.WOODEN_SWORD),
-						new CheckmarkTask("raid", "Clear a raid with only a wooden sword and no armour")));
+						new StatTask("raid", "Win a Raid", 1, Stats.RAID_WIN),
+						new CheckmarkTask("wooden_only",
+								"...using only a wooden sword and no armour")));
 
 		addSide(Quest.builder("s04_speleologist", QuestPhase.SIDE)
 				.title("The Speleologist")
@@ -121,7 +128,8 @@ final class SideQuests {
 				.task(new CheckmarkTask("goats", "Get rammed off a ledge by a goat"),
 						new ItemTask("powder", "Collect a Powder Snow Bucket", 1,
 								Items.POWDER_SNOW_BUCKET),
-						new CheckmarkTask("summit", "Stand on a mountain peak above Y=250")));
+						new PositionTask("summit", "Reach Y=250 on a mountain peak",
+								PositionTask.Kind.ABOVE_Y, 250)));
 
 		addSide(Quest.builder("s08_zoologist", QuestPhase.SIDE)
 				.title("The Zoologist")
@@ -156,8 +164,7 @@ final class SideQuests {
 				.tools("Bone Meal", "Any Axe")
 				.task(new ItemTask("all_saplings", "Collect every Sapling type", 6, SAPLINGS),
 						new ItemTask("azalea", "Collect an Azalea", 1,
-								Items.AZALEA, Items.FLOWERING_AZALEA),
-						new CheckmarkTask("one_each", "Hold one of each sapling type at once")));
+								Items.AZALEA, Items.FLOWERING_AZALEA)));
 
 		addSide(Quest.builder("s11_flower_child", QuestPhase.SIDE)
 				.title("The Flower Child")
@@ -334,7 +341,8 @@ final class SideQuests {
 				.task(new CraftTask("crossbow", "Craft a Crossbow", 1, Items.CROSSBOW),
 						new CraftTask("arrows", "Craft Arrows", 32, Items.ARROW),
 						new CraftTask("spectral", "Craft Spectral Arrows", 4, Items.SPECTRAL_ARROW),
-						new CheckmarkTask("piercing", "Get Piercing or Multishot on a crossbow")));
+						new EnchantTask("piercing", "Enchant a crossbow (Piercing or Multishot)", 1, 1,
+								Enchantments.PIERCING, Enchantments.MULTISHOT)));
 
 		addSide(Quest.builder("s25_cactus_and_cane", QuestPhase.SIDE)
 				.title("The Desert Farmer")
@@ -345,8 +353,7 @@ final class SideQuests {
 						+ "green dye.")
 				.tools("Sand", "Fences", "Hoppers")
 				.task(new ItemTask("cactus", "Collect Cactus", 16, Items.CACTUS),
-						new CraftTask("green", "Smelt Green Dye", 4, Items.GREEN_DYE),
-						new CheckmarkTask("auto_cactus", "Build an automatic cactus farm")));
+						new CraftTask("green", "Smelt Green Dye", 4, Items.GREEN_DYE)));
 
 		addSide(Quest.builder("s26_bamboo_and_kelp", QuestPhase.SIDE)
 				.title("Renewable Fuel")

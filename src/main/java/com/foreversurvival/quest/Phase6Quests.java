@@ -6,11 +6,16 @@ import static com.foreversurvival.quest.QuestRegistry.addMain;
 
 import com.foreversurvival.quest.task.CheckmarkTask;
 import com.foreversurvival.quest.task.CraftTask;
+import com.foreversurvival.quest.task.EnchantTask;
 import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
+import com.foreversurvival.quest.task.PositionTask;
+import com.foreversurvival.quest.task.StatTask;
 
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
+import net.minecraft.stat.Stats;
 
 /**
  * PHASE 6 - THE FOREVER GOALS (20 quests, MAJOR).
@@ -33,10 +38,11 @@ final class Phase6Quests {
 						+ "Librarian trades are cheaper than the table once you have an emerald farm.")
 				.tools("Trading Hall", "Anvil", "XP Farm")
 				.task(new ItemTask("books", "Collect Enchanted Books", 20, Items.ENCHANTED_BOOK),
-						new CheckmarkTask("fortune", "Get a Fortune III pickaxe"),
-						new CheckmarkTask("silk", "Get a Silk Touch pickaxe"),
-						new CheckmarkTask("looting", "Get a Looting III sword"),
-						new CheckmarkTask("efficiency", "Get an Efficiency V pickaxe")));
+						new EnchantTask("fortune", "Carry a Fortune III tool", 1, 3, Enchantments.FORTUNE),
+						new EnchantTask("silk", "Carry a Silk Touch tool", 1, 1, Enchantments.SILK_TOUCH),
+						new EnchantTask("looting", "Carry a Looting III sword", 1, 3, Enchantments.LOOTING),
+						new EnchantTask("efficiency", "Carry an Efficiency V tool", 1, 5,
+								Enchantments.EFFICIENCY)));
 
 		addMain(Quest.builder("p6_02_the_alchemist", QuestPhase.PHASE_6)
 				.title("The Alchemist")
@@ -213,7 +219,8 @@ final class Phase6Quests {
 				.tools("Water Breathing", "Depth Strider", "Conduit")
 				.task(new KillTask("drowned", "Kill Drowned", 40, EntityType.DROWNED),
 						new ItemTask("trident", "Obtain a Trident", 1, Items.TRIDENT),
-						new CheckmarkTask("channeling", "Get Channeling on a trident"),
+						new EnchantTask("channeling", "Carry a Channeling trident", 1, 1,
+								Enchantments.CHANNELING),
 						new CheckmarkTask("ruins", "Explore an ocean ruin and a shipwreck")));
 
 		addMain(Quest.builder("p6_16_the_completionist", QuestPhase.PHASE_6)
@@ -259,7 +266,8 @@ final class Phase6Quests {
 						+ "out is 12,500 in the Nether - roughly an hour of rocket flight along a "
 						+ "prepared tunnel.")
 				.tools("Elytra", "Rockets", "Nether Highway", "Shulker Boxes")
-				.task(new CheckmarkTask("far_out", "Travel at least 50,000 blocks from spawn"),
+				.task(new PositionTask("far_out", "Travel 50,000 blocks from spawn",
+								PositionTask.Kind.FROM_SPAWN, 50000),
 						new CheckmarkTask("outpost", "Build an outpost there and get home alive")));
 
 		addMain(Quest.builder("p6_20_forever_survivor", QuestPhase.PHASE_6)
@@ -269,7 +277,8 @@ final class Phase6Quests {
 				.guide("Look at the Deaths tab, look at how long the list is, and decide whether you "
 						+ "are done. Confirm the last objective when you are.")
 				.tools("Everything you have")
-				.task(new CheckmarkTask("hundred_days", "Survive at least 100 in-game days in this world"),
+				.task(new StatTask("hundred_days", "Play 33+ hours in this world (~100 days)",
+								2_400_000, Stats.PLAY_TIME),
 						new CheckmarkTask("forever", "Declare this world finished")));
 	}
 }

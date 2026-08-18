@@ -5,12 +5,16 @@ import static com.foreversurvival.quest.QuestRegistry.addMain;
 
 import com.foreversurvival.quest.task.CheckmarkTask;
 import com.foreversurvival.quest.task.CraftTask;
+import com.foreversurvival.quest.task.EnchantTask;
 import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
+import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
+import net.minecraft.stat.Stats;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
@@ -56,7 +60,8 @@ final class Phase4Quests {
 						+ "directly under the X, usually a few blocks down in the sand or gravel. "
 						+ "It is the ONLY source of a Heart of the Sea.")
 				.tools("Boat", "Shovel", "Water Breathing Potion")
-				.task(new CheckmarkTask("map_found", "Find a Buried Treasure Map"),
+				.task(new StructureTask("shipwreck", "Find a Shipwreck", OVERWORLD,
+								StructureFeature.SHIPWRECK),
 						new ItemTask("heart", "Dig up a Heart of the Sea", 1, Items.HEART_OF_THE_SEA)));
 
 		addMain(Quest.builder("p4_04_ocean_monument", QuestPhase.PHASE_4)
@@ -91,8 +96,7 @@ final class Phase4Quests {
 						+ "best XP and prismarine source in the game.")
 				.tools("Sponges", "Building Blocks", "Water Buckets", "Conduit")
 				.task(new KillTask("guardians", "Kill Guardians", 40, EntityType.GUARDIAN),
-						new ItemTask("shards", "Collect Prismarine Shards", 32, Items.PRISMARINE_SHARD),
-						new CheckmarkTask("farm", "Build a guardian farm or drained kill room")));
+						new ItemTask("shards", "Collect Prismarine Shards", 32, Items.PRISMARINE_SHARD)));
 
 		addMain(Quest.builder("p4_07_trading_hall", QuestPhase.PHASE_4)
 				.title("The Trading Hall")
@@ -102,7 +106,7 @@ final class Phase4Quests {
 						+ "profession, and break it before the first trade to re-roll. Keep each "
 						+ "villager in its own cell so they cannot swap jobs.")
 				.tools("Workstations", "Beds", "Building Blocks", "Villagers")
-				.task(new CheckmarkTask("hall", "Build a trading hall with at least 6 villagers"),
+				.task(new StatTask("trades", "Trade with Villagers", 40, Stats.TRADED_WITH_VILLAGER),
 						new ItemTask("emeralds", "Stockpile Emeralds", 32, Items.EMERALD),
 						new CraftTask("emerald_block", "Craft Emerald Blocks", 2, Items.EMERALD_BLOCK)));
 
@@ -128,7 +132,8 @@ final class Phase4Quests {
 				.tools("Lectern", "Villager", "Emeralds")
 				.task(new CraftTask("lectern", "Craft a Lectern", 1, Items.LECTERN),
 						new ItemTask("books", "Collect Enchanted Books", 4, Items.ENCHANTED_BOOK),
-						new CheckmarkTask("mending", "Obtain a Mending book")));
+						new EnchantTask("mending", "Obtain Mending (book or item)", 1, 1,
+								Enchantments.MENDING)));
 
 		addMain(Quest.builder("p4_10_storage_system", QuestPhase.PHASE_4)
 				.title("The Storage System")
@@ -139,8 +144,7 @@ final class Phase4Quests {
 						+ "before the chest wall becomes unmanageable.")
 				.tools("Hoppers", "Chests", "Comparators", "Redstone")
 				.task(new CraftTask("hoppers", "Craft Hoppers", 12, Items.HOPPER),
-						new CraftTask("comparators", "Craft Comparators", 4, Items.COMPARATOR),
-						new CheckmarkTask("sorter", "Build a working item sorter")));
+						new CraftTask("comparators", "Craft Comparators", 4, Items.COMPARATOR)));
 
 		addMain(Quest.builder("p4_11_auto_smelter", QuestPhase.PHASE_4)
 				.title("The Smelter")
@@ -151,7 +155,7 @@ final class Phase4Quests {
 						+ "trip while you sleep.")
 				.tools("Hoppers", "Blast Furnaces", "Chests")
 				.task(new CraftTask("blast_bank", "Craft Blast Furnaces", 4, Items.BLAST_FURNACE),
-						new CheckmarkTask("auto_smelt", "Build an automatic smelter with hoppers")));
+						new CraftTask("smelt_hoppers", "Craft Hoppers for it", 3, Items.HOPPER)));
 
 		addMain(Quest.builder("p4_12_iron_economy", QuestPhase.PHASE_4)
 				.title("The Iron Economy")
@@ -160,8 +164,7 @@ final class Phase4Quests {
 				.guide("Three villagers, three beds and a zombie they can see makes them panic and "
 						+ "spawn iron golems. This is the quest that pays for everything after it.")
 				.tools("Villagers", "Beds", "Building Blocks", "Water Bucket")
-				.task(new CheckmarkTask("golem_farm", "Build a working iron golem farm"),
-						new ItemTask("stock", "Stockpile Iron Blocks", 32, Items.IRON_BLOCK)));
+				.task(new ItemTask("stock", "Stockpile Iron Blocks", 32, Items.IRON_BLOCK)));
 
 		addMain(Quest.builder("p4_13_gold_farm", QuestPhase.PHASE_4)
 				.title("The Gold Farm")
@@ -173,8 +176,7 @@ final class Phase4Quests {
 				.tools("Building Blocks", "Fire Resistance Potions", "Blocks to bridge")
 				.task(new KillTask("zpigs", "Kill Zombified Piglins", 60,
 								EntityType.ZOMBIFIED_PIGLIN),
-						new CraftTask("gold_blocks", "Craft Gold Blocks", 8, Items.GOLD_BLOCK),
-						new CheckmarkTask("gold_farm", "Build a gold or XP farm in the Nether")));
+						new CraftTask("gold_blocks", "Craft Gold Blocks", 8, Items.GOLD_BLOCK)));
 
 		addMain(Quest.builder("p4_14_creeper_farm", QuestPhase.PHASE_4)
 				.title("The Creeper Farm")
@@ -185,8 +187,7 @@ final class Phase4Quests {
 						+ "rockets, TNT and splash potions forever.")
 				.tools("Building Blocks", "Water Buckets", "Sword")
 				.task(new KillTask("creepers", "Kill Creepers", 50, EntityType.CREEPER),
-						new ItemTask("gunpowder", "Collect Gunpowder", 32, Items.GUNPOWDER),
-						new CheckmarkTask("creeper_farm", "Build a mob or creeper farm")));
+						new ItemTask("gunpowder", "Collect Gunpowder", 32, Items.GUNPOWDER)));
 
 		addMain(Quest.builder("p4_15_blaze_farm", QuestPhase.PHASE_4)
 				.title("The Blaze Farm")
@@ -196,8 +197,7 @@ final class Phase4Quests {
 						+ "into a drop. Blaze powder is the base of every potion and every eye of "
 						+ "ender you will ever need.")
 				.tools("Fire Resistance Potions", "Building Blocks", "Hoppers")
-				.task(new ItemTask("powder", "Collect Blaze Powder", 24, Items.BLAZE_POWDER),
-						new CheckmarkTask("blaze_farm", "Build a blaze spawner farm")));
+				.task(new ItemTask("powder", "Collect Blaze Powder", 24, Items.BLAZE_POWDER)));
 
 		addMain(Quest.builder("p4_16_slime_chunk", QuestPhase.PHASE_4)
 				.title("The Slime Chunk")
@@ -280,10 +280,11 @@ final class Phase4Quests {
 						+ "a real day. Vindicators hit for 13 and Evokers summon vexes that pass "
 						+ "through walls. Fight in doorways.")
 				.tools("Woodland Explorer Map", "Diamond Armour", "Golden Apples", "Horse or Boat")
-				.task(new KillTask("vindicators", "Kill Vindicators", 10, EntityType.VINDICATOR),
+				.task(new StructureTask("mansion", "Find a Woodland Mansion", OVERWORLD,
+								StructureFeature.MANSION),
+						new KillTask("vindicators", "Kill Vindicators", 10, EntityType.VINDICATOR),
 						new ItemTask("notch", "Loot an Enchanted Golden Apple", 1,
-								Items.ENCHANTED_GOLDEN_APPLE),
-						new CheckmarkTask("mansion", "Clear a Woodland Mansion")));
+								Items.ENCHANTED_GOLDEN_APPLE)));
 
 		addMain(Quest.builder("p4_23_raid_breaker", QuestPhase.PHASE_4)
 				.title("The Raid Breaker")
@@ -311,7 +312,9 @@ final class Phase4Quests {
 								Items.DIAMOND_CHESTPLATE),
 						new CraftTask("d_legs", "Craft Diamond Leggings", 1, Items.DIAMOND_LEGGINGS),
 						new CraftTask("d_boots", "Craft Diamond Boots", 1, Items.DIAMOND_BOOTS),
-						new CheckmarkTask("prot4", "Get Protection IV on every armour piece"),
-						new CheckmarkTask("mending_gear", "Put Mending on your sword and pickaxe")));
+						new EnchantTask("prot4", "Protection IV on all 4 armour pieces", 4, 4,
+								Enchantments.PROTECTION),
+						new EnchantTask("mending_gear", "Mending on 2 tools/weapons", 2, 1,
+								Enchantments.MENDING)));
 	}
 }
