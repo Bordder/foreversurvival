@@ -177,10 +177,20 @@ public final class QuestManager {
 	private void evaluate(ServerPlayerEntity player) {
 		PlayerQuestData data = QuestDataHolder.get(player);
 
-		// 1. Collect the quests that are actually in play right now.
+		// 1. Collect the quests actually in play. The main line is a strict chain,
+		// so exactly one main quest is ever active - the first incomplete one,
+		// whose parent is by definition already done. Everything after it is
+		// locked, so stop there instead of walking all 127. Side quests carry no
+		// parent, so every incomplete one is live.
 		List<Quest> active = new ArrayList<>();
-		for (Quest quest : quests.values()) {
-			if (!data.isCompleted(quest.getId()) && isUnlocked(data, quest)) {
+		for (Quest quest : mainQuests) {
+			if (!data.isCompleted(quest.getId())) {
+				active.add(quest);
+				break;
+			}
+		}
+		for (Quest quest : sideQuests) {
+			if (!data.isCompleted(quest.getId())) {
 				active.add(quest);
 			}
 		}

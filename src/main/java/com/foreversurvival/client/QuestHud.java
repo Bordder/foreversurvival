@@ -218,7 +218,11 @@ public final class QuestHud extends DrawableHelper {
 	 * it sizes to its content.
 	 */
 	public int[] measure(@Nullable Quest quest) {
-		List<Row> rows = layout(quest);
+		ensureLayout(quest);
+		return cachedSize;
+	}
+
+	private int[] sizeFor(List<Row> rows) {
 		int width = fittedWidth(rows);
 
 		if (HudConfig.hudHeight > 0) {
@@ -230,6 +234,52 @@ public final class QuestHud extends DrawableHelper {
 		int minimum = HudConfig.showIcon ? ICON : 0;
 
 		return new int[] { width, PADDING * 2 + Math.max(textHeight, minimum) };
+	}
+
+	// ------------------------------------------------------------------
+	// Layout cache
+	//
+	// render() runs every frame (60-144 fps) and both measure() and drawPanel()
+	// used to rebuild the wrapped-text layout each call. Text is re-shaped only
+	// when something it depends on actually changes - quest progress, the pinned
+	// quest, or the panel's size/toggles - which is at most a few times a second.
+	// ------------------------------------------------------------------
+
+	private List<Row> cachedRows;
+	private int[] cachedSize;
+	private String cacheKey;
+
+	private void ensureLayout(@Nullable Quest quest) {
+		String key = layoutKey(quest);
+		if (cachedRows != null && key.equals(cacheKey)) {
+			return;
+		}
+		cacheKey = key;
+		cachedRows = layout(quest);
+		cachedSize = sizeFor(cachedRows);
+	}
+
+	private String layoutKey(@Nullable Quest quest) {
+		StringBuilder key = new StringBuilder(64);
+		key.append(HudConfig.hudWidth).append(',').append(HudConfig.hudHeight)
+				.append(HudConfig.showIcon ? 'I' : 'i')
+				.append(HudConfig.showObjectives ? 'O' : 'o').append('|');
+		appendQuestSignature(key, quest);
+		key.append('|');
+		appendQuestSignature(key, getPinnedQuest(quest));
+		return key.toString();
+	}
+
+	private void appendQuestSignature(StringBuilder key, @Nullable Quest quest) {
+		if (quest == null) {
+			key.append('~');
+			return;
+		}
+		PlayerQuestData data = ClientQuestState.get();
+		key.append(quest.getId());
+		for (QuestTask task : quest.getTasks()) {
+			key.append(':').append(data.getProgress(quest.getId(), task.getId()));
+		}
 	}
 
 	// ------------------------------------------------------------------
@@ -273,10 +323,10 @@ public final class QuestHud extends DrawableHelper {
 		MinecraftClient client = MinecraftClient.getInstance();
 		TextRenderer font = client.textRenderer;
 
-		List<Row> rows = layout(quest);
-		int[] size = measure(quest);
-		int width = size[0];
-		int height = size[1];
+		ensureLayout(quest);
+		List<Row> rows = cachedRows;
+		int width = cachedSize[0];
+		int height = cachedSize[1];
 
 		if (HudConfig.backgroundOpacity > 0) {
 			fill(matrices, 0, 0, width, height, HudConfig.backgroundColor(RGB_PANEL));
