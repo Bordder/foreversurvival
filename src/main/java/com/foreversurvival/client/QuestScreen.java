@@ -136,6 +136,10 @@ public class QuestScreen extends Screen {
 	private double detailScroll;
 	private double deathScroll;
 	private double settingsScroll;
+	private double statsScroll;
+
+	/** "Time per quest" dropdown open in the Stats tab. */
+	private boolean statsTimesOpen;
 
 	private int draggingSlider = -1;
 
@@ -163,6 +167,7 @@ public class QuestScreen extends Screen {
 	private static final int SB_DEATHS = 2;
 	private static final int SB_SETTINGS = 3;
 	private static final int SB_TREE = 4;
+	private static final int SB_STATS = 5;
 	private static final int SB_WIDTH = 5;
 	private static final int SB_MIN_THUMB = 14;
 
@@ -177,7 +182,7 @@ public class QuestScreen extends Screen {
 		boolean active;
 	}
 
-	private final Bar[] scrollBars = new Bar[5];
+	private final Bar[] scrollBars = new Bar[6];
 	private int scrollDrag = -1;
 	/** Cursor offset inside the thumb when the drag started. */
 	private double scrollGrab;
@@ -287,7 +292,7 @@ public class QuestScreen extends Screen {
 				}
 			}
 			case DEATHS -> renderDeaths(matrices, mouseX, mouseY);
-			case STATS -> renderStats(matrices);
+			case STATS -> renderStats(matrices, mouseX, mouseY);
 			case SUMMARY -> renderSummary(matrices);
 			case SETTINGS -> renderSettings(matrices, mouseX, mouseY);
 		}
@@ -1164,21 +1169,16 @@ public class QuestScreen extends Screen {
 	// Stats
 	// ------------------------------------------------------------------
 
-	private void renderStats(MatrixStack matrices) {
+	/** Y of the "Time per quest" toggle row, recorded for click hit-testing. */
+	private int statsToggleY = -1;
+
+	private void renderStats(MatrixStack matrices, int mouseX, int mouseY) {
 		int panelLeft = left + PADDING;
 		int panelRight = left + panelWidth - PADDING;
 		fill(matrices, panelLeft, contentTop, panelRight, contentBottom, COLOR_SUBPANEL);
 
 		NbtCompound stats = ClientQuestState.getStats();
 		PlayerQuestData data = ClientQuestState.get();
-
-		enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
-
-		int x = panelLeft + 8;
-		int y = contentTop + 7;
-
-		textRenderer.draw(matrices, "This World", x, y, TEXT_TITLE);
-		y += 14;
 
 		int mainDone = 0;
 		for (Quest quest : QuestManager.get().getMainQuests()) {
@@ -1193,9 +1193,16 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		int playTicks = stats.getInt("PlayTime");
+		enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
 
-		y = stat(matrices, x, y, "Playtime", formatDuration(playTicks));
+		int x = panelLeft + 8;
+		int startY = contentTop + 7 - (int) statsScroll;
+		int y = startY;
+
+		textRenderer.draw(matrices, "This World", x, y, TEXT_TITLE);
+		y += 14;
+
+		y = stat(matrices, x, y, "Playtime", formatDuration(stats.getInt("PlayTime")));
 		y = stat(matrices, x, y, "Quests completed", mainDone + " main, " + sideDone + " side");
 		y = stat(matrices, x, y, "Since last death", formatDuration(stats.getInt("SinceDeath")));
 		y += 6;
@@ -1210,9 +1217,51 @@ public class QuestScreen extends Screen {
 		y = stat(matrices, x, y, "Distance sprinted", formatDistance(stats.getInt("SprintCm")));
 		y = stat(matrices, x, y, "Distance flown", formatDistance(stats.getInt("FlyCm")));
 		y = stat(matrices, x, y, "Jumps", Integer.toString(stats.getInt("Jumps")));
-		stat(matrices, x, y, "Nights slept", Integer.toString(stats.getInt("Slept")));
+		y = stat(matrices, x, y, "Nights slept", Integer.toString(stats.getInt("Slept")));
+		y += 8;
+
+		// ---- Time per quest dropdown ----
+		statsToggleY = y;
+		fill(matrices, panelLeft + 4, y - 2, panelRight - 4, y + 11, COLOR_HEADER_ROW);
+		drawFoldArrow(matrices, panelLeft + 8, y + 1, !statsTimesOpen, TEXT_TITLE);
+		textRenderer.draw(matrices, "Time per quest", panelLeft + 18, y, TEXT_TITLE);
+		String hint = statsTimesOpen ? "click to hide" : "click to show";
+		textRenderer.draw(matrices, hint, panelRight - 8 - textRenderer.getWidth(hint), y, TEXT_DIM);
+		y += 15;
+
+		if (statsTimesOpen) {
+			int prevTicks = 0;
+			boolean any = false;
+			for (Quest quest : QuestManager.get().getMainQuests()) {
+				if (!data.isCompleted(quest.getId())) {
+					continue;
+				}
+				any = true;
+				int t = data.getCompletionPlayTicks(quest.getId());
+				String duration;
+				if (t < 0) {
+					duration = "-";
+				} else {
+					duration = formatDuration(Math.max(0, t - prevTicks));
+					prevTicks = t;
+				}
+				textRenderer.draw(matrices, trim(quest.getTitle(), 160), x + 4, y, TEXT_BODY);
+				textRenderer.draw(matrices, duration,
+						panelRight - 8 - textRenderer.getWidth(duration), y, TEXT_GUIDE);
+				y += 11;
+			}
+			if (!any) {
+				textRenderer.draw(matrices, "No quests completed yet.", x + 4, y, TEXT_DIM);
+				y += 11;
+			}
+		}
 
 		disableScissor();
+
+		int contentHeight = (y - startY) + 8;
+		statsScroll = clampScroll(statsScroll, contentHeight, contentBottom - contentTop);
+		drawScrollbar(matrices, SB_STATS, panelRight, contentTop + 1, contentBottom - 1,
+				contentHeight, mouseX, mouseY);
 		drawBorder(matrices, panelLeft, contentTop, panelRight, contentBottom);
 	}
 
@@ -1605,6 +1654,16 @@ public class QuestScreen extends Screen {
 			return handleDeathClick(mouseX, mouseY);
 		}
 
+		if (tab == Tab.STATS) {
+			// The "Time per quest" toggle row.
+			if (statsToggleY >= 0 && mouseX >= left + PADDING + 4 && mouseX <= left + panelWidth - PADDING - 4
+					&& mouseY >= statsToggleY - 2 && mouseY <= statsToggleY + 11) {
+				statsTimesOpen = !statsTimesOpen;
+				statsScroll = 0;
+			}
+			return true;
+		}
+
 		if (tab == Tab.MAIN || tab == Tab.SIDE) {
 			// List/Tree switch, drawn in both layouts.
 			if (mouseX >= viewToggleX1 && mouseX <= viewToggleX2
@@ -1821,7 +1880,8 @@ public class QuestScreen extends Screen {
 		switch (tab) {
 			case DEATHS -> deathScroll = Math.max(0, deathScroll - step);
 			case SETTINGS -> settingsScroll = Math.max(0, settingsScroll - step);
-			case STATS, SUMMARY -> {
+			case STATS -> statsScroll = Math.max(0, statsScroll - step);
+			case SUMMARY -> {
 				// Nothing to scroll.
 			}
 			default -> {
@@ -1899,6 +1959,7 @@ public class QuestScreen extends Screen {
 			case SB_DETAIL -> detailScroll;
 			case SB_DEATHS -> deathScroll;
 			case SB_SETTINGS -> settingsScroll;
+			case SB_STATS -> statsScroll;
 			default -> treeScroll;
 		};
 	}
@@ -1909,6 +1970,7 @@ public class QuestScreen extends Screen {
 			case SB_DETAIL -> detailScroll = value;
 			case SB_DEATHS -> deathScroll = value;
 			case SB_SETTINGS -> settingsScroll = value;
+			case SB_STATS -> statsScroll = value;
 			default -> treeScroll = value;
 		}
 	}

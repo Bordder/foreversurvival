@@ -37,6 +37,14 @@ public class PlayerQuestData {
 	/** IDs of quests that are 100% finished (and whose rewards were paid out). */
 	private final Set<String> completedQuests = new HashSet<>();
 
+	/**
+	 * questId -> the player's PLAY_TIME (ticks played) at the moment it was
+	 * completed. Play-time, not wall-clock, so idle/offline time never inflates
+	 * how long a quest "took". The gap to the previous quest in the chain is the
+	 * real time spent on it.
+	 */
+	private final Map<String, Integer> completionPlayTicks = new HashMap<>();
+
 	/** questId -> (taskId -> progress). Progress is sticky: it never goes down. */
 	private final Map<String, Map<String, Integer>> progress = new HashMap<>();
 
@@ -65,6 +73,19 @@ public class PlayerQuestData {
 
 	public Set<String> getCompletedQuests() {
 		return completedQuests;
+	}
+
+	/** Records the play-time stamp for a quest the first time it completes. */
+	public void setCompletionPlayTicks(String questId, int playTicks) {
+		if (!completionPlayTicks.containsKey(questId)) {
+			completionPlayTicks.put(questId, playTicks);
+			markDirty();
+		}
+	}
+
+	/** @return play-ticks at completion, or -1 if never recorded. */
+	public int getCompletionPlayTicks(String questId) {
+		return completionPlayTicks.getOrDefault(questId, -1);
 	}
 
 	// ------------------------------------------------------------------
@@ -194,6 +215,12 @@ public class PlayerQuestData {
 		}
 		root.put("Deaths", deathList);
 
+		NbtCompound timesNbt = new NbtCompound();
+		for (Map.Entry<String, Integer> entry : completionPlayTicks.entrySet()) {
+			timesNbt.putInt(entry.getKey(), entry.getValue());
+		}
+		root.put("CompletionTimes", timesNbt);
+
 		return root;
 	}
 
@@ -202,6 +229,7 @@ public class PlayerQuestData {
 		progress.clear();
 		celebratedPhases.clear();
 		deaths.clear();
+		completionPlayTicks.clear();
 
 		NbtList completedList = root.getList("Completed", NbtElement.STRING_TYPE);
 		for (int i = 0; i < completedList.size(); i++) {
@@ -226,6 +254,11 @@ public class PlayerQuestData {
 		NbtList deathList = root.getList("Deaths", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < deathList.size(); i++) {
 			deaths.add(DeathRecord.fromNbt(deathList.getCompound(i)));
+		}
+
+		NbtCompound timesNbt = root.getCompound("CompletionTimes");
+		for (String questId : timesNbt.getKeys()) {
+			completionPlayTicks.put(questId, timesNbt.getInt(questId));
 		}
 
 		markDirty();

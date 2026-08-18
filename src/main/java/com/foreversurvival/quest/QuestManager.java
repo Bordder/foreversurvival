@@ -23,6 +23,7 @@ import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.stat.Stats;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -260,6 +261,8 @@ public final class QuestManager {
 		}
 
 		data.setCompleted(quest.getId());
+		data.setCompletionPlayTicks(quest.getId(),
+				player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME)));
 
 		// No items, no XP: the mod tells you what to do, vanilla does the rest.
 		player.sendMessage(new LiteralText("[ForeverSurvival] ").formatted(Formatting.DARK_AQUA)
