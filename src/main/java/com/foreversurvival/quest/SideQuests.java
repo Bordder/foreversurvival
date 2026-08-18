@@ -412,5 +412,70 @@ final class SideQuests {
 						+ "falls forever. Any tool works.")
 				.tools("Elytra", "Firework Rockets", "Building Blocks")
 				.task(new ItemTask("head", "Obtain a Dragon Head", 1, Items.DRAGON_HEAD)));
+
+		addSide(Quest.builder("s31_glassblower", QuestPhase.SIDE)
+				.title("The Glassblower")
+				.desc("Sand, fire, and a bit of dye.")
+				.icon(Items.GLASS)
+				.guide("Smelt sand into glass. Eight glass around a dye makes eight stained glass; six "
+						+ "glass in a row makes sixteen panes. Tinted glass needs amethyst and blocks "
+						+ "light without blocking the view.")
+				.tools("Furnace", "Sand", "Dyes")
+				.task(new ItemTask("glass", "Collect Glass", 32, Items.GLASS),
+						new CraftTask("stained", "Craft Stained Glass", 16,
+								Items.WHITE_STAINED_GLASS, Items.BLUE_STAINED_GLASS,
+								Items.RED_STAINED_GLASS, Items.GREEN_STAINED_GLASS,
+								Items.YELLOW_STAINED_GLASS, Items.BLACK_STAINED_GLASS),
+						new CraftTask("panes", "Craft Glass Panes", 32, Items.GLASS_PANE)));
+
+		addSide(Quest.builder("s32_concrete", QuestPhase.SIDE)
+				.title("Concrete Foundations")
+				.desc("The cleanest building block there is.")
+				.icon(Items.LIGHT_BLUE_CONCRETE)
+				.guide("4 sand + 4 gravel + 1 dye makes 8 concrete powder. Powder hardens into "
+						+ "concrete the instant it touches water - drop it in, mine it back.")
+				.tools("Sand", "Gravel", "Dyes", "Water")
+				.task(new CraftTask("powder", "Craft Concrete Powder", 32,
+								Items.WHITE_CONCRETE_POWDER, Items.LIGHT_BLUE_CONCRETE_POWDER,
+								Items.GRAY_CONCRETE_POWDER, Items.RED_CONCRETE_POWDER),
+						new ItemTask("concrete", "Harden Concrete", 16,
+								Items.WHITE_CONCRETE, Items.LIGHT_BLUE_CONCRETE,
+								Items.GRAY_CONCRETE, Items.RED_CONCRETE, Items.BLACK_CONCRETE)));
+
+		addSide(Quest.builder("s33_banners", QuestPhase.SIDE)
+				.title("The Banner Maker")
+				.desc("A flag for the front of your base.")
+				.icon(Items.CYAN_BANNER)
+				.guide("6 wool + 1 stick makes a banner. A Loom applies patterns from dyes and banner "
+						+ "pattern items far more cheaply than the crafting grid.")
+				.tools("Wool", "Loom", "Dyes")
+				.task(new CraftTask("loom", "Craft a Loom", 1, Items.LOOM),
+						new CraftTask("banners", "Craft Banners", 4,
+								Items.WHITE_BANNER, Items.CYAN_BANNER, Items.RED_BANNER,
+								Items.BLACK_BANNER, Items.BLUE_BANNER)));
+
+		addSide(Quest.builder("s34_pyrotechnician", QuestPhase.SIDE)
+				.title("The Pyrotechnician")
+				.desc("Not for flying - for the show.")
+				.icon(Items.FIREWORK_ROCKET)
+				.guide("A firework star is gunpowder + dye, plus optional shape items (fire charge, "
+						+ "gold nugget, feather, head). Add stars to a rocket to paint the sky.")
+				.tools("Gunpowder", "Dyes", "Paper")
+				.task(new CraftTask("stars", "Craft Firework Stars", 8, Items.FIREWORK_STAR),
+						new CraftTask("rockets", "Craft Firework Rockets", 32, Items.FIREWORK_ROCKET)));
+
+		addSide(Quest.builder("s35_stonemason", QuestPhase.SIDE)
+				.title("The Stonemason")
+				.desc("Every polished, chiselled and cut variant of the stone you walk on.")
+				.icon(Items.CHISELED_STONE_BRICKS)
+				.guide("A Stonecutter turns one block into any of its cut variants with no waste, and "
+						+ "does it one-to-one instead of the 4-to-4 of the crafting grid.")
+				.tools("Stone", "Stonecutter")
+				.task(new CraftTask("stonecutter", "Craft a Stonecutter", 1, Items.STONECUTTER),
+						new CraftTask("polished", "Cut Polished Stone", 16,
+								Items.POLISHED_ANDESITE, Items.POLISHED_DIORITE,
+								Items.POLISHED_GRANITE, Items.SMOOTH_STONE),
+						new CraftTask("chiseled", "Craft Chiselled Stone Bricks", 4,
+								Items.CHISELED_STONE_BRICKS)));
 	}
 }
