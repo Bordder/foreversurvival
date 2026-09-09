@@ -5,10 +5,10 @@ import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 
 /**
  * Records where every death happened, what caused it, and what was in the
@@ -41,7 +41,7 @@ public final class DeathLogger {
 			}
 
 			// Snapshot before vanilla scatters everything on the floor.
-			NbtList inventory = player.getInventory().writeNbt(new NbtList());
+			ListTag inventory = player.getInventory().writeNbt(new ListTag());
 
 			PlayerQuestData data = QuestDataHolder.get(player);
 			DeathRecord record = new DeathRecord(pos.getX(), pos.getY(), pos.getZ(), dimension,
@@ -49,10 +49,10 @@ public final class DeathLogger {
 			data.addDeath(record);
 
 			int index = data.getDeaths().size();
-			player.sendMessage(new LiteralText("[ForeverSurvival] ").formatted(Formatting.DARK_AQUA)
-					.append(new LiteralText("Death #" + index + " logged: "
+			player.sendMessage(new Component("[ForeverSurvival] ").formatted(ChatFormatting.DARK_AQUA)
+					.append(new Component("Death #" + index + " logged: "
 							+ record.getX() + ", " + record.getY() + ", " + record.getZ()
-							+ " [" + record.getDimensionDisplayName() + "]").formatted(Formatting.RED)), false);
+							+ " [" + record.getDimensionDisplayName() + "]").formatted(ChatFormatting.RED)), false);
 
 			return true;
 		});

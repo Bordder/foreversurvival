@@ -10,15 +10,15 @@ import com.foreversurvival.ForeverSurvival;
 import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Attaches a {@link PlayerQuestData} to every server player and hooks it into
  * the vanilla player save/load path, which is exactly "saving to player NBT".
  */
-@Mixin(ServerPlayerEntity.class)
+@Mixin(ServerPlayer.class)
 public class ServerPlayerEntityMixin implements QuestDataHolder {
 
 	@Unique
@@ -30,13 +30,13 @@ public class ServerPlayerEntityMixin implements QuestDataHolder {
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-	private void foreversurvival$write(NbtCompound nbt, CallbackInfo ci) {
+	private void foreversurvival$write(CompoundTag nbt, CallbackInfo ci) {
 		nbt.put(ForeverSurvival.NBT_ROOT_KEY, foreversurvival$questData.writeNbt());
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-	private void foreversurvival$read(NbtCompound nbt, CallbackInfo ci) {
-		if (nbt.contains(ForeverSurvival.NBT_ROOT_KEY, NbtElement.COMPOUND_TYPE)) {
+	private void foreversurvival$read(CompoundTag nbt, CallbackInfo ci) {
+		if (nbt.contains(ForeverSurvival.NBT_ROOT_KEY, Tag.COMPOUND_TYPE)) {
 			foreversurvival$questData.readNbt(nbt.getCompound(ForeverSurvival.NBT_ROOT_KEY));
 		}
 	}

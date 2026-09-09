@@ -1,8 +1,8 @@
 package com.foreversurvival.quest.task;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.resources.Identifier;
 
 /**
  * Tracks one of the vanilla "custom" statistics - the counters behind the
@@ -33,7 +33,7 @@ public class StatTask extends QuestTask {
 
 	@Override
 	public int computeProgress(TaskContext ctx) {
-		ServerPlayerEntity player = ctx.getPlayer();
+		ServerPlayer player = ctx.getPlayer();
 		return player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(stat)) / divisor;
 	}
 

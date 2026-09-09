@@ -22,18 +22,18 @@ import com.foreversurvival.quest.task.QuestTask;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.ChatFormatting;
 
 /**
  * The quest book, opened with 'U'.
@@ -223,7 +223,7 @@ public class QuestScreen extends Screen {
 	private String checkmarkTaskId;
 
 	public QuestScreen() {
-		super(new LiteralText("ForeverSurvival"));
+		super(new Component("ForeverSurvival"));
 	}
 
 	@Override
@@ -496,7 +496,7 @@ public class QuestScreen extends Screen {
 				fill(matrices, listLeft, rowTop, listRight, rowBottom, COLOR_ROW_HOVER);
 			}
 
-			MinecraftClient.getInstance().getItemRenderer()
+			Minecraft.getInstance().getItemRenderer()
 					.renderInGuiWithOverrides(quest.getIconStack(), listLeft + 3, rowTop + 2);
 			if (!unlocked) {
 				fill(matrices, listLeft + 3, rowTop + 2, listLeft + 19, rowTop + 18, 0x99161620);
@@ -822,7 +822,7 @@ public class QuestScreen extends Screen {
 		fill(matrices, x + NODE - 1, y, x + NODE, y + NODE, border);
 
 		// 16px item icon centred in the 30px node.
-		MinecraftClient.getInstance().getItemRenderer()
+		Minecraft.getInstance().getItemRenderer()
 				.renderInGuiWithOverrides(quest.getIconStack(), x + 7, y + 7);
 
 		if (!unlocked) {
@@ -1132,13 +1132,13 @@ public class QuestScreen extends Screen {
 			slots[i] = ItemStack.EMPTY;
 		}
 
-		NbtList list = record.getInventory();
+		ListTag list = record.getInventory();
 		if (list == null) {
 			return slots;
 		}
 
 		for (int i = 0; i < list.size(); i++) {
-			NbtCompound entry = list.getCompound(i);
+			CompoundTag entry = list.getCompound(i);
 			int slot = entry.getByte("Slot") & 255;
 			ItemStack stack = ItemStack.fromNbt(entry);
 			if (stack.isEmpty()) {
@@ -1162,7 +1162,7 @@ public class QuestScreen extends Screen {
 			return;
 		}
 
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		client.getItemRenderer().renderInGuiWithOverrides(stack, x, y);
 		client.getItemRenderer().renderGuiItemOverlay(textRenderer, stack, x, y);
 	}
@@ -1180,7 +1180,7 @@ public class QuestScreen extends Screen {
 		int panelRight = left + panelWidth - PADDING;
 		fill(matrices, panelLeft, contentTop, panelRight, contentBottom, COLOR_SUBPANEL);
 
-		NbtCompound stats = ClientQuestState.getStats();
+		CompoundTag stats = ClientQuestState.getStats();
 		PlayerQuestData data = ClientQuestState.get();
 
 		int mainDone = 0;
@@ -1499,7 +1499,7 @@ public class QuestScreen extends Screen {
 				() -> HudConfig.showIcon = !HudConfig.showIcon));
 		settings.add(new Slider("Background opacity", 0, 100,
 				() -> HudConfig.backgroundOpacity, v -> HudConfig.backgroundOpacity = v, "%"));
-		settings.add(new Slider("Text opacity", 20, 100,
+		settings.add(new Slider("Component opacity", 20, 100,
 				() -> HudConfig.textOpacity, v -> HudConfig.textOpacity = v, "%"));
 		settings.add(new Slider("Panel width", HudConfig.MIN_HUD_WIDTH, HudConfig.MAX_HUD_WIDTH,
 				() -> HudConfig.hudWidth, v -> HudConfig.hudWidth = v, "px"));
@@ -1997,7 +1997,7 @@ public class QuestScreen extends Screen {
 	}
 
 	private void sendCheckmark(String questId, String taskId, boolean set) {
-		PacketByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = PacketByteBufs.create();
 		buf.writeString(questId);
 		buf.writeString(taskId);
 		buf.writeBoolean(set);
@@ -2129,7 +2129,7 @@ public class QuestScreen extends Screen {
 	}
 
 	private void enableScissor(int x1, int y1, int x2, int y2) {
-		Window window = MinecraftClient.getInstance().getWindow();
+		Window window = Minecraft.getInstance().getWindow();
 		double scale = window.getScaleFactor();
 
 		int sx = (int) (x1 * scale);
@@ -2210,8 +2210,8 @@ public class QuestScreen extends Screen {
 			return y;
 		}
 
-		List<OrderedText> lines = textRenderer.wrapLines(new LiteralText(text), width);
-		for (OrderedText line : lines) {
+		List<FormattedCharSequence> lines = textRenderer.wrapLines(new Component(text), width);
+		for (FormattedCharSequence line : lines) {
 			textRenderer.draw(matrices, line, x, y, color);
 			y += 9;
 		}
@@ -2248,7 +2248,7 @@ public class QuestScreen extends Screen {
 		return Math.max(0, Math.min(scroll, maxScroll));
 	}
 
-	private static int colorOf(Formatting formatting) {
+	private static int colorOf(ChatFormatting formatting) {
 		Integer value = formatting.getColorValue();
 		return 0xFF000000 | (value == null ? 0xFFFFFF : value);
 	}

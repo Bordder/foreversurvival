@@ -1,7 +1,7 @@
 package com.foreversurvival.quest;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 /**
  * Shared plumbing for the quest tree. The quests themselves live in the

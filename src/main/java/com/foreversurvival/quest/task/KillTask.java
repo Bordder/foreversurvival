@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stats;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 
 /**
  * "Kill" task, backed by the vanilla {@code minecraft.killed} statistic so only
@@ -24,7 +24,7 @@ public class KillTask extends QuestTask {
 
 	@Override
 	public int computeProgress(TaskContext ctx) {
-		ServerPlayerEntity player = ctx.getPlayer();
+		ServerPlayer player = ctx.getPlayer();
 		int total = 0;
 
 		for (EntityType<?> type : types) {

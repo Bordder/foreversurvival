@@ -9,9 +9,9 @@ import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**

@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.foreversurvival.quest.task.QuestTask;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 /**
  * A single quest definition. Immutable and shared by both logical sides, so the

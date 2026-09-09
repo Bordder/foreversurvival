@@ -7,9 +7,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.foreversurvival.client.HudConfig;
 
-import net.minecraft.client.toast.AdvancementToast;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.gui.components.toasts.AdvancementToast;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 
 /**
  * Swallows the vanilla advancement pop-up.

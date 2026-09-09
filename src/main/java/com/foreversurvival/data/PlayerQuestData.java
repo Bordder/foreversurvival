@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 
 /**
  * Everything the mod remembers about a single player.
  *
- * This object lives on the {@code ServerPlayerEntity} (injected by
+ * This object lives on the {@code ServerPlayer} (injected by
  * {@code ServerPlayerEntityMixin}) and is written straight into the player's
  * own NBT, so it survives logout, death and dimension changes without any
  * extra world save data.
@@ -204,18 +204,18 @@ public class PlayerQuestData {
 	// Persistence
 	// ------------------------------------------------------------------
 
-	public NbtCompound writeNbt() {
-		NbtCompound root = new NbtCompound();
+	public CompoundTag writeNbt() {
+		CompoundTag root = new CompoundTag();
 
-		NbtList completedList = new NbtList();
+		ListTag completedList = new ListTag();
 		for (String id : completedQuests) {
-			completedList.add(NbtString.of(id));
+			completedList.add(StringTag.of(id));
 		}
 		root.put("Completed", completedList);
 
-		NbtCompound progressNbt = new NbtCompound();
+		CompoundTag progressNbt = new CompoundTag();
 		for (Map.Entry<String, Map<String, Integer>> questEntry : progress.entrySet()) {
-			NbtCompound taskNbt = new NbtCompound();
+			CompoundTag taskNbt = new CompoundTag();
 			for (Map.Entry<String, Integer> taskEntry : questEntry.getValue().entrySet()) {
 				taskNbt.putInt(taskEntry.getKey(), taskEntry.getValue());
 			}
@@ -223,25 +223,25 @@ public class PlayerQuestData {
 		}
 		root.put("Progress", progressNbt);
 
-		NbtList celebratedList = new NbtList();
+		ListTag celebratedList = new ListTag();
 		for (String id : celebratedPhases) {
-			celebratedList.add(NbtString.of(id));
+			celebratedList.add(StringTag.of(id));
 		}
 		root.put("Celebrated", celebratedList);
 
-		NbtList deathList = new NbtList();
+		ListTag deathList = new ListTag();
 		for (DeathRecord record : deaths) {
 			deathList.add(record.writeNbt());
 		}
 		root.put("Deaths", deathList);
 
-		NbtCompound timesNbt = new NbtCompound();
+		CompoundTag timesNbt = new CompoundTag();
 		for (Map.Entry<String, Integer> entry : completionPlayTicks.entrySet()) {
 			timesNbt.putInt(entry.getKey(), entry.getValue());
 		}
 		root.put("CompletionTimes", timesNbt);
 
-		NbtCompound damageNbt = new NbtCompound();
+		CompoundTag damageNbt = new CompoundTag();
 		for (Map.Entry<String, Float> entry : damageDealt.entrySet()) {
 			damageNbt.putFloat(entry.getKey(), entry.getValue());
 		}
@@ -250,7 +250,7 @@ public class PlayerQuestData {
 		return root;
 	}
 
-	public void readNbt(NbtCompound root) {
+	public void readNbt(CompoundTag root) {
 		completedQuests.clear();
 		progress.clear();
 		celebratedPhases.clear();
@@ -258,14 +258,14 @@ public class PlayerQuestData {
 		completionPlayTicks.clear();
 		damageDealt.clear();
 
-		NbtList completedList = root.getList("Completed", NbtElement.STRING_TYPE);
+		ListTag completedList = root.getList("Completed", Tag.STRING_TYPE);
 		for (int i = 0; i < completedList.size(); i++) {
 			completedQuests.add(completedList.getString(i));
 		}
 
-		NbtCompound progressNbt = root.getCompound("Progress");
+		CompoundTag progressNbt = root.getCompound("Progress");
 		for (String questId : progressNbt.getKeys()) {
-			NbtCompound taskNbt = progressNbt.getCompound(questId);
+			CompoundTag taskNbt = progressNbt.getCompound(questId);
 			Map<String, Integer> tasks = new LinkedHashMap<>();
 			for (String taskId : taskNbt.getKeys()) {
 				tasks.put(taskId, taskNbt.getInt(taskId));
@@ -273,22 +273,22 @@ public class PlayerQuestData {
 			progress.put(questId, tasks);
 		}
 
-		NbtList celebratedList = root.getList("Celebrated", NbtElement.STRING_TYPE);
+		ListTag celebratedList = root.getList("Celebrated", Tag.STRING_TYPE);
 		for (int i = 0; i < celebratedList.size(); i++) {
 			celebratedPhases.add(celebratedList.getString(i));
 		}
 
-		NbtList deathList = root.getList("Deaths", NbtElement.COMPOUND_TYPE);
+		ListTag deathList = root.getList("Deaths", Tag.COMPOUND_TYPE);
 		for (int i = 0; i < deathList.size(); i++) {
 			deaths.add(DeathRecord.fromNbt(deathList.getCompound(i)));
 		}
 
-		NbtCompound timesNbt = root.getCompound("CompletionTimes");
+		CompoundTag timesNbt = root.getCompound("CompletionTimes");
 		for (String questId : timesNbt.getKeys()) {
 			completionPlayTicks.put(questId, timesNbt.getInt(questId));
 		}
 
-		NbtCompound damageNbt = root.getCompound("DamageDealt");
+		CompoundTag damageNbt = root.getCompound("DamageDealt");
 		for (String typeId : damageNbt.getKeys()) {
 			damageDealt.put(typeId, damageNbt.getFloat(typeId));
 		}

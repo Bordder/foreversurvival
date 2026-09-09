@@ -18,18 +18,18 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.TaskContext;
 
-import net.minecraft.block.Block;
-import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
-import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
-import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.stat.Stats;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.stats.Stats;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 
 /**
  * The single source of truth for quest definitions and for evaluating progress.
@@ -160,7 +160,7 @@ public final class QuestManager {
 			return;
 		}
 
-		for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+		for (ServerPlayer player : server.getPlayerManager().getPlayerList()) {
 			try {
 				evaluate(player);
 			} catch (Exception e) {
@@ -174,7 +174,7 @@ public final class QuestManager {
 		}
 	}
 
-	private void evaluate(ServerPlayerEntity player) {
+	private void evaluate(ServerPlayer player) {
 		PlayerQuestData data = QuestDataHolder.get(player);
 
 		// 1. Collect the quests actually in play. The main line is a strict chain,
@@ -235,7 +235,7 @@ public final class QuestManager {
 	 * Walks a small box around the player and returns which of the wanted
 	 * blocks are present. Runs at most once per second per player.
 	 */
-	private Set<Block> scanNearbyBlocks(ServerPlayerEntity player, Set<Block> wanted) {
+	private Set<Block> scanNearbyBlocks(ServerPlayer player, Set<Block> wanted) {
 		Set<Block> found = new HashSet<>();
 		BlockPos origin = player.getBlockPos();
 		BlockPos.Mutable cursor = new BlockPos.Mutable();
@@ -265,7 +265,7 @@ public final class QuestManager {
 	// Completion / rewards / celebration
 	// ------------------------------------------------------------------
 
-	private void completeQuest(ServerPlayerEntity player, PlayerQuestData data, Quest quest) {
+	private void completeQuest(ServerPlayer player, PlayerQuestData data, Quest quest) {
 		if (data.isCompleted(quest.getId())) {
 			return;
 		}
@@ -275,20 +275,20 @@ public final class QuestManager {
 				player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME)));
 
 		// No items, no XP: the mod tells you what to do, vanilla does the rest.
-		player.sendMessage(new LiteralText("[ForeverSurvival] ").formatted(Formatting.DARK_AQUA)
-				.append(new LiteralText("Quest complete: ").formatted(Formatting.GREEN))
-				.append(new LiteralText(quest.getTitle()).formatted(Formatting.YELLOW)), false);
+		player.sendMessage(new Component("[ForeverSurvival] ").formatted(ChatFormatting.DARK_AQUA)
+				.append(new Component("Quest complete: ").formatted(ChatFormatting.GREEN))
+				.append(new Component(quest.getTitle()).formatted(ChatFormatting.YELLOW)), false);
 
 		// Small celebration: action bar line plus a brief puff of sparks.
-		player.sendMessage(new LiteralText("✔ ").formatted(Formatting.GREEN)
-				.append(new LiteralText(quest.getTitle()).formatted(Formatting.WHITE)), true);
+		player.sendMessage(new Component("✔ ").formatted(ChatFormatting.GREEN)
+				.append(new Component(quest.getTitle()).formatted(ChatFormatting.WHITE)), true);
 		spawnSparks(player);
 
 		checkPhaseCompletion(player, data, quest.getPhase());
 	}
 
 	/** Fires once per phase, the moment its last quest is signed off. */
-	private void checkPhaseCompletion(ServerPlayerEntity player, PlayerQuestData data, QuestPhase phase) {
+	private void checkPhaseCompletion(ServerPlayer player, PlayerQuestData data, QuestPhase phase) {
 		if (phase.isSide() || data.hasCelebrated(phase.getId())) {
 			return;
 		}
@@ -301,15 +301,15 @@ public final class QuestManager {
 
 		data.setCelebrated(phase.getId());
 
-		player.sendMessage(new LiteralText("=== " + phase.getDisplayName() + " COMPLETE ===")
-				.formatted(phase.getColor(), Formatting.BOLD), false);
+		player.sendMessage(new Component("=== " + phase.getDisplayName() + " COMPLETE ===")
+				.formatted(phase.getColor(), ChatFormatting.BOLD), false);
 
 		// Big celebration: a title card, and fireworks for the major phases.
-		player.networkHandler.sendPacket(new TitleFadeS2CPacket(10, 60, 20));
-		player.networkHandler.sendPacket(new SubtitleS2CPacket(
-				new LiteralText(phase.getDisplayName()).formatted(phase.getColor())));
-		player.networkHandler.sendPacket(new TitleS2CPacket(
-				new LiteralText("PHASE COMPLETE").formatted(Formatting.GOLD, Formatting.BOLD)));
+		player.networkHandler.sendPacket(new ClientboundSetTitlesAnimationPacket(10, 60, 20));
+		player.networkHandler.sendPacket(new ClientboundSetSubtitleTextPacket(
+				new Component(phase.getDisplayName()).formatted(phase.getColor())));
+		player.networkHandler.sendPacket(new ClientboundSetTitleTextPacket(
+				new Component("PHASE COMPLETE").formatted(ChatFormatting.GOLD, ChatFormatting.BOLD)));
 
 		if (phase.isMajor()) {
 			spawnCelebration(player);
@@ -317,8 +317,8 @@ public final class QuestManager {
 	}
 
 	/** A handful of sparks for a single quest - deliberately understated. */
-	private void spawnSparks(ServerPlayerEntity player) {
-		if (!(player.world instanceof ServerWorld world)) {
+	private void spawnSparks(ServerPlayer player) {
+		if (!(player.world instanceof ServerLevel world)) {
 			return;
 		}
 
@@ -331,8 +331,8 @@ public final class QuestManager {
 	 * Pure visual celebration: firework particles around the player, no sound,
 	 * no entity, no lasting marker of any kind.
 	 */
-	private void spawnCelebration(ServerPlayerEntity player) {
-		if (!(player.world instanceof ServerWorld world)) {
+	private void spawnCelebration(ServerPlayer player) {
+		if (!(player.world instanceof ServerLevel world)) {
 			return;
 		}
 
@@ -354,7 +354,7 @@ public final class QuestManager {
 	 *
 	 * @param set true to mark done, false to undo a misclick
 	 */
-	public void handleCheckmark(ServerPlayerEntity player, String questId, String taskId, boolean set) {
+	public void handleCheckmark(ServerPlayer player, String questId, String taskId, boolean set) {
 		Quest quest = getQuest(questId);
 		if (quest == null) {
 			return;

@@ -18,10 +18,10 @@ import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.UseTask;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Items;
-import net.minecraft.stat.Stats;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
+import net.minecraft.stats.Stats;
 
 /**
  * PHASE 1 - THE STRUGGLE (18 quests).

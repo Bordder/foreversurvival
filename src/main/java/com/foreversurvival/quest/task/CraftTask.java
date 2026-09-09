@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.item.Item;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stats;
+import net.minecraft.world.item.Item;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 
 /**
  * "Craft" task.
@@ -28,7 +28,7 @@ public class CraftTask extends QuestTask {
 
 	@Override
 	public int computeProgress(TaskContext ctx) {
-		ServerPlayerEntity player = ctx.getPlayer();
+		ServerPlayer player = ctx.getPlayer();
 		int total = 0;
 
 		for (Item item : items) {

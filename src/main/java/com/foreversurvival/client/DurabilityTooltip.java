@@ -3,11 +3,11 @@ package com.foreversurvival.client;
 import java.util.List;
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 /**
  * Adds a plain "Durability: 57 / 100" line to any damageable item's tooltip.
@@ -28,7 +28,7 @@ public final class DurabilityTooltip {
 		ItemTooltipCallback.EVENT.register(DurabilityTooltip::appendDurability);
 	}
 
-	private static void appendDurability(ItemStack stack, TooltipContext context, List<Text> lines) {
+	private static void appendDurability(ItemStack stack, TooltipFlag context, List<Component> lines) {
 		if (!HudConfig.showDurability || stack.isEmpty() || !stack.isDamageable()) {
 			return;
 		}
@@ -45,18 +45,18 @@ public final class DurabilityTooltip {
 		}
 
 		double fraction = remaining / (double) max;
-		Formatting colour;
+		ChatFormatting colour;
 		if (fraction > 0.5D) {
-			colour = Formatting.GREEN;
+			colour = ChatFormatting.GREEN;
 		} else if (fraction > 0.25D) {
-			colour = Formatting.YELLOW;
+			colour = ChatFormatting.YELLOW;
 		} else if (fraction > 0.1D) {
-			colour = Formatting.GOLD;
+			colour = ChatFormatting.GOLD;
 		} else {
-			colour = Formatting.RED;
+			colour = ChatFormatting.RED;
 		}
 
-		lines.add(new LiteralText("Durability: ").formatted(Formatting.GRAY)
-				.append(new LiteralText(remaining + " / " + max).formatted(colour)));
+		lines.add(new Component("Durability: ").formatted(ChatFormatting.GRAY)
+				.append(new Component(remaining + " / " + max).formatted(colour)));
 	}
 }

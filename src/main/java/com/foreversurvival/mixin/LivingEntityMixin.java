@@ -8,11 +8,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Registry;
 
 /**
  * Records how much damage the player deals to each mob type, for the Combat Log
@@ -35,7 +35,7 @@ public abstract class LivingEntityMixin {
 		}
 
 		Entity attacker = source.getAttacker();
-		if (!(attacker instanceof ServerPlayerEntity player)) {
+		if (!(attacker instanceof ServerPlayer player)) {
 			return;
 		}
 

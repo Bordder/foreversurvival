@@ -11,10 +11,10 @@ import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Items;
-import net.minecraft.stat.Stats;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.gen.feature.StructureFeature;
 
 /**

@@ -35,13 +35,13 @@ public final class HudConfig {
 	public static double hudY = 0.02D;
 	/** Overall zoom applied on top of the width/height box. */
 	public static double hudScale = 1.0D;
-	/** Panel content width in GUI pixels. Text wraps to this. */
+	/** Panel content width in GUI pixels. Component wraps to this. */
 	public static int hudWidth = 150;
 	/** Minimum panel height. The panel still grows if the content needs more. */
 	public static int hudHeight = 0;
 	/** Panel background alpha, 0-100. 0 means text only, no panel. */
 	public static int backgroundOpacity = 60;
-	/** Text alpha, 20-100. Floored so it can never become invisible. */
+	/** Component alpha, 20-100. Floored so it can never become invisible. */
 	public static int textOpacity = 100;
 	public static boolean showObjectives = true;
 	public static boolean showIcon = true;

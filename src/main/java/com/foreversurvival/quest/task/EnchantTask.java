@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Registry;
 
 /**
  * Counts items the player is carrying that bear one of the wanted enchantments
@@ -37,7 +37,7 @@ public class EnchantTask extends QuestTask {
 
 	@Override
 	public int computeProgress(TaskContext ctx) {
-		ServerPlayerEntity player = ctx.getPlayer();
+		ServerPlayer player = ctx.getPlayer();
 		int count = 0;
 
 		for (int slot = 0; slot < player.getInventory().size(); slot++) {
@@ -59,11 +59,11 @@ public class EnchantTask extends QuestTask {
 		// Enchanted books keep their enchantments under StoredEnchantments, which
 		// EnchantmentHelper.getLevel does not read - check that list directly.
 		if (stack.isOf(Items.ENCHANTED_BOOK) && stack.hasNbt()) {
-			NbtCompound nbt = stack.getNbt();
-			if (nbt != null && nbt.contains("StoredEnchantments", NbtElement.LIST_TYPE)) {
-				NbtList stored = nbt.getList("StoredEnchantments", NbtElement.COMPOUND_TYPE);
+			CompoundTag nbt = stack.getNbt();
+			if (nbt != null && nbt.contains("StoredEnchantments", Tag.LIST_TYPE)) {
+				ListTag stored = nbt.getList("StoredEnchantments", Tag.COMPOUND_TYPE);
 				for (int i = 0; i < stored.size(); i++) {
-					NbtCompound entry = stored.getCompound(i);
+					CompoundTag entry = stored.getCompound(i);
 					int level = entry.getInt("lvl");
 					for (Enchantment enchant : enchants) {
 						String id = String.valueOf(Registry.ENCHANTMENT.getId(enchant));

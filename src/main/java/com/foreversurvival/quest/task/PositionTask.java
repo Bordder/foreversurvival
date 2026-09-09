@@ -1,8 +1,8 @@
 package com.foreversurvival.quest.task;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 
 /**
  * Tracks where the player has actually been.
@@ -34,7 +34,7 @@ public class PositionTask extends QuestTask {
 
 	@Override
 	public int computeProgress(TaskContext ctx) {
-		ServerPlayerEntity player = ctx.getPlayer();
+		ServerPlayer player = ctx.getPlayer();
 
 		switch (kind) {
 			case BELOW_Y:
@@ -45,7 +45,7 @@ public class PositionTask extends QuestTask {
 				break;
 		}
 
-		if (!(player.world instanceof ServerWorld world)) {
+		if (!(player.world instanceof ServerLevel world)) {
 			return 0;
 		}
 

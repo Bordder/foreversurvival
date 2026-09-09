@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.foreversurvival.client.LocatorBar;
 
-import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.util.math.MatrixStack;
 
 /**
@@ -22,7 +22,7 @@ import net.minecraft.client.util.math.MatrixStack;
  * In creative, or while riding a mount, vanilla draws something else there and
  * never calls this - the flag is how the bar still gets shown in those states.
  */
-@Mixin(InGameHud.class)
+@Mixin(Hud.class)
 public class InGameHudMixin {
 
 	@Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)

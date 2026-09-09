@@ -11,20 +11,20 @@ import com.foreversurvival.network.PlayerLocation;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Client entrypoint: one key binding ('U'), two packet receivers, and the HUD.
  */
 public class ForeverSurvivalClient implements ClientModInitializer {
 
-	public static KeyBinding openQuestsKey;
-	public static KeyBinding toggleHudKey;
+	public static KeyMapping openQuestsKey;
+	public static KeyMapping toggleHudKey;
 
 	@Override
 	public void onInitializeClient() {
@@ -34,22 +34,22 @@ public class ForeverSurvivalClient implements ClientModInitializer {
 
 		// Both defaults are keys vanilla leaves unbound, and both show up in
 		// Options -> Controls -> ForeverSurvival for rebinding.
-		openQuestsKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		openQuestsKey = KeyMappingHelper.registerKeyBinding(new KeyMapping(
 				"key." + ForeverSurvival.MOD_ID + ".open_quests",
-				InputUtil.Type.KEYSYM,
+				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_U,
 				"key.categories." + ForeverSurvival.MOD_ID));
 
-		toggleHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		toggleHudKey = KeyMappingHelper.registerKeyBinding(new KeyMapping(
 				"key." + ForeverSurvival.MOD_ID + ".toggle_hud",
-				InputUtil.Type.KEYSYM,
+				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_APOSTROPHE,
 				"key.categories." + ForeverSurvival.MOD_ID));
 
 		ClientPlayNetworking.registerGlobalReceiver(ModNetworking.SYNC_DATA,
 				(client, handler, buf, responseSender) -> {
 					// Read off the network thread, apply on the client thread.
-					NbtCompound nbt = buf.readNbt();
+					CompoundTag nbt = buf.readNbt();
 					client.execute(() -> {
 						if (nbt != null) {
 							ClientQuestState.accept(nbt);

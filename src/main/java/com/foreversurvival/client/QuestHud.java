@@ -11,12 +11,12 @@ import com.foreversurvival.quest.QuestManager;
 import com.foreversurvival.quest.task.QuestTask;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
+import net.minecraft.util.FormattedCharSequence;
 
 /**
  * The on-screen objective overlay.
@@ -68,13 +68,13 @@ public final class QuestHud extends DrawableHelper {
 	/** One laid-out line. A checkbox is drawn on the first line of a task only. */
 	private static final class Row {
 
-		final OrderedText text;
+		final FormattedCharSequence text;
 		final int rgb;
 		final int indent;
 		/** -1 none, 0 empty box, 1 ticked. */
 		final int checkbox;
 
-		Row(OrderedText text, int rgb, int indent, int checkbox) {
+		Row(FormattedCharSequence text, int rgb, int indent, int checkbox) {
 			this.text = text;
 			this.rgb = rgb;
 			this.indent = indent;
@@ -103,20 +103,20 @@ public final class QuestHud extends DrawableHelper {
 		return pinned;
 	}
 
-	private void addWrapped(List<Row> out, TextRenderer font, String text, int width, int rgb,
+	private void addWrapped(List<Row> out, Font font, String text, int width, int rgb,
 			int indent, int checkbox) {
 		if (text == null || text.isEmpty()) {
 			return;
 		}
 
-		List<OrderedText> lines = font.wrapLines(new LiteralText(text), Math.max(20, width));
+		List<FormattedCharSequence> lines = font.wrapLines(new Component(text), Math.max(20, width));
 		for (int i = 0; i < lines.size(); i++) {
 			// Only the first line of a block carries the checkbox.
 			out.add(new Row(lines.get(i), rgb, indent, i == 0 ? checkbox : -1));
 		}
 	}
 
-	private void addTaskRows(List<Row> out, TextRenderer font, Quest quest, int textWidth) {
+	private void addTaskRows(List<Row> out, Font font, Quest quest, int textWidth) {
 		PlayerQuestData data = ClientQuestState.get();
 
 		for (QuestTask task : quest.getTasks()) {
@@ -135,7 +135,7 @@ public final class QuestHud extends DrawableHelper {
 
 	/** The whole panel as a flat list of laid-out lines. */
 	private List<Row> layout(@Nullable Quest quest) {
-		TextRenderer font = MinecraftClient.getInstance().textRenderer;
+		Font font = Minecraft.getInstance().textRenderer;
 		int textWidth = HudConfig.hudWidth - PADDING * 2;
 		int headerWidth = textWidth - (HudConfig.showIcon ? ICON : 0);
 
@@ -173,7 +173,7 @@ public final class QuestHud extends DrawableHelper {
 		if (HudConfig.hudHeight > 0) {
 			int maxRows = Math.max(1, (HudConfig.hudHeight - PADDING * 2) / LINE);
 			if (rows.size() > maxRows) {
-				TextRenderer font2 = MinecraftClient.getInstance().textRenderer;
+				Font font2 = Minecraft.getInstance().textRenderer;
 				int hidden = rows.size() - (maxRows - 1);
 				List<Row> trimmed = new ArrayList<>(rows.subList(0, Math.max(0, maxRows - 1)));
 				addWrapped(trimmed, font2, "+" + hidden + " more...",
@@ -192,7 +192,7 @@ public final class QuestHud extends DrawableHelper {
 	 * one fills it.
 	 */
 	private int fittedWidth(List<Row> rows) {
-		TextRenderer font = MinecraftClient.getInstance().textRenderer;
+		Font font = Minecraft.getInstance().textRenderer;
 
 		int widest = 0;
 		for (Row row : rows) {
@@ -240,7 +240,7 @@ public final class QuestHud extends DrawableHelper {
 	// Layout cache
 	//
 	// render() runs every frame (60-144 fps) and both measure() and drawPanel()
-	// used to rebuild the wrapped-text layout each call. Text is re-shaped only
+	// used to rebuild the wrapped-text layout each call. Component is re-shaped only
 	// when something it depends on actually changes - quest progress, the pinned
 	// quest, or the panel's size/toggles - which is at most a few times a second.
 	// ------------------------------------------------------------------
@@ -291,7 +291,7 @@ public final class QuestHud extends DrawableHelper {
 			return;
 		}
 
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (client.player == null || client.options.hudHidden || client.options.debugEnabled) {
 			return;
 		}
@@ -320,8 +320,8 @@ public final class QuestHud extends DrawableHelper {
 	}
 
 	private void drawPanel(MatrixStack matrices, @Nullable Quest quest) {
-		MinecraftClient client = MinecraftClient.getInstance();
-		TextRenderer font = client.textRenderer;
+		Minecraft client = Minecraft.getInstance();
+		Font font = client.textRenderer;
 
 		ensureLayout(quest);
 		List<Row> rows = cachedRows;

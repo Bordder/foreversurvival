@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.foreversurvival.network.PlayerLocation;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 /**
  * A compass-style bar showing where the other players are.
@@ -70,7 +70,7 @@ public final class LocatorBar extends DrawableHelper {
 	// Visibility
 	// ------------------------------------------------------------------
 
-	private boolean hudUsable(MinecraftClient client) {
+	private boolean hudUsable(Minecraft client) {
 		return HudConfig.locatorEnabled
 				&& client.player != null
 				&& !client.options.hudHidden
@@ -78,7 +78,7 @@ public final class LocatorBar extends DrawableHelper {
 	}
 
 	/** True when at least one other player is in the same dimension as you. */
-	private boolean hasCompany(ClientPlayerEntity self) {
+	private boolean hasCompany(LocalPlayer self) {
 		String selfName = self.getGameProfile().getName();
 		String dimension = self.world.getRegistryKey().getValue().toString();
 
@@ -101,7 +101,7 @@ public final class LocatorBar extends DrawableHelper {
 
 	/** Asked by the mixin: should the locator bar replace the XP bar right now? */
 	public boolean shouldTakeXpSlot() {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (!HudConfig.locatorXpBarMode || !hudUsable(client)) {
 			return false;
 		}
@@ -128,7 +128,7 @@ public final class LocatorBar extends DrawableHelper {
 	 * the jump/health bar - so XP-slot mode still shows something there.
 	 */
 	public void renderFree(MatrixStack matrices) {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 
 		if (HudConfig.locatorXpBarMode) {
 			boolean offered = xpSlotOffered;
@@ -165,7 +165,7 @@ public final class LocatorBar extends DrawableHelper {
 	 * vanilla would have used, so the bar lines up with the hotbar.
 	 */
 	public void renderXpSlot(MatrixStack matrices, int xpBarX) {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (client.player == null) {
 			return;
 		}
@@ -185,14 +185,14 @@ public final class LocatorBar extends DrawableHelper {
 	// Drawing
 	// ------------------------------------------------------------------
 
-	private void drawBar(MatrixStack matrices, MinecraftClient client, int x, int y,
+	private void drawBar(MatrixStack matrices, Minecraft client, int x, int y,
 			int width, int height) {
-		ClientPlayerEntity self = client.player;
+		LocalPlayer self = client.player;
 		if (self == null) {
 			return;
 		}
 
-		TextRenderer font = client.textRenderer;
+		Font font = client.textRenderer;
 		String selfName = self.getGameProfile().getName();
 		String selfDimension = self.world.getRegistryKey().getValue().toString();
 
@@ -206,7 +206,7 @@ public final class LocatorBar extends DrawableHelper {
 		int centre = x + width / 2;
 		fill(matrices, centre, y + 1, centre + 1, y + height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
 
-		double selfYaw = MathHelper.wrapDegrees(self.getYaw());
+		double selfYaw = Mth.wrapDegrees(self.getYaw());
 		double halfFov = HudConfig.locatorFov;
 		int half = width / 2 - 2;
 
@@ -225,12 +225,12 @@ public final class LocatorBar extends DrawableHelper {
 
 			// Minecraft yaw: 0 is +Z (south) and increases clockwise from above.
 			double targetYaw = Math.toDegrees(Math.atan2(-dx, dz));
-			double relative = MathHelper.wrapDegrees(targetYaw - selfYaw);
+			double relative = Mth.wrapDegrees(targetYaw - selfYaw);
 
 			boolean offEdge = Math.abs(relative) > halfFov;
-			double clamped = MathHelper.clamp(relative, -halfFov, halfFov);
+			double clamped = Mth.clamp(relative, -halfFov, halfFov);
 			int markerX = centre + (int) Math.round(clamped / halfFov * half);
-			markerX = MathHelper.clamp(markerX, x + 1, x + width - MARKER_WIDTH - 1);
+			markerX = Mth.clamp(markerX, x + 1, x + width - MARKER_WIDTH - 1);
 
 			int rgb = PALETTE[Math.floorMod(other.getName().hashCode(), PALETTE.length)];
 			int colour = offEdge
@@ -286,7 +286,7 @@ public final class LocatorBar extends DrawableHelper {
 	public void renderPreviewAt(MatrixStack matrices, double originX, double originY, double scale) {
 		HudRender.push(originX, originY, scale);
 		try {
-			TextRenderer font = MinecraftClient.getInstance().textRenderer;
+			Font font = Minecraft.getInstance().textRenderer;
 			int width = HudConfig.locatorWidth;
 			int height = HudConfig.locatorHeight;
 
@@ -302,7 +302,7 @@ public final class LocatorBar extends DrawableHelper {
 
 			int[] offsets = { -width / 3, 4, width / 4 };
 			for (int i = 0; i < offsets.length; i++) {
-				int px = MathHelper.clamp(centre + offsets[i], 1, width - MARKER_WIDTH - 1);
+				int px = Mth.clamp(centre + offsets[i], 1, width - MARKER_WIDTH - 1);
 				fill(matrices, px, 2, px + MARKER_WIDTH, height - 2,
 						HudConfig.applyTextAlpha(PALETTE[i]));
 			}

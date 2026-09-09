@@ -6,7 +6,7 @@ import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.quest.Quest;
 import com.foreversurvival.quest.QuestManager;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Client-side mirror of the player's server data, refreshed by the sync packet.
@@ -24,15 +24,15 @@ public final class ClientQuestState {
 		return DATA;
 	}
 
-	private static NbtCompound stats = new NbtCompound();
+	private static CompoundTag stats = new CompoundTag();
 
-	public static void accept(NbtCompound root) {
+	public static void accept(CompoundTag root) {
 		DATA.readNbt(root.getCompound("Data"));
 		stats = root.getCompound("Stats");
 	}
 
 	/** Vanilla stats snapshot that rode along with the last sync. */
-	public static NbtCompound getStats() {
+	public static CompoundTag getStats() {
 		return stats;
 	}
 

@@ -4,8 +4,8 @@ import java.util.Set;
 
 import com.foreversurvival.data.PlayerQuestData;
 
-import net.minecraft.block.Block;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Everything a task needs in order to evaluate itself, gathered once per scan
@@ -13,20 +13,20 @@ import net.minecraft.server.network.ServerPlayerEntity;
  */
 public class TaskContext {
 
-	private final ServerPlayerEntity player;
+	private final ServerPlayer player;
 	private final PlayerQuestData data;
 	/** Distinct blocks found in a small box around the player this scan. */
 	private final Set<Block> nearbyBlocks;
 	/** Progress value already stored for the task being evaluated. */
 	private int storedProgress;
 
-	public TaskContext(ServerPlayerEntity player, PlayerQuestData data, Set<Block> nearbyBlocks) {
+	public TaskContext(ServerPlayer player, PlayerQuestData data, Set<Block> nearbyBlocks) {
 		this.player = player;
 		this.data = data;
 		this.nearbyBlocks = nearbyBlocks;
 	}
 
-	public ServerPlayerEntity getPlayer() {
+	public ServerPlayer getPlayer() {
 		return player;
 	}
 

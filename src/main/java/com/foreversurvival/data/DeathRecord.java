@@ -2,9 +2,9 @@ package com.foreversurvival.data;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
 
 /**
  * One recorded death: where it happened, what killed you, and what you were
@@ -31,10 +31,10 @@ public class DeathRecord {
 	 * format. Dropped from older records to keep player NBT from ballooning.
 	 */
 	@Nullable
-	private NbtList inventory;
+	private ListTag inventory;
 
 	public DeathRecord(int x, int y, int z, String dimension, long time, String cause,
-			@Nullable NbtList inventory) {
+			@Nullable ListTag inventory) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -69,7 +69,7 @@ public class DeathRecord {
 	}
 
 	@Nullable
-	public NbtList getInventory() {
+	public ListTag getInventory() {
 		return inventory;
 	}
 
@@ -104,8 +104,8 @@ public class DeathRecord {
 		return out.toString();
 	}
 
-	public NbtCompound writeNbt() {
-		NbtCompound nbt = new NbtCompound();
+	public CompoundTag writeNbt() {
+		CompoundTag nbt = new CompoundTag();
 		nbt.putInt("X", x);
 		nbt.putInt("Y", y);
 		nbt.putInt("Z", z);
@@ -118,10 +118,10 @@ public class DeathRecord {
 		return nbt;
 	}
 
-	public static DeathRecord fromNbt(NbtCompound nbt) {
-		NbtList inventory = null;
-		if (nbt.contains("Inv", NbtElement.LIST_TYPE)) {
-			inventory = nbt.getList("Inv", NbtElement.COMPOUND_TYPE);
+	public static DeathRecord fromNbt(CompoundTag nbt) {
+		ListTag inventory = null;
+		if (nbt.contains("Inv", Tag.LIST_TYPE)) {
+			inventory = nbt.getList("Inv", Tag.COMPOUND_TYPE);
 		}
 
 		return new DeathRecord(

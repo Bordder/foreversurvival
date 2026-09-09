@@ -6,12 +6,12 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.Block;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.structure.StructureStart;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -59,7 +59,7 @@ public class StructureTask extends QuestTask {
 
 	@Override
 	public int computeProgress(TaskContext ctx) {
-		ServerPlayerEntity player = ctx.getPlayer();
+		ServerPlayer player = ctx.getPlayer();
 
 		if (dimension != null) {
 			String current = player.world.getRegistryKey().getValue().toString();
@@ -91,8 +91,8 @@ public class StructureTask extends QuestTask {
 	 * types, several ruined portal types - and only the configured form can be
 	 * looked up, so every variant of the wanted feature is checked.
 	 */
-	private boolean isInsideStructure(ServerPlayerEntity player) {
-		if (!(player.world instanceof ServerWorld world)) {
+	private boolean isInsideStructure(ServerPlayer player) {
+		if (!(player.world instanceof ServerLevel world)) {
 			return false;
 		}
 

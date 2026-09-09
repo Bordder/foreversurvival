@@ -9,12 +9,12 @@ import com.foreversurvival.quest.QuestManager;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.resources.Identifier;
 
 /**
  * Three packets:
@@ -44,25 +44,25 @@ public final class ModNetworking {
 	}
 
 	/** Pushes the full quest state to its owner. Progress stays per-player. */
-	public static void syncToClient(ServerPlayerEntity player) {
+	public static void syncToClient(ServerPlayer player) {
 		PlayerQuestData data = QuestDataHolder.get(player);
 
 		// Vanilla stats only reach the client when it explicitly asks for them,
 		// so the handful the Stats tab shows ride along with the quest sync.
-		NbtCompound root = new NbtCompound();
+		CompoundTag root = new CompoundTag();
 		root.put("Data", data.writeNbt());
 		root.put("Stats", buildStats(player));
 
-		PacketByteBuf buf = PacketByteBufs.create();
+		FriendlyByteBuf buf = PacketByteBufs.create();
 		buf.writeNbt(root);
 
 		ServerPlayNetworking.send(player, SYNC_DATA, buf);
 		data.clearDirty();
 	}
 
-	private static NbtCompound buildStats(ServerPlayerEntity player) {
+	private static CompoundTag buildStats(ServerPlayer player) {
 		var handler = player.getStatHandler();
-		NbtCompound stats = new NbtCompound();
+		CompoundTag stats = new CompoundTag();
 
 		stats.putInt("PlayTime", handler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME)));
 		stats.putInt("SinceDeath", handler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.TIME_SINCE_DEATH)));
@@ -85,19 +85,19 @@ public final class ModNetworking {
 	 * needs a direction, not a smooth interpolation.
 	 */
 	public static void syncPlayerLocations(MinecraftServer server) {
-		List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
+		List<ServerPlayer> players = server.getPlayerManager().getPlayerList();
 		if (players.size() < 2) {
 			// Nothing worth drawing when you are the only one online.
 			return;
 		}
 
-		// A fresh buffer per recipient: a PacketByteBuf is released once sent,
+		// A fresh buffer per recipient: a FriendlyByteBuf is released once sent,
 		// so the same instance must never be handed to two sends.
-		for (ServerPlayerEntity recipient : players) {
-			PacketByteBuf buf = PacketByteBufs.create();
+		for (ServerPlayer recipient : players) {
+			FriendlyByteBuf buf = PacketByteBufs.create();
 			buf.writeVarInt(players.size());
 
-			for (ServerPlayerEntity player : players) {
+			for (ServerPlayer player : players) {
 				buf.writeString(player.getGameProfile().getName());
 				buf.writeDouble(player.getX());
 				buf.writeDouble(player.getY());
