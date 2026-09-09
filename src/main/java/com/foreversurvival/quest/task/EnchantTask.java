@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.ListTag;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.core.Registry;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 /**
  * Counts items the player is carrying that bear one of the wanted enchantments
@@ -25,11 +25,12 @@ import net.minecraft.core.Registry;
  */
 public class EnchantTask extends QuestTask {
 
-	private final Set<Enchantment> enchants;
+	private final Set<ResourceKey<Enchantment>> enchants;
 	private final int minLevel;
 
+	@SafeVarargs
 	public EnchantTask(String id, String description, int required, int minLevel,
-			Enchantment... enchants) {
+			ResourceKey<Enchantment>... enchants) {
 		super(id, description, required);
 		this.minLevel = Math.max(1, minLevel);
 		this.enchants = new LinkedHashSet<>(Arrays.asList(enchants));
@@ -40,8 +41,8 @@ public class EnchantTask extends QuestTask {
 		ServerPlayer player = ctx.getPlayer();
 		int count = 0;
 
-		for (int slot = 0; slot < player.getInventory().size(); slot++) {
-			ItemStack stack = player.getInventory().getStack(slot);
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			ItemStack stack = player.getInventory().getItem(slot);
 			if (!stack.isEmpty() && hasWantedEnchant(stack)) {
 				count++;
 			}
@@ -49,28 +50,26 @@ public class EnchantTask extends QuestTask {
 		return count;
 	}
 
+	/**
+	 * 26.2 keeps enchantments in item components rather than NBT, and an
+	 * enchanted book still keeps its own under STORED_ENCHANTMENTS - so both
+	 * components are checked rather than special-casing the book item.
+	 */
 	private boolean hasWantedEnchant(ItemStack stack) {
-		for (Enchantment enchant : enchants) {
-			if (EnchantmentHelper.getLevel(enchant, stack) >= minLevel) {
-				return true;
-			}
-		}
+		return matches(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY))
+				|| matches(stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS,
+						ItemEnchantments.EMPTY));
+	}
 
-		// Enchanted books keep their enchantments under StoredEnchantments, which
-		// EnchantmentHelper.getLevel does not read - check that list directly.
-		if (stack.isOf(Items.ENCHANTED_BOOK) && stack.hasNbt()) {
-			CompoundTag nbt = stack.getNbt();
-			if (nbt != null && nbt.contains("StoredEnchantments")) {
-				ListTag stored = nbt.getListOrEmpty("StoredEnchantments");
-				for (int i = 0; i < stored.size(); i++) {
-					CompoundTag entry = stored.getCompoundOrEmpty(i);
-					int level = entry.getIntOr("lvl", 0);
-					for (Enchantment enchant : enchants) {
-						String id = String.valueOf(Registry.ENCHANTMENT.getId(enchant));
-						if (id.equals(entry.getStringOr("id", "")) && level >= minLevel) {
-							return true;
-						}
-					}
+	private boolean matches(ItemEnchantments present) {
+		for (Object2IntMap.Entry<Holder<Enchantment>> entry : present.entrySet()) {
+			if (entry.getIntValue() < minLevel) {
+				continue;
+			}
+			for (ResourceKey<Enchantment> wanted : enchants) {
+				// Comparing by key avoids needing registry access here.
+				if (entry.getKey().is(wanted)) {
+					return true;
 				}
 			}
 		}

@@ -29,6 +29,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.ItemStackWithSlot;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.ChatFormatting;
 
@@ -1105,7 +1109,9 @@ public class QuestScreen extends Screen {
 
 	/**
 	 * Rebuilds the 41-slot layout from the stored vanilla inventory list.
-	 * Vanilla writes main slots as 0-35, armour as 100+i and the offhand as 150.
+	 * 26.2 numbers the slots flat: 0-35 main, 36-39 armour, 40 offhand. The old
+	 * 100+i armour and 150 offhand encoding is gone, so the stored slot index
+	 * now maps straight onto this array.
 	 */
 	private ItemStack[] readInventory(DeathRecord record) {
 		ItemStack[] slots = new ItemStack[41];
@@ -1118,20 +1124,29 @@ public class QuestScreen extends Screen {
 			return slots;
 		}
 
+		ClientLevel level = Minecraft.getInstance().level;
+		if (level == null) {
+			// No registry access without a level, and components cannot be
+			// decoded without it.
+			return slots;
+		}
+
+		RegistryOps<Tag> ops = level.registryAccess()
+				.createSerializationContext(NbtOps.INSTANCE);
+
 		for (int i = 0; i < list.size(); i++) {
-			CompoundTag entry = list.getCompoundOrEmpty(i);
-			int slot = entry.getByteOr("Slot", (byte) 0) & 255;
-			ItemStack stack = ItemStack.fromNbt(entry);
-			if (stack.isEmpty()) {
+			Tag entry = list.get(i);
+			ItemStackWithSlot decoded = ItemStackWithSlot.CODEC
+					.parse(ops, entry)
+					.result()
+					.orElse(null);
+			if (decoded == null || decoded.stack().isEmpty()) {
 				continue;
 			}
 
-			if (slot < 36) {
-				slots[slot] = stack;
-			} else if (slot >= 100 && slot < 104) {
-				slots[36 + (slot - 100)] = stack;
-			} else if (slot >= 150 && slot < 154) {
-				slots[40] = stack;
+			int slot = decoded.slot();
+			if (slot >= 0 && slot < slots.length) {
+				slots[slot] = decoded.stack();
 			}
 		}
 		return slots;
