@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.level().item.Item;
+import net.minecraft.level().item.ItemStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 
@@ -48,7 +48,7 @@ public class ItemTask extends QuestTask {
 		// cumulative and never falls, so whichever is higher wins.
 		int gathered = 0;
 		for (Item item : items) {
-			gathered += player.getStatHandler().getStat(Stats.PICKED_UP.getOrCreateStat(item));
+			gathered += player.getStats().getStat(Stats.PICKED_UP.get(item));
 		}
 
 		return Math.max(carried, gathered);

@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.foreversurvival.data.PlayerQuestData;
 
-import net.minecraft.world.level.block.Block;
+import net.minecraft.level().level.block.Block;
 import net.minecraft.server.level.ServerPlayer;
 
 /**

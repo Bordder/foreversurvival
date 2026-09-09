@@ -23,10 +23,10 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().level.block.Block;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().item.Item;
+import net.minecraft.level().item.Items;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.Registry;
 

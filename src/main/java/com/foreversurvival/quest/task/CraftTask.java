@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.level().item.Item;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 
@@ -32,7 +32,7 @@ public class CraftTask extends QuestTask {
 		int total = 0;
 
 		for (Item item : items) {
-			total += player.getStatHandler().getStat(Stats.CRAFTED.getOrCreateStat(item));
+			total += player.getStats().getStat(Stats.CRAFTED.get(item));
 		}
 
 		return total;

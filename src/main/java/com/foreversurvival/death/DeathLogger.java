@@ -29,7 +29,7 @@ public final class DeathLogger {
 		// the death itself is never vetoed.
 		ServerPlayerEvents.ALLOW_DEATH.register((player, damageSource, damageAmount) -> {
 			BlockPos pos = player.getBlockPos();
-			String dimension = player.world.getRegistryKey().getValue().toString();
+			String dimension = player.level().getRegistryKey().getValue().toString();
 
 			String cause;
 			try {
@@ -44,7 +44,7 @@ public final class DeathLogger {
 
 			PlayerQuestData data = QuestDataHolder.get(player);
 			DeathRecord record = new DeathRecord(pos.getX(), pos.getY(), pos.getZ(), dimension,
-					player.world.getTime(), cause, inventory);
+					player.level().getTime(), cause, inventory);
 			data.addDeath(record);
 
 			int index = data.getDeaths().size();

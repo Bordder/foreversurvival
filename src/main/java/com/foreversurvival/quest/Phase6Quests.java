@@ -12,9 +12,10 @@ import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.PositionTask;
 import com.foreversurvival.quest.task.StatTask;
 
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().item.enchantment.Enchantments;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.Items;
 import net.minecraft.stats.Stats;
 
 /**
@@ -82,7 +83,7 @@ final class Phase6Quests {
 				.tools("Looting III Sword", "Building Blocks", "Fire Resistance")
 				.task(new CheckmarkTask("skele_farm", "Build a wither skeleton farm"),
 						new ItemTask("stars", "Collect Nether Stars", 5, Items.NETHER_STAR),
-						new KillTask("withers", "Defeat the Wither (total)", 5, EntityType.WITHER)));
+						new KillTask("withers", "Defeat the Wither (total)", 5, EntityTypes.WITHER)));
 
 		addMain(Quest.builder("p6_05_beacon_array", QuestPhase.PHASE_6)
 				.title("The Beacon Array")
@@ -217,7 +218,7 @@ final class Phase6Quests {
 						+ "biomes, never from converted zombies. Channeling plus a thunderstorm is how "
 						+ "you make charged creepers.")
 				.tools("Water Breathing", "Depth Strider", "Conduit")
-				.task(new KillTask("drowned", "Kill Drowned", 40, EntityType.DROWNED),
+				.task(new KillTask("drowned", "Kill Drowned", 40, EntityTypes.DROWNED),
 						new ItemTask("trident", "Obtain a Trident", 1, Items.TRIDENT),
 						new EnchantTask("channeling", "Carry a Channeling trident", 1, 1,
 								Enchantments.CHANNELING),

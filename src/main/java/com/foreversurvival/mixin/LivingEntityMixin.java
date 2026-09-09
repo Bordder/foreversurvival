@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.level().entity.Entity;
+import net.minecraft.level().entity.LivingEntity;
+import net.minecraft.level().damagesource.DamageSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.Registry;
 
@@ -30,7 +30,7 @@ public abstract class LivingEntityMixin {
 	private void foreversurvival$recordDamage(DamageSource source, float amount,
 			CallbackInfoReturnable<Boolean> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (self.world.isClient || amount <= 0.0F) {
+		if (self.level().isClient || amount <= 0.0F) {
 			return;
 		}
 

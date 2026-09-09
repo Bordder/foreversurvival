@@ -9,10 +9,11 @@ import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.level().level.block.Blocks;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.Items;
+import net.minecraft.level().level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 3 - THE EXPANSION (22 quests, MAJOR).
@@ -72,9 +73,9 @@ final class Phase3Quests {
 						+ "at it for a one-hit kill. Magma cubes split when killed - deal with the "
 						+ "small ones first. Their cream is what Fire Resistance is brewed from.")
 				.tools("Bow", "Shield", "Diamond Armour")
-				.task(new KillTask("ghasts", "Kill Ghasts", 3, EntityType.GHAST),
+				.task(new KillTask("ghasts", "Kill Ghasts", 3, EntityTypes.GHAST),
 						new ItemTask("tears", "Collect Ghast Tears", 2, Items.GHAST_TEAR),
-						new KillTask("magma", "Kill Magma Cubes", 8, EntityType.MAGMA_CUBE),
+						new KillTask("magma", "Kill Magma Cubes", 8, EntityTypes.MAGMA_CUBE),
 						new ItemTask("cream", "Collect Magma Cream", 4, Items.MAGMA_CREAM)));
 
 		addMain(Quest.builder("p3_05_crimson_forest", QuestPhase.PHASE_3)
@@ -85,7 +86,7 @@ final class Phase3Quests {
 						+ "fungus and of nether portals - put one of either between you and them. "
 						+ "Crimson and warped stems are the only fireproof wood in the game.")
 				.tools("Diamond Sword", "Gold Armour", "Axe")
-				.task(new KillTask("hoglins", "Kill Hoglins", 6, EntityType.HOGLIN),
+				.task(new KillTask("hoglins", "Kill Hoglins", 6, EntityTypes.HOGLIN),
 						new ItemTask("crimson", "Collect Crimson Stems", 12, Items.CRIMSON_STEM),
 						new ItemTask("fungus", "Collect Crimson Fungus", 4, Items.CRIMSON_FUNGUS)));
 
@@ -132,7 +133,7 @@ final class Phase3Quests {
 				.guide("Fight from behind a wall with a 1 block gap. Snowballs damage them. "
 						+ "Expect about 2 kills per rod; 7 rods covers a stand and 12 eyes.")
 				.tools("Diamond Sword", "Shield", "Diamond Armour")
-				.task(new KillTask("blazes", "Kill Blazes", 12, EntityType.BLAZE),
+				.task(new KillTask("blazes", "Kill Blazes", 12, EntityTypes.BLAZE),
 						new ItemTask("rods", "Collect Blaze Rods", 7, Items.BLAZE_ROD)));
 
 		addMain(Quest.builder("p3_10_nether_wart", QuestPhase.PHASE_3)
@@ -207,7 +208,7 @@ final class Phase3Quests {
 				.guide("Warped Forests have the highest density. Endermen are 3 blocks tall, so a "
 						+ "2 block tunnel is safe. A carved pumpkin stops them aggroing.")
 				.tools("Diamond Sword", "Carved Pumpkin")
-				.task(new KillTask("endermen", "Kill Endermen", 16, EntityType.ENDERMAN),
+				.task(new KillTask("endermen", "Kill Endermen", 16, EntityTypes.ENDERMAN),
 						new ItemTask("pearls", "Collect Ender Pearls", 12, Items.ENDER_PEARL)));
 
 		addMain(Quest.builder("p3_17_bastion_raider", QuestPhase.PHASE_3)

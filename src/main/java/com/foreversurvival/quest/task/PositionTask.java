@@ -45,7 +45,7 @@ public class PositionTask extends QuestTask {
 				break;
 		}
 
-		if (!(player.world instanceof ServerLevel world)) {
+		if (!(player.level() instanceof ServerLevel world)) {
 			return 0;
 		}
 

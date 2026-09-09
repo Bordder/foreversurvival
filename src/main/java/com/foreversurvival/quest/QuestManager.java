@@ -18,7 +18,7 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.TaskContext;
 
-import net.minecraft.world.level.block.Block;
+import net.minecraft.level().level.block.Block;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
@@ -240,14 +240,14 @@ public final class QuestManager {
 		BlockPos origin = player.getBlockPos();
 		BlockPos.Mutable cursor = new BlockPos.Mutable();
 
-		int minY = Math.max(player.world.getBottomY(), origin.getY() - SCAN_RADIUS_VERTICAL);
-		int maxY = Math.min(player.world.getTopY() - 1, origin.getY() + SCAN_RADIUS_VERTICAL);
+		int minY = Math.max(player.level().getBottomY(), origin.getY() - SCAN_RADIUS_VERTICAL);
+		int maxY = Math.min(player.level().getTopY() - 1, origin.getY() + SCAN_RADIUS_VERTICAL);
 
 		for (int dx = -SCAN_RADIUS_HORIZONTAL; dx <= SCAN_RADIUS_HORIZONTAL; dx++) {
 			for (int dz = -SCAN_RADIUS_HORIZONTAL; dz <= SCAN_RADIUS_HORIZONTAL; dz++) {
 				for (int y = minY; y <= maxY; y++) {
 					cursor.set(origin.getX() + dx, y, origin.getZ() + dz);
-					Block block = player.world.getBlockState(cursor).getBlock();
+					Block block = player.level().getBlockState(cursor).getBlock();
 					if (wanted.contains(block)) {
 						found.add(block);
 						if (found.size() == wanted.size()) {
@@ -272,7 +272,7 @@ public final class QuestManager {
 
 		data.setCompleted(quest.getId());
 		data.setCompletionPlayTicks(quest.getId(),
-				player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME)));
+				player.getStats().getStat(Stats.CUSTOM.get(Stats.PLAY_TIME)));
 
 		// No items, no XP: the mod tells you what to do, vanilla does the rest.
 		player.sendSystemMessage(Component.literal("[ForeverSurvival] ").withStyle(ChatFormatting.DARK_AQUA)
@@ -320,7 +320,7 @@ public final class QuestManager {
 
 	/** A handful of sparks for a single quest - deliberately understated. */
 	private void spawnSparks(ServerPlayer player) {
-		if (!(player.world instanceof ServerLevel world)) {
+		if (!(player.level() instanceof ServerLevel world)) {
 			return;
 		}
 
@@ -334,7 +334,7 @@ public final class QuestManager {
 	 * no entity, no lasting marker of any kind.
 	 */
 	private void spawnCelebration(ServerPlayer player) {
-		if (!(player.world instanceof ServerLevel world)) {
+		if (!(player.level() instanceof ServerLevel world)) {
 			return;
 		}
 

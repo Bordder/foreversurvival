@@ -1,7 +1,8 @@
 package com.foreversurvival.quest;
 
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().item.Item;
+import net.minecraft.level().item.DyeColor;
+import net.minecraft.level().item.Items;
 
 /**
  * Shared plumbing for the quest tree. The quests themselves live in the
@@ -41,17 +42,17 @@ public final class QuestRegistry {
 	};
 
 	static final Item[] BEDS = {
-			Items.WHITE_BED, Items.ORANGE_BED, Items.MAGENTA_BED, Items.LIGHT_BLUE_BED,
-			Items.YELLOW_BED, Items.LIME_BED, Items.PINK_BED, Items.GRAY_BED,
-			Items.LIGHT_GRAY_BED, Items.CYAN_BED, Items.PURPLE_BED, Items.BLUE_BED,
-			Items.BROWN_BED, Items.GREEN_BED, Items.RED_BED, Items.BLACK_BED
+			Items.BED.pick(DyeColor.WHITE), Items.BED.pick(DyeColor.ORANGE), Items.BED.pick(DyeColor.MAGENTA), Items.BED.pick(DyeColor.LIGHT_BLUE),
+			Items.BED.pick(DyeColor.YELLOW), Items.BED.pick(DyeColor.LIME), Items.BED.pick(DyeColor.PINK), Items.BED.pick(DyeColor.GRAY),
+			Items.BED.pick(DyeColor.LIGHT_GRAY), Items.BED.pick(DyeColor.CYAN), Items.BED.pick(DyeColor.PURPLE), Items.BED.pick(DyeColor.BLUE),
+			Items.BED.pick(DyeColor.BROWN), Items.BED.pick(DyeColor.GREEN), Items.BED.pick(DyeColor.RED), Items.BED.pick(DyeColor.BLACK)
 	};
 
 	static final Item[] WOOL = {
-			Items.WHITE_WOOL, Items.ORANGE_WOOL, Items.MAGENTA_WOOL, Items.LIGHT_BLUE_WOOL,
-			Items.YELLOW_WOOL, Items.LIME_WOOL, Items.PINK_WOOL, Items.GRAY_WOOL,
-			Items.LIGHT_GRAY_WOOL, Items.CYAN_WOOL, Items.PURPLE_WOOL, Items.BLUE_WOOL,
-			Items.BROWN_WOOL, Items.GREEN_WOOL, Items.RED_WOOL, Items.BLACK_WOOL
+			Items.WOOL.pick(DyeColor.WHITE), Items.WOOL.pick(DyeColor.ORANGE), Items.WOOL.pick(DyeColor.MAGENTA), Items.WOOL.pick(DyeColor.LIGHT_BLUE),
+			Items.WOOL.pick(DyeColor.YELLOW), Items.WOOL.pick(DyeColor.LIME), Items.WOOL.pick(DyeColor.PINK), Items.WOOL.pick(DyeColor.GRAY),
+			Items.WOOL.pick(DyeColor.LIGHT_GRAY), Items.WOOL.pick(DyeColor.CYAN), Items.WOOL.pick(DyeColor.PURPLE), Items.WOOL.pick(DyeColor.BLUE),
+			Items.WOOL.pick(DyeColor.BROWN), Items.WOOL.pick(DyeColor.GREEN), Items.WOOL.pick(DyeColor.RED), Items.WOOL.pick(DyeColor.BLACK)
 	};
 
 	static final Item[] RAW_MEAT = {

@@ -12,12 +12,13 @@ import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().level.block.Blocks;
+import net.minecraft.level().item.enchantment.Enchantments;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.Items;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.level().level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 5 - THE ENDGAME (18 quests, MAJOR).
@@ -81,7 +82,7 @@ final class Phase5Quests {
 						+ "thrown snowball. Melee her when she perches. Carry a water bucket for the "
 						+ "knockback and never stand on the portal rim.")
 				.tools("Bow", "Diamond Sword", "Water Bucket", "Golden Apples", "Carved Pumpkin")
-				.task(new KillTask("dragon", "Defeat the Ender Dragon", 1, EntityType.ENDER_DRAGON),
+				.task(new KillTask("dragon", "Defeat the Ender Dragon", 1, EntityTypes.ENDER_DRAGON),
 						new ItemTask("breath", "Collect Dragon's Breath", 1, Items.DRAGON_BREATH)));
 
 		addMain(Quest.builder("p5_06_the_egg", QuestPhase.PHASE_5)
@@ -102,7 +103,7 @@ final class Phase5Quests {
 						+ "stone in complete darkness at enormous rates. Lure them with an endermite "
 						+ "in a minecart and let them fall 43 blocks.")
 				.tools("Building Blocks", "Carved Pumpkin", "Water Bucket", "Ender Pearls")
-				.task(new KillTask("endermen", "Kill Endermen", 100, EntityType.ENDERMAN),
+				.task(new KillTask("endermen", "Kill Endermen", 100, EntityTypes.ENDERMAN),
 						new ItemTask("pearls", "Stockpile Ender Pearls", 32, Items.ENDER_PEARL)));
 
 		addMain(Quest.builder("p5_08_end_city", QuestPhase.PHASE_5)
@@ -162,7 +163,7 @@ final class Phase5Quests {
 						+ "Killing a shulker can spawn another, so leave one alive and the city keeps "
 						+ "producing.")
 				.tools("Looting III Sword", "Water Bucket")
-				.task(new KillTask("shulkers", "Kill Shulkers", 6, EntityType.SHULKER),
+				.task(new KillTask("shulkers", "Kill Shulkers", 6, EntityTypes.SHULKER),
 						new ItemTask("shells", "Collect Shulker Shells", 4, Items.SHULKER_SHELL),
 						new CraftTask("box", "Craft a Shulker Box", 2, Items.SHULKER_BOX)));
 
@@ -239,6 +240,6 @@ final class Phase5Quests {
 				.tools("End Crystals", "Ghast Tears", "Netherite Gear")
 				.task(new CraftTask("crystals", "Craft End Crystals", 4, Items.END_CRYSTAL),
 						new KillTask("dragons", "Defeat the Ender Dragon (total)", 2,
-								EntityType.ENDER_DRAGON)));
+								EntityTypes.ENDER_DRAGON)));
 	}
 }

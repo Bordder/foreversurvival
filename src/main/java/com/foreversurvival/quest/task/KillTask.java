@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.level().entity.EntityType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 
@@ -28,7 +28,7 @@ public class KillTask extends QuestTask {
 		int total = 0;
 
 		for (EntityType<?> type : types) {
-			total += player.getStatHandler().getStat(Stats.KILLED.getOrCreateStat(type));
+			total += player.getStats().getStat(Stats.KILLED.get(type));
 		}
 
 		return total;

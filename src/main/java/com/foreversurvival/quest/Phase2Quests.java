@@ -17,9 +17,10 @@ import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.UseTask;
 
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().level.block.Blocks;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.Items;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
 
@@ -219,7 +220,7 @@ final class Phase2Quests {
 				.task(new StructureTask("mineshaft", "Find an Abandoned Mineshaft", OVERWORLD,
 								StructureTags.MINESHAFT),
 						new ItemTask("string", "Collect String from cobwebs", 24, Items.STRING),
-						new KillTask("cave_spiders", "Kill Cave Spiders", 12, EntityType.CAVE_SPIDER)));
+						new KillTask("cave_spiders", "Kill Cave Spiders", 12, EntityTypes.CAVE_SPIDER)));
 
 		addMain(Quest.builder("p2_17_rails_and_carts", QuestPhase.PHASE_2)
 				.title("Rails and Minecarts")

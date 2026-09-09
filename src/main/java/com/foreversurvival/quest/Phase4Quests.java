@@ -11,12 +11,13 @@ import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().item.enchantment.Enchantments;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.Items;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
-import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.level().level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 4 - THE MASTERY (24 quests, MAJOR).
@@ -72,7 +73,7 @@ final class Phase4Quests {
 				.guide("Deep Ocean biomes. Kill all three Elder Guardians to stop Mining Fatigue; milk "
 						+ "clears it meanwhile. Placing a door underwater makes an air pocket.")
 				.tools("Water Breathing Potions", "Milk Buckets", "Doors")
-				.task(new KillTask("elder", "Kill Elder Guardians", 3, EntityType.ELDER_GUARDIAN),
+				.task(new KillTask("elder", "Kill Elder Guardians", 3, EntityTypes.ELDER_GUARDIAN),
 						new StructureTask("monument", "Find an Ocean Monument", OVERWORLD,
 								BuiltinStructures.OCEAN_MONUMENT),
 						new ItemTask("sponge", "Collect a Sponge", 1, Items.SPONGE, Items.WET_SPONGE)));
@@ -96,7 +97,7 @@ final class Phase4Quests {
 						+ "sponges, or build a kill chamber under the spawning platforms. This is the "
 						+ "best XP and prismarine source in the game.")
 				.tools("Sponges", "Building Blocks", "Water Buckets", "Conduit")
-				.task(new KillTask("guardians", "Kill Guardians", 40, EntityType.GUARDIAN),
+				.task(new KillTask("guardians", "Kill Guardians", 40, EntityTypes.GUARDIAN),
 						new ItemTask("shards", "Collect Prismarine Shards", 32, Items.PRISMARINE_SHARD)));
 
 		addMain(Quest.builder("p4_07_trading_hall", QuestPhase.PHASE_4)
@@ -176,7 +177,7 @@ final class Phase4Quests {
 						+ "the rotten flesh for villager trades.")
 				.tools("Building Blocks", "Fire Resistance Potions", "Blocks to bridge")
 				.task(new KillTask("zpigs", "Kill Zombified Piglins", 60,
-								EntityType.ZOMBIFIED_PIGLIN),
+								EntityTypes.ZOMBIFIED_PIGLIN),
 						new CraftTask("gold_blocks", "Craft Gold Blocks", 8, Items.GOLD_BLOCK)));
 
 		addMain(Quest.builder("p4_14_creeper_farm", QuestPhase.PHASE_4)
@@ -187,7 +188,7 @@ final class Phase4Quests {
 						+ "Cats scare them, so keep the farm away from villages. Gunpowder means "
 						+ "rockets, TNT and splash potions forever.")
 				.tools("Building Blocks", "Water Buckets", "Sword")
-				.task(new KillTask("creepers", "Kill Creepers", 50, EntityType.CREEPER),
+				.task(new KillTask("creepers", "Kill Creepers", 50, EntityTypes.CREEPER),
 						new ItemTask("gunpowder", "Collect Gunpowder", 32, Items.GUNPOWDER)));
 
 		addMain(Quest.builder("p4_15_blaze_farm", QuestPhase.PHASE_4)
@@ -208,7 +209,7 @@ final class Phase4Quests {
 						+ "swamps between Y=50 and Y=70 at night. Slime blocks and sticky pistons are "
 						+ "the basis of every flying machine.")
 				.tools("Sword", "Torches", "Pickaxe")
-				.task(new KillTask("slimes", "Kill Slimes", 20, EntityType.SLIME),
+				.task(new KillTask("slimes", "Kill Slimes", 20, EntityTypes.SLIME),
 						new ItemTask("slimeballs", "Collect Slimeballs", 16, Items.SLIME_BALL),
 						new CraftTask("sticky", "Craft Sticky Pistons", 4, Items.STICKY_PISTON)));
 
@@ -222,7 +223,7 @@ final class Phase4Quests {
 				.tools("Bow", "Armour", "Milk Bucket")
 				.task(new StructureTask("hut", "Find a Swamp Hut", OVERWORLD,
 								BuiltinStructures.SWAMP_HUT),
-						new KillTask("witches", "Kill Witches", 15, EntityType.WITCH),
+						new KillTask("witches", "Kill Witches", 15, EntityTypes.WITCH),
 						new ItemTask("glowstone_dust", "Collect Glowstone Dust", 16,
 								Items.GLOWSTONE_DUST)));
 
@@ -234,7 +235,7 @@ final class Phase4Quests {
 						+ "drop to 5.5% and roughly halves the grind. Milk clears the wither effect.")
 				.tools("Looting III Sword", "Milk Bucket", "Fire Resistance Potions")
 				.task(new KillTask("wskellies", "Kill Wither Skeletons", 20,
-								EntityType.WITHER_SKELETON),
+								EntityTypes.WITHER_SKELETON),
 						new ItemTask("skulls", "Collect Wither Skeleton Skulls", 3,
 								Items.WITHER_SKELETON_SKULL)));
 
@@ -246,7 +247,7 @@ final class Phase4Quests {
 						+ "obsidian box. Withered targets cannot regenerate - carry milk.")
 				.tools("Diamond Armour", "Enchanted Sword", "Golden Apples", "Milk Bucket", "Obsidian")
 				.task(new ItemTask("soul_sand", "Collect Soul Sand", 6, Items.SOUL_SAND),
-						new KillTask("wither", "Defeat the Wither", 1, EntityType.WITHER),
+						new KillTask("wither", "Defeat the Wither", 1, EntityTypes.WITHER),
 						new ItemTask("star", "Collect a Nether Star", 1, Items.NETHER_STAR)));
 
 		addMain(Quest.builder("p4_20_beacon_of_hope", QuestPhase.PHASE_4)
@@ -283,7 +284,7 @@ final class Phase4Quests {
 				.tools("Woodland Explorer Map", "Diamond Armour", "Golden Apples", "Horse or Boat")
 				.task(new StructureTask("mansion", "Find a Woodland Mansion", OVERWORLD,
 								BuiltinStructures.WOODLAND_MANSION),
-						new KillTask("vindicators", "Kill Vindicators", 10, EntityType.VINDICATOR),
+						new KillTask("vindicators", "Kill Vindicators", 10, EntityTypes.VINDICATOR),
 						new ItemTask("notch", "Loot an Enchanted Golden Apple", 1,
 								Items.ENCHANTED_GOLDEN_APPLE)));
 
@@ -294,9 +295,9 @@ final class Phase4Quests {
 				.guide("Kill the pillager with the banner on its head for Bad Omen, then enter a "
 						+ "village. Evokers drop the totem - hold it in your OFF-HAND.")
 				.tools("Diamond Armour", "Enchanted Sword", "Shield", "Golden Apples")
-				.task(new KillTask("pillagers", "Kill Pillagers", 20, EntityType.PILLAGER),
-						new KillTask("ravagers", "Kill Ravagers", 2, EntityType.RAVAGER),
-						new KillTask("evokers", "Kill Evokers", 2, EntityType.EVOKER),
+				.task(new KillTask("pillagers", "Kill Pillagers", 20, EntityTypes.PILLAGER),
+						new KillTask("ravagers", "Kill Ravagers", 2, EntityTypes.RAVAGER),
+						new KillTask("evokers", "Kill Evokers", 2, EntityTypes.EVOKER),
 						new ItemTask("totem", "Collect a Totem of Undying", 1,
 								Items.TOTEM_OF_UNDYING)));
 

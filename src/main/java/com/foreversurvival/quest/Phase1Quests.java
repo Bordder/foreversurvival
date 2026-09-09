@@ -18,9 +18,11 @@ import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.UseTask;
 
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().level.block.Blocks;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.DyeColor;
+import net.minecraft.level().item.Items;
 import net.minecraft.stats.Stats;
 
 /**
@@ -85,8 +87,8 @@ final class Phase1Quests {
 						+ "wastes most of the hunger it is worth.")
 				.tools("Stone Sword")
 				.task(new KillTask("animals", "Kill Animals", 10,
-								EntityType.COW, EntityType.PIG, EntityType.SHEEP,
-								EntityType.CHICKEN, EntityType.RABBIT),
+								EntityTypes.COW, EntityTypes.PIG, EntityTypes.SHEEP,
+								EntityTypes.CHICKEN, EntityTypes.RABBIT),
 						new ItemTask("raw_meat", "Carry Raw Meat", 10, RAW_MEAT)));
 
 		addMain(Quest.builder("p1_06_a_warm_meal", QuestPhase.PHASE_1)
@@ -121,7 +123,7 @@ final class Phase1Quests {
 		addMain(Quest.builder("p1_09_wool_gathering", QuestPhase.PHASE_1)
 				.title("Wool Gathering")
 				.desc("Skipping the night is the biggest safety upgrade you get for free.")
-				.icon(Items.WHITE_WOOL)
+				.icon(Items.WOOL.pick(DyeColor.WHITE))
 				.guide("3 wool of the same colour + 3 planks = Bed. Never sleep in the Nether or the "
 						+ "End - the bed explodes.")
 				.tools("Shears or any Sword")
@@ -131,7 +133,7 @@ final class Phase1Quests {
 		addMain(Quest.builder("p1_10_good_night", QuestPhase.PHASE_1)
 				.title("Good Night")
 				.desc("The first night you sleep through instead of hiding through.")
-				.icon(Items.RED_BED)
+				.icon(Items.BED.pick(DyeColor.RED))
 				.guide("Place the bed and use it after dusk. Sleeping sets your respawn point and "
 						+ "clears Phantoms for three days.")
 				.tools("Bed", "A lit, enclosed room")
@@ -166,10 +168,10 @@ final class Phase1Quests {
 				.icon(Items.ROTTEN_FLESH)
 				.guide("Hit a creeper once and step back - it detonates 1.5 seconds after it hisses.")
 				.tools("Stone Sword", "Torches")
-				.task(new KillTask("zombies", "Kill Zombies", 15, EntityType.ZOMBIE),
-						new KillTask("skeletons", "Kill Skeletons", 12, EntityType.SKELETON),
-						new KillTask("spiders", "Kill Spiders", 8, EntityType.SPIDER),
-						new KillTask("creepers", "Kill Creepers", 5, EntityType.CREEPER)));
+				.task(new KillTask("zombies", "Kill Zombies", 15, EntityTypes.ZOMBIE),
+						new KillTask("skeletons", "Kill Skeletons", 12, EntityTypes.SKELETON),
+						new KillTask("spiders", "Kill Spiders", 8, EntityTypes.SPIDER),
+						new KillTask("creepers", "Kill Creepers", 5, EntityTypes.CREEPER)));
 
 		addMain(Quest.builder("p1_14_arrows_and_aim", QuestPhase.PHASE_1)
 				.title("Arrows and Aim")

@@ -14,13 +14,15 @@ import com.foreversurvival.quest.task.PositionTask;
 import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Items;
+import net.minecraft.level().level.block.Blocks;
+import net.minecraft.level().item.enchantment.Enchantments;
+import net.minecraft.level().entity.EntityType;
+import net.minecraft.level().entity.EntityTypes;
+import net.minecraft.level().item.DyeColor;
+import net.minecraft.level().item.Items;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
-import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.level().level.levelgen.structure.BuiltinStructures;
 
 /**
  * SIDE CHALLENGES (30) - optional, unlocked from the start, never blocking.
@@ -38,26 +40,26 @@ final class SideQuests {
 		addSide(Quest.builder("s01_rainbow", QuestPhase.SIDE)
 				.title("Somewhere Over the Rainbow")
 				.desc("All sixteen colours of wool.")
-				.icon(Items.MAGENTA_WOOL)
+				.icon(Items.WOOL.pick(DyeColor.MAGENTA))
 				.guide("Dye a sheep and shear it repeatedly instead of killing it. Blue dye needs "
 						+ "lapis, green needs smelted cactus, and cyan is blue plus green.")
 				.tools("Shears", "Dyes", "Sheep Pen")
-				.task(new ItemTask("white", "White Wool", 1, Items.WHITE_WOOL),
-						new ItemTask("orange", "Orange Wool", 1, Items.ORANGE_WOOL),
-						new ItemTask("magenta", "Magenta Wool", 1, Items.MAGENTA_WOOL),
-						new ItemTask("light_blue", "Light Blue Wool", 1, Items.LIGHT_BLUE_WOOL),
-						new ItemTask("yellow", "Yellow Wool", 1, Items.YELLOW_WOOL),
-						new ItemTask("lime", "Lime Wool", 1, Items.LIME_WOOL),
-						new ItemTask("pink", "Pink Wool", 1, Items.PINK_WOOL),
-						new ItemTask("gray", "Gray Wool", 1, Items.GRAY_WOOL),
-						new ItemTask("light_gray", "Light Gray Wool", 1, Items.LIGHT_GRAY_WOOL),
-						new ItemTask("cyan", "Cyan Wool", 1, Items.CYAN_WOOL),
-						new ItemTask("purple", "Purple Wool", 1, Items.PURPLE_WOOL),
-						new ItemTask("blue", "Blue Wool", 1, Items.BLUE_WOOL),
-						new ItemTask("brown", "Brown Wool", 1, Items.BROWN_WOOL),
-						new ItemTask("green", "Green Wool", 1, Items.GREEN_WOOL),
-						new ItemTask("red", "Red Wool", 1, Items.RED_WOOL),
-						new ItemTask("black", "Black Wool", 1, Items.BLACK_WOOL)));
+				.task(new ItemTask("white", "White Wool", 1, Items.WOOL.pick(DyeColor.WHITE)),
+						new ItemTask("orange", "Orange Wool", 1, Items.WOOL.pick(DyeColor.ORANGE)),
+						new ItemTask("magenta", "Magenta Wool", 1, Items.WOOL.pick(DyeColor.MAGENTA)),
+						new ItemTask("light_blue", "Light Blue Wool", 1, Items.WOOL.pick(DyeColor.LIGHT_BLUE)),
+						new ItemTask("yellow", "Yellow Wool", 1, Items.WOOL.pick(DyeColor.YELLOW)),
+						new ItemTask("lime", "Lime Wool", 1, Items.WOOL.pick(DyeColor.LIME)),
+						new ItemTask("pink", "Pink Wool", 1, Items.WOOL.pick(DyeColor.PINK)),
+						new ItemTask("gray", "Gray Wool", 1, Items.WOOL.pick(DyeColor.GRAY)),
+						new ItemTask("light_gray", "Light Gray Wool", 1, Items.WOOL.pick(DyeColor.LIGHT_GRAY)),
+						new ItemTask("cyan", "Cyan Wool", 1, Items.WOOL.pick(DyeColor.CYAN)),
+						new ItemTask("purple", "Purple Wool", 1, Items.WOOL.pick(DyeColor.PURPLE)),
+						new ItemTask("blue", "Blue Wool", 1, Items.WOOL.pick(DyeColor.BLUE)),
+						new ItemTask("brown", "Brown Wool", 1, Items.WOOL.pick(DyeColor.BROWN)),
+						new ItemTask("green", "Green Wool", 1, Items.WOOL.pick(DyeColor.GREEN)),
+						new ItemTask("red", "Red Wool", 1, Items.WOOL.pick(DyeColor.RED)),
+						new ItemTask("black", "Black Wool", 1, Items.WOOL.pick(DyeColor.BLACK))));
 
 		addSide(Quest.builder("s02_home_in_every_biome", QuestPhase.SIDE)
 				.title("Home Sweet Biome")
@@ -180,7 +182,7 @@ final class SideQuests {
 						new ItemTask("rose", "Collect a Rose Bush", 1, Items.ROSE_BUSH),
 						new ItemTask("peony", "Collect a Peony", 1, Items.PEONY),
 						new CraftTask("dyes", "Craft Dyes", 16,
-								Items.RED_DYE, Items.YELLOW_DYE, Items.BLUE_DYE, Items.PINK_DYE)));
+								Items.DYE.pick(DyeColor.RED), Items.DYE.pick(DyeColor.YELLOW), Items.DYE.pick(DyeColor.BLUE), Items.DYE.pick(DyeColor.PINK))));
 
 		addSide(Quest.builder("s12_nether_botanist", QuestPhase.SIDE)
 				.title("The Nether Botanist")
@@ -203,11 +205,11 @@ final class SideQuests {
 				.guide("A dark-room farm above an ocean or high in the sky is the only sane way to "
 						+ "reach these numbers.")
 				.tools("Enchanted Sword", "Mob Farm")
-				.task(new KillTask("zombies", "Kill Zombies", 100, EntityType.ZOMBIE),
-						new KillTask("skeletons", "Kill Skeletons", 100, EntityType.SKELETON),
-						new KillTask("spiders", "Kill Spiders", 60, EntityType.SPIDER),
-						new KillTask("creepers", "Kill Creepers", 40, EntityType.CREEPER),
-						new KillTask("phantoms", "Kill Phantoms", 10, EntityType.PHANTOM)));
+				.task(new KillTask("zombies", "Kill Zombies", 100, EntityTypes.ZOMBIE),
+						new KillTask("skeletons", "Kill Skeletons", 100, EntityTypes.SKELETON),
+						new KillTask("spiders", "Kill Spiders", 60, EntityTypes.SPIDER),
+						new KillTask("creepers", "Kill Creepers", 40, EntityTypes.CREEPER),
+						new KillTask("phantoms", "Kill Phantoms", 10, EntityTypes.PHANTOM)));
 
 		addSide(Quest.builder("s14_beekeeper", QuestPhase.SIDE)
 				.title("The Beekeeper")
@@ -239,7 +241,7 @@ final class SideQuests {
 						+ "hatched on. Baby turtles drop a scute when they grow up - five makes the "
 						+ "helmet, which gives 10 seconds of water breathing.")
 				.tools("Seagrass", "Shears", "Patience")
-				.task(new ItemTask("scute", "Collect Scutes", 5, Items.SCUTE),
+				.task(new ItemTask("scute", "Collect Scutes", 5, Items.TURTLE_SCUTE),
 						new CraftTask("helmet", "Craft a Turtle Shell helmet", 1, Items.TURTLE_HELMET),
 						new CheckmarkTask("hatched", "Hatch a turtle egg")));
 
@@ -250,7 +252,7 @@ final class SideQuests {
 				.guide("Tridents only drop from drowned that spawn holding one, about 6.25% in ocean "
 						+ "biomes. Converted zombies never have them.")
 				.tools("Water Breathing Potions", "Depth Strider Boots")
-				.task(new KillTask("drowned", "Kill Drowned", 30, EntityType.DROWNED),
+				.task(new KillTask("drowned", "Kill Drowned", 30, EntityTypes.DROWNED),
 						new ItemTask("trident", "Obtain a Trident", 1, Items.TRIDENT),
 						new ItemTask("pickle", "Collect Sea Pickles", 8, Items.SEA_PICKLE)));
 
@@ -262,7 +264,7 @@ final class SideQuests {
 						+ "over short distances. Strays only spawn in Snowy Plains and shoot Slowness "
 						+ "arrows.")
 				.tools("Silk Touch Pickaxe", "Bucket", "Boat")
-				.task(new KillTask("strays", "Kill Strays", 10, EntityType.STRAY),
+				.task(new KillTask("strays", "Kill Strays", 10, EntityTypes.STRAY),
 						new ItemTask("blue_ice", "Collect Blue Ice", 4, Items.BLUE_ICE),
 						new ItemTask("packed", "Collect Packed Ice", 8, Items.PACKED_ICE)));
 
@@ -354,7 +356,7 @@ final class SideQuests {
 						+ "green dye.")
 				.tools("Sand", "Fences", "Hoppers")
 				.task(new ItemTask("cactus", "Collect Cactus", 16, Items.CACTUS),
-						new CraftTask("green", "Smelt Green Dye", 4, Items.GREEN_DYE)));
+						new CraftTask("green", "Smelt Green Dye", 4, Items.DYE.pick(DyeColor.GREEN))));
 
 		addSide(Quest.builder("s26_bamboo_and_kelp", QuestPhase.SIDE)
 				.title("Renewable Fuel")
@@ -391,8 +393,8 @@ final class SideQuests {
 				.tools("Honeycomb", "String", "Dyes")
 				.task(new CraftTask("candles", "Craft Candles", 8, Items.CANDLE),
 						new CraftTask("dyed", "Craft Dyed Candles", 4,
-								Items.RED_CANDLE, Items.BLUE_CANDLE, Items.GREEN_CANDLE,
-								Items.YELLOW_CANDLE),
+								Items.DYED_CANDLE.pick(DyeColor.RED), Items.DYED_CANDLE.pick(DyeColor.BLUE), Items.DYED_CANDLE.pick(DyeColor.GREEN),
+								Items.DYED_CANDLE.pick(DyeColor.YELLOW)),
 						new CheckmarkTask("cake_candle", "Put a candle on a cake")));
 
 		addSide(Quest.builder("s29_pacifist", QuestPhase.SIDE)
@@ -424,36 +426,36 @@ final class SideQuests {
 				.tools("Furnace", "Sand", "Dyes")
 				.task(new ItemTask("glass", "Collect Glass", 32, Items.GLASS),
 						new CraftTask("stained", "Craft Stained Glass", 16,
-								Items.WHITE_STAINED_GLASS, Items.BLUE_STAINED_GLASS,
-								Items.RED_STAINED_GLASS, Items.GREEN_STAINED_GLASS,
-								Items.YELLOW_STAINED_GLASS, Items.BLACK_STAINED_GLASS),
+								Items.STAINED_GLASS.pick(DyeColor.WHITE), Items.STAINED_GLASS.pick(DyeColor.BLUE),
+								Items.STAINED_GLASS.pick(DyeColor.RED), Items.STAINED_GLASS.pick(DyeColor.GREEN),
+								Items.STAINED_GLASS.pick(DyeColor.YELLOW), Items.STAINED_GLASS.pick(DyeColor.BLACK)),
 						new CraftTask("panes", "Craft Glass Panes", 32, Items.GLASS_PANE)));
 
 		addSide(Quest.builder("s32_concrete", QuestPhase.SIDE)
 				.title("Concrete Foundations")
 				.desc("The cleanest building block there is.")
-				.icon(Items.LIGHT_BLUE_CONCRETE)
+				.icon(Items.CONCRETE.pick(DyeColor.LIGHT_BLUE))
 				.guide("4 sand + 4 gravel + 1 dye makes 8 concrete powder. Powder hardens into "
 						+ "concrete the instant it touches water - drop it in, mine it back.")
 				.tools("Sand", "Gravel", "Dyes", "Water")
 				.task(new CraftTask("powder", "Craft Concrete Powder", 32,
-								Items.WHITE_CONCRETE_POWDER, Items.LIGHT_BLUE_CONCRETE_POWDER,
-								Items.GRAY_CONCRETE_POWDER, Items.RED_CONCRETE_POWDER),
+								Items.CONCRETE_POWDER.pick(DyeColor.WHITE), Items.CONCRETE_POWDER.pick(DyeColor.LIGHT_BLUE),
+								Items.CONCRETE_POWDER.pick(DyeColor.GRAY), Items.CONCRETE_POWDER.pick(DyeColor.RED)),
 						new ItemTask("concrete", "Harden Concrete", 16,
-								Items.WHITE_CONCRETE, Items.LIGHT_BLUE_CONCRETE,
-								Items.GRAY_CONCRETE, Items.RED_CONCRETE, Items.BLACK_CONCRETE)));
+								Items.CONCRETE.pick(DyeColor.WHITE), Items.CONCRETE.pick(DyeColor.LIGHT_BLUE),
+								Items.CONCRETE.pick(DyeColor.GRAY), Items.CONCRETE.pick(DyeColor.RED), Items.CONCRETE.pick(DyeColor.BLACK))));
 
 		addSide(Quest.builder("s33_banners", QuestPhase.SIDE)
 				.title("The Banner Maker")
 				.desc("A flag for the front of your base.")
-				.icon(Items.CYAN_BANNER)
+				.icon(Items.BANNER.pick(DyeColor.CYAN))
 				.guide("6 wool + 1 stick makes a banner. A Loom applies patterns from dyes and banner "
 						+ "pattern items far more cheaply than the crafting grid.")
 				.tools("Wool", "Loom", "Dyes")
 				.task(new CraftTask("loom", "Craft a Loom", 1, Items.LOOM),
 						new CraftTask("banners", "Craft Banners", 4,
-								Items.WHITE_BANNER, Items.CYAN_BANNER, Items.RED_BANNER,
-								Items.BLACK_BANNER, Items.BLUE_BANNER)));
+								Items.BANNER.pick(DyeColor.WHITE), Items.BANNER.pick(DyeColor.CYAN), Items.BANNER.pick(DyeColor.RED),
+								Items.BANNER.pick(DyeColor.BLACK), Items.BANNER.pick(DyeColor.BLUE))));
 
 		addSide(Quest.builder("s34_pyrotechnician", QuestPhase.SIDE)
 				.title("The Pyrotechnician")
