@@ -27,8 +27,8 @@ public final class ClientQuestState {
 	private static CompoundTag stats = new CompoundTag();
 
 	public static void accept(CompoundTag root) {
-		DATA.readNbt(root.getCompound("Data"));
-		stats = root.getCompound("Stats");
+		DATA.readNbt(root.getCompoundOrEmpty("Data"));
+		stats = root.getCompoundOrEmpty("Stats");
 	}
 
 	/** Vanilla stats snapshot that rode along with the last sync. */

@@ -6,9 +6,8 @@ import com.foreversurvival.network.PlayerLocation;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 
 /**
@@ -31,7 +30,7 @@ import net.minecraft.util.Mth;
  * Only players in your own dimension are shown; a bearing to someone in the
  * Nether while you are in the Overworld would mean nothing.
  */
-public final class LocatorBar extends DrawableHelper {
+public final class LocatorBar {
 
 	private static final int MARKER_WIDTH = 3;
 	/** Within this many degrees of centre, the player's name is shown. */
@@ -127,7 +126,7 @@ public final class LocatorBar extends DrawableHelper {
 	 * creative mode, or while riding a mount, where vanilla swaps the slot for
 	 * the jump/health bar - so XP-slot mode still shows something there.
 	 */
-	public void renderFree(MatrixStack matrices) {
+	public void renderFree(GuiGraphicsExtractor graphics) {
 		Minecraft client = Minecraft.getInstance();
 
 		if (HudConfig.locatorXpBarMode) {
@@ -135,8 +134,8 @@ public final class LocatorBar extends DrawableHelper {
 			xpSlotOffered = false;
 
 			if (!offered && shouldTakeXpSlot()) {
-				int screenWidth = client.getWindow().getScaledWidth();
-				renderXpSlot(matrices, screenWidth / 2 - 91);
+				int screenWidth = client.getWindow().getGuiScaledWidth();
+				renderXpSlot(graphics, screenWidth / 2 - 91);
 			}
 			return;
 		}
@@ -145,18 +144,18 @@ public final class LocatorBar extends DrawableHelper {
 			return;
 		}
 
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenWidth = client.getWindow().getGuiScaledWidth();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 		int width = HudConfig.locatorWidth;
 
 		double originX = HudConfig.locatorX * screenWidth - (width * HudConfig.locatorScale) / 2.0D;
 		double originY = HudConfig.locatorY * screenHeight;
 
-		HudRender.push(originX, originY, HudConfig.locatorScale);
+		HudRender.push(graphics, originX, originY, HudConfig.locatorScale);
 		try {
-			drawBar(matrices, client, 0, 0, width, HudConfig.locatorHeight);
+			drawBar(graphics, client, 0, 0, width, HudConfig.locatorHeight);
 		} finally {
-			HudRender.pop();
+			HudRender.pop(graphics);
 		}
 	}
 
@@ -164,13 +163,13 @@ public final class LocatorBar extends DrawableHelper {
 	 * Draws into the experience bar's slot. {@code xpBarX} is the left edge
 	 * vanilla would have used, so the bar lines up with the hotbar.
 	 */
-	public void renderXpSlot(MatrixStack matrices, int xpBarX) {
+	public void renderXpSlot(GuiGraphicsExtractor graphics, int xpBarX) {
 		Minecraft client = Minecraft.getInstance();
 		if (client.player == null) {
 			return;
 		}
 
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 		int width = HudConfig.locatorWidth;
 		int height = HudConfig.locatorHeight;
 
@@ -178,35 +177,35 @@ public final class LocatorBar extends DrawableHelper {
 		int x = xpBarX + (182 - width) / 2;
 		int y = screenHeight - 32 + 3;
 
-		drawBar(matrices, client, x, y, width, height);
+		drawBar(graphics, client, x, y, width, height);
 	}
 
 	// ------------------------------------------------------------------
 	// Drawing
 	// ------------------------------------------------------------------
 
-	private void drawBar(MatrixStack matrices, Minecraft client, int x, int y,
+	private void drawBar(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
 			int width, int height) {
 		LocalPlayer self = client.player;
 		if (self == null) {
 			return;
 		}
 
-		Font font = client.textRenderer;
+		Font font = client.font;
 		String selfName = self.getGameProfile().getName();
 		String selfDimension = self.world.getRegistryKey().getValue().toString();
 
-		fill(matrices, x, y, x + width, y + height, HudConfig.backgroundColor(RGB_BAR));
+		graphics.fill(x, y, x + width, y + height, HudConfig.backgroundColor(RGB_BAR));
 		int border = HudConfig.backgroundColor(RGB_BORDER);
-		fill(matrices, x, y, x + width, y + 1, border);
-		fill(matrices, x, y + height - 1, x + width, y + height, border);
-		fill(matrices, x, y, x + 1, y + height, border);
-		fill(matrices, x + width - 1, y, x + width, y + height, border);
+		graphics.fill(x, y, x + width, y + 1, border);
+		graphics.fill(x, y + height - 1, x + width, y + height, border);
+		graphics.fill(x, y, x + 1, y + height, border);
+		graphics.fill(x + width - 1, y, x + width, y + height, border);
 
 		int centre = x + width / 2;
-		fill(matrices, centre, y + 1, centre + 1, y + height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
+		graphics.fill(centre, y + 1, centre + 1, y + height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
 
-		double selfYaw = Mth.wrapDegrees(self.getYaw());
+		double selfYaw = Mth.wrapDegrees(self.getYRot());
 		double halfFov = HudConfig.locatorFov;
 		int half = width / 2 - 2;
 
@@ -237,7 +236,7 @@ public final class LocatorBar extends DrawableHelper {
 					? (HudConfig.applyTextAlpha(rgb) & 0x60FFFFFF)
 					: HudConfig.applyTextAlpha(rgb);
 
-			fill(matrices, markerX, y + 2, markerX + MARKER_WIDTH, y + height - 2, colour);
+			graphics.fill(markerX, y + 2, markerX + MARKER_WIDTH, y + height - 2, colour);
 
 			double angle = Math.abs(relative);
 			if (!offEdge && angle <= NAME_ANGLE && angle < bestAngle) {
@@ -255,7 +254,7 @@ public final class LocatorBar extends DrawableHelper {
 			int labelY = above ? y - 20 : y + height + 2;
 			int distanceY = above ? y - 10 : y + height + 12;
 
-			font.draw(matrices, hoveredName, centre - font.getWidth(hoveredName) / 2, labelY,
+			graphics.text(font, hoveredName, centre - font.width(hoveredName) / 2, labelY,
 					HudConfig.applyTextAlpha(RGB_NAME));
 
 			if (HudConfig.locatorShowDistance) {
@@ -265,7 +264,7 @@ public final class LocatorBar extends DrawableHelper {
 				}
 
 				String distance = Math.round(shownDistance) + "m";
-				font.draw(matrices, distance, centre - font.getWidth(distance) / 2, distanceY,
+				graphics.text(font, distance, centre - font.width(distance) / 2, distanceY,
 						HudConfig.applyTextAlpha(RGB_DISTANCE));
 			}
 		} else {
@@ -283,35 +282,35 @@ public final class LocatorBar extends DrawableHelper {
 	}
 
 	/** Static stand-in used by the layout editor, where there is no live data. */
-	public void renderPreviewAt(MatrixStack matrices, double originX, double originY, double scale) {
-		HudRender.push(originX, originY, scale);
+	public void renderPreviewAt(GuiGraphicsExtractor graphics, double originX, double originY, double scale) {
+		HudRender.push(graphics, originX, originY, scale);
 		try {
-			Font font = Minecraft.getInstance().textRenderer;
+			Font font = Minecraft.getInstance().font;
 			int width = HudConfig.locatorWidth;
 			int height = HudConfig.locatorHeight;
 
-			fill(matrices, 0, 0, width, height, HudConfig.backgroundColor(RGB_BAR));
+			graphics.fill(0, 0, width, height, HudConfig.backgroundColor(RGB_BAR));
 			int border = HudConfig.backgroundColor(RGB_BORDER);
-			fill(matrices, 0, 0, width, 1, border);
-			fill(matrices, 0, height - 1, width, height, border);
-			fill(matrices, 0, 0, 1, height, border);
-			fill(matrices, width - 1, 0, width, height, border);
+			graphics.fill(0, 0, width, 1, border);
+			graphics.fill(0, height - 1, width, height, border);
+			graphics.fill(0, 0, 1, height, border);
+			graphics.fill(width - 1, 0, width, height, border);
 
 			int centre = width / 2;
-			fill(matrices, centre, 1, centre + 1, height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
+			graphics.fill(centre, 1, centre + 1, height - 1, HudConfig.applyTextAlpha(RGB_CENTRE));
 
 			int[] offsets = { -width / 3, 4, width / 4 };
 			for (int i = 0; i < offsets.length; i++) {
 				int px = Mth.clamp(centre + offsets[i], 1, width - MARKER_WIDTH - 1);
-				fill(matrices, px, 2, px + MARKER_WIDTH, height - 2,
+				graphics.fill(px, 2, px + MARKER_WIDTH, height - 2,
 						HudConfig.applyTextAlpha(PALETTE[i]));
 			}
 
 			String label = "Player";
-			font.draw(matrices, label, centre - font.getWidth(label) / 2, height + 2,
+			graphics.text(font, label, centre - font.width(label) / 2, height + 2,
 					HudConfig.applyTextAlpha(RGB_NAME));
 		} finally {
-			HudRender.pop();
+			HudRender.pop(graphics);
 		}
 	}
 }

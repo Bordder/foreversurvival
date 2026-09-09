@@ -39,6 +39,9 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 	it.options.release = 25
+	// javac stops at 100 errors by default, which hides whole files during a
+	// port and makes "no errors left in X" read as true when it is not.
+	it.options.compilerArgs << "-Xmaxerrs" << "10000"
 }
 
 java {

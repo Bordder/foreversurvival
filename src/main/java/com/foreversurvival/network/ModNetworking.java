@@ -32,11 +32,11 @@ public final class ModNetworking {
 	 * runs from the common initialiser rather than the server one.
 	 */
 	public static void registerPayloads() {
-		PayloadTypeRegistry.playS2C().register(
+		PayloadTypeRegistry.clientboundPlay().register(
 				ModPayloads.SyncData.TYPE, ModPayloads.SyncData.CODEC);
-		PayloadTypeRegistry.playS2C().register(
+		PayloadTypeRegistry.clientboundPlay().register(
 				ModPayloads.PlayerLocations.TYPE, ModPayloads.PlayerLocations.CODEC);
-		PayloadTypeRegistry.playC2S().register(
+		PayloadTypeRegistry.serverboundPlay().register(
 				ModPayloads.Checkmark.TYPE, ModPayloads.Checkmark.CODEC);
 	}
 

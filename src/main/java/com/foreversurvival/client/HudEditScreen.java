@@ -4,7 +4,7 @@ import com.foreversurvival.quest.Quest;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Layout editor.
@@ -97,13 +97,13 @@ public class HudEditScreen extends Screen {
 				button -> {
 					HudConfig.locatorXpBarMode = !HudConfig.locatorXpBarMode;
 					HudConfig.save();
-					this.client.setScreen(new HudEditScreen(parent));
+					this.client.setScreenAndShow(new HudEditScreen(parent));
 				}));
 
 		addDrawableChild(new Button(this.width / 2 + 96, y, 84, 20,
 				Component.literal("Done"), button -> {
 					HudConfig.save();
-					this.client.setScreen(parent);
+					this.client.setScreenAndShow(parent);
 				}));
 	}
 
@@ -251,43 +251,40 @@ public class HudEditScreen extends Screen {
 	// ------------------------------------------------------------------
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderBackground(matrices);
+	public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		this.renderBackground(graphics);
 
 		Quest quest = ClientQuestState.getCurrentMainQuest();
 		double[] questOrigin = originOf(Element.QUEST);
-		QuestHud.get().renderAt(matrices, questOrigin[0], questOrigin[1], HudConfig.hudScale, quest);
-		drawFrame(matrices, Element.QUEST, mouseX, mouseY);
+		QuestHud.get().renderAt(graphics, questOrigin[0], questOrigin[1], HudConfig.hudScale, quest);
+		drawFrame(graphics, Element.QUEST, mouseX, mouseY);
 
 		if (locatorMovable()) {
 			double[] barOrigin = originOf(Element.LOCATOR);
-			LocatorBar.get().renderPreviewAt(matrices, barOrigin[0], barOrigin[1],
+			LocatorBar.get().renderPreviewAt(graphics, barOrigin[0], barOrigin[1],
 					HudConfig.locatorScale);
-			drawFrame(matrices, Element.LOCATOR, mouseX, mouseY);
+			drawFrame(graphics, Element.LOCATOR, mouseX, mouseY);
 		}
 
 		String hint = "Drag the body to move  -  right edge = width  -  bottom edge = height "
 				+ " -  corner = both";
-		textRenderer.draw(matrices, hint, (this.width - textRenderer.getWidth(hint)) / 2.0F, 8.0F,
-				TEXT_HINT);
+		graphics.text(font, hint, (int) ((this.width - font.width(hint)) / 2.0F), (int) (8.0F), TEXT_HINT);
 
 		String keys = "Snaps to an 8px grid, screen centre and edges  -  hold Shift to snap freely."
 				+ "  Arrow keys nudge (Shift = 10px)";
-		textRenderer.draw(matrices, keys, (this.width - textRenderer.getWidth(keys)) / 2.0F, 20.0F,
-				TEXT_DIM);
+		graphics.text(font, keys, (int) ((this.width - font.width(keys)) / 2.0F), (int) (20.0F), TEXT_DIM);
 
 		// Centre guides, shown while dragging so the snap targets are visible.
 		if (active != null && mode == Mode.MOVING && snapping) {
 			int cx = this.width / 2;
 			int cy = this.height / 2;
-			fill(matrices, cx, 0, cx + 1, this.height, 0x33FFD24A);
-			fill(matrices, 0, cy, this.width, cy + 1, 0x33FFD24A);
+			graphics.fill(cx, 0, cx + 1, this.height, 0x33FFD24A);
+			graphics.fill(0, cy, this.width, cy + 1, 0x33FFD24A);
 		}
 
 		if (HudConfig.locatorEnabled && HudConfig.locatorXpBarMode) {
 			String note = "Locator bar is in the XP bar slot - set it to free placement to move it";
-			textRenderer.draw(matrices, note, (this.width - textRenderer.getWidth(note)) / 2.0F, 32.0F,
-					TEXT_DIM);
+			graphics.text(font, note, (int) ((this.width - font.width(note)) / 2.0F), (int) (32.0F), TEXT_DIM);
 		}
 
 		// Live size readout, pinned near the cursor while dragging.
@@ -297,17 +294,17 @@ public class HudEditScreen extends Screen {
 							+ (HudConfig.hudHeight == 0 ? "auto" : String.valueOf(HudConfig.hudHeight)))
 					: (HudConfig.locatorWidth + " x " + HudConfig.locatorHeight);
 
-			int w = textRenderer.getWidth(label) + 8;
+			int w = font.width(label) + 8;
 			int tipX = Math.min(mouseX + 10, this.width - w - 2);
 			int tipY = Math.max(2, mouseY - 16);
-			fill(matrices, tipX, tipY, tipX + w, tipY + 13, COLOR_TIP_BG);
-			textRenderer.draw(matrices, label, tipX + 4, tipY + 3, COLOR_HANDLE);
+			graphics.fill(tipX, tipY, tipX + w, tipY + 13, COLOR_TIP_BG);
+			graphics.text(font, label, (int) (tipX + 4), (int) (tipY + 3), COLOR_HANDLE);
 		}
 
-		super.render(matrices, mouseX, mouseY, delta);
+		super.render(graphics, mouseX, mouseY, delta);
 	}
 
-	private void drawFrame(MatrixStack matrices, Element element, int mouseX, int mouseY) {
+	private void drawFrame(GuiGraphicsExtractor graphics, Element element, int mouseX, int mouseY) {
 		double[] b = boundsOf(element);
 		int x1 = (int) Math.round(b[0]);
 		int y1 = (int) Math.round(b[1]);
@@ -318,20 +315,20 @@ public class HudEditScreen extends Screen {
 		boolean hot = active == element || hover != Mode.NONE;
 		int colour = hot ? COLOR_OUTLINE_ACTIVE : COLOR_OUTLINE;
 
-		fill(matrices, x1, y1, x2, y1 + 1, colour);
-		fill(matrices, x1, y2 - 1, x2, y2, colour);
-		fill(matrices, x1, y1, x1 + 1, y2, colour);
-		fill(matrices, x2 - 1, y1, x2, y2, colour);
+		graphics.fill(x1, y1, x2, y1 + 1, colour);
+		graphics.fill(x1, y2 - 1, x2, y2, colour);
+		graphics.fill(x1, y1, x1 + 1, y2, colour);
+		graphics.fill(x2 - 1, y1, x2, y2, colour);
 
 		// Handles light up individually so it is obvious what is grabbable.
 		boolean widthHot = hover == Mode.RESIZE_WIDTH || hover == Mode.RESIZE_BOTH;
 		boolean heightHot = hover == Mode.RESIZE_HEIGHT || hover == Mode.RESIZE_BOTH;
 
-		fill(matrices, x2 - 3, y1 + CORNER, x2, y2 - CORNER,
+		graphics.fill(x2 - 3, y1 + CORNER, x2, y2 - CORNER,
 				widthHot ? COLOR_HANDLE : COLOR_HANDLE_DIM);
-		fill(matrices, x1 + CORNER, y2 - 3, x2 - CORNER, y2,
+		graphics.fill(x1 + CORNER, y2 - 3, x2 - CORNER, y2,
 				heightHot ? COLOR_HANDLE : COLOR_HANDLE_DIM);
-		fill(matrices, x2 - CORNER, y2 - CORNER, x2, y2,
+		graphics.fill(x2 - CORNER, y2 - CORNER, x2, y2,
 				hover == Mode.RESIZE_BOTH ? COLOR_HANDLE : COLOR_HANDLE_DIM);
 	}
 
@@ -436,6 +433,6 @@ public class HudEditScreen extends Screen {
 	@Override
 	public void close() {
 		HudConfig.save();
-		this.client.setScreen(parent);
+		this.client.setScreenAndShow(parent);
 	}
 }

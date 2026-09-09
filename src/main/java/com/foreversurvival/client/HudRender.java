@@ -1,15 +1,13 @@
 package com.foreversurvival.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Shared transform helper for the HUD elements.
  *
- * Item rendering in 1.18.2 goes through {@code RenderSystem.getModelViewStack()}
- * rather than the MatrixStack handed to the render callback, so scaling has to
- * be applied there for the quest icon to scale along with the text.
+ * 26.2 draws the GUI through a retained render state, so there is no global
+ * model-view stack to poke: the transform belongs to the extractor being drawn
+ * into, and is a 2D Matrix3x2fStack rather than a full 4x4.
  */
 public final class HudRender {
 
@@ -17,16 +15,13 @@ public final class HudRender {
 	}
 
 	/** Translates to (x, y) and scales, so callers can draw from the origin. */
-	public static void push(double x, double y, double scale) {
-		MatrixStack model = RenderSystem.getModelViewStack();
-		model.push();
-		model.translate(x, y, 0.0D);
-		model.scale((float) scale, (float) scale, 1.0F);
-		RenderSystem.applyModelViewMatrix();
+	public static void push(GuiGraphicsExtractor graphics, double x, double y, double scale) {
+		graphics.pose().pushMatrix();
+		graphics.pose().translate((float) x, (float) y);
+		graphics.pose().scale((float) scale, (float) scale);
 	}
 
-	public static void pop() {
-		RenderSystem.getModelViewStack().pop();
-		RenderSystem.applyModelViewMatrix();
+	public static void pop(GuiGraphicsExtractor graphics) {
+		graphics.pose().popMatrix();
 	}
 }

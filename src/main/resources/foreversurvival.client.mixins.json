@@ -3,7 +3,6 @@
 	"package": "com.foreversurvival.mixin.client",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"InGameHudMixin",
 		"ToastManagerMixin"
 	],
 	"injectors": {

@@ -6,15 +6,16 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import com.foreversurvival.data.PlayerQuestData;
+import com.foreversurvival.ForeverSurvival;
 import com.foreversurvival.quest.Quest;
 import com.foreversurvival.quest.QuestManager;
 import com.foreversurvival.quest.task.QuestTask;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.FormattedCharSequence;
 
 /**
@@ -32,7 +33,7 @@ import net.minecraft.util.FormattedCharSequence;
  * This is a UI panel, not a world marker: it never points at anything, never
  * draws in the world, and never reveals a locked quest.
  */
-public final class QuestHud extends DrawableHelper {
+public final class QuestHud {
 
 	private static final int PADDING = 5;
 	private static final int LINE = 10;
@@ -58,10 +59,14 @@ public final class QuestHud extends DrawableHelper {
 	}
 
 	public static void register() {
-		HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
-			INSTANCE.render(matrices);
-			LocatorBar.get().renderFree(matrices);
-		});
+		// A registered element rather than a mixin: supported API, and it draws
+		// after the vanilla elements so the panel sits on top.
+		HudElementRegistry.addLast(
+				Identifier.fromNamespaceAndPath(ForeverSurvival.MOD_ID, "quest_hud"),
+				(graphics, deltaTracker) -> {
+					INSTANCE.render(graphics);
+					LocatorBar.get().renderFree(graphics);
+				});
 	}
 
 	/** One laid-out line. A checkbox is drawn on the first line of a task only. */
@@ -108,7 +113,7 @@ public final class QuestHud extends DrawableHelper {
 			return;
 		}
 
-		List<FormattedCharSequence> lines = font.wrapLines(Component.literal(text), Math.max(20, width));
+		List<FormattedCharSequence> lines = font.split(Component.literal(text), Math.max(20, width));
 		for (int i = 0; i < lines.size(); i++) {
 			// Only the first line of a block carries the checkbox.
 			out.add(new Row(lines.get(i), rgb, indent, i == 0 ? checkbox : -1));
@@ -134,7 +139,7 @@ public final class QuestHud extends DrawableHelper {
 
 	/** The whole panel as a flat list of laid-out lines. */
 	private List<Row> layout(@Nullable Quest quest) {
-		Font font = Minecraft.getInstance().textRenderer;
+		Font font = Minecraft.getInstance().font;
 		int textWidth = HudConfig.hudWidth - PADDING * 2;
 		int headerWidth = textWidth - (HudConfig.showIcon ? ICON : 0);
 
@@ -172,7 +177,7 @@ public final class QuestHud extends DrawableHelper {
 		if (HudConfig.hudHeight > 0) {
 			int maxRows = Math.max(1, (HudConfig.hudHeight - PADDING * 2) / LINE);
 			if (rows.size() > maxRows) {
-				Font font2 = Minecraft.getInstance().textRenderer;
+				Font font2 = Minecraft.getInstance().font;
 				int hidden = rows.size() - (maxRows - 1);
 				List<Row> trimmed = new ArrayList<>(rows.subList(0, Math.max(0, maxRows - 1)));
 				addWrapped(trimmed, font2, "+" + hidden + " more...",
@@ -191,7 +196,7 @@ public final class QuestHud extends DrawableHelper {
 	 * one fills it.
 	 */
 	private int fittedWidth(List<Row> rows) {
-		Font font = Minecraft.getInstance().textRenderer;
+		Font font = Minecraft.getInstance().font;
 
 		int widest = 0;
 		for (Row row : rows) {
@@ -200,7 +205,7 @@ public final class QuestHud extends DrawableHelper {
 			}
 			// Checkbox rows reserve a fixed strip on the right for the box.
 			int reserve = row.checkbox >= 0 ? CHECKBOX : 0;
-			widest = Math.max(widest, row.indent + font.getWidth(row.text) + reserve);
+			widest = Math.max(widest, row.indent + font.width(row.text) + reserve);
 		}
 
 		// Never narrower than the icon, or a sane floor, and never past the cap.
@@ -285,7 +290,7 @@ public final class QuestHud extends DrawableHelper {
 	// Rendering
 	// ------------------------------------------------------------------
 
-	private void render(MatrixStack matrices) {
+	private void render(GuiGraphicsExtractor graphics) {
 		if (!HudConfig.enabled) {
 			return;
 		}
@@ -300,27 +305,27 @@ public final class QuestHud extends DrawableHelper {
 			return;
 		}
 
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenWidth = client.getWindow().getGuiScaledWidth();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 
-		renderAt(matrices, HudConfig.hudX * screenWidth, HudConfig.hudY * screenHeight,
+		renderAt(graphics, HudConfig.hudX * screenWidth, HudConfig.hudY * screenHeight,
 				HudConfig.hudScale, quest);
 	}
 
 	/** Draws the panel with its top-left corner at (originX, originY). */
-	public void renderAt(MatrixStack matrices, double originX, double originY, double scale,
+	public void renderAt(GuiGraphicsExtractor graphics, double originX, double originY, double scale,
 			@Nullable Quest quest) {
-		HudRender.push(originX, originY, scale);
+		HudRender.push(graphics, originX, originY, scale);
 		try {
-			drawPanel(matrices, quest);
+			drawPanel(graphics, quest);
 		} finally {
-			HudRender.pop();
+			HudRender.pop(graphics);
 		}
 	}
 
-	private void drawPanel(MatrixStack matrices, @Nullable Quest quest) {
+	private void drawPanel(GuiGraphicsExtractor graphics, @Nullable Quest quest) {
 		Minecraft client = Minecraft.getInstance();
-		Font font = client.textRenderer;
+		Font font = client.font;
 
 		ensureLayout(quest);
 		List<Row> rows = cachedRows;
@@ -328,13 +333,13 @@ public final class QuestHud extends DrawableHelper {
 		int height = cachedSize[1];
 
 		if (HudConfig.backgroundOpacity > 0) {
-			fill(matrices, 0, 0, width, height, HudConfig.backgroundColor(RGB_PANEL));
+			graphics.fill(0, 0, width, height, HudConfig.backgroundColor(RGB_PANEL));
 
 			int border = HudConfig.backgroundColor(RGB_BORDER);
-			fill(matrices, 0, 0, width, 1, border);
-			fill(matrices, 0, height - 1, width, height, border);
-			fill(matrices, 0, 0, 1, height, border);
-			fill(matrices, width - 1, 0, width, height, border);
+			graphics.fill(0, 0, width, 1, border);
+			graphics.fill(0, height - 1, width, height, border);
+			graphics.fill(0, 0, 1, height, border);
+			graphics.fill(width - 1, 0, width, height, border);
 		}
 
 		if (HudConfig.showIcon && quest != null) {
@@ -345,17 +350,17 @@ public final class QuestHud extends DrawableHelper {
 		for (Row row : rows) {
 			if (row.text == null) {
 				// Spacer: draw the separator rule in the middle of the gap.
-				fill(matrices, PADDING, y + LINE / 2, width - PADDING, y + LINE / 2 + 1,
+				graphics.fill(PADDING, y + LINE / 2, width - PADDING, y + LINE / 2 + 1,
 						HudConfig.backgroundColor(RGB_BORDER));
 				y += LINE;
 				continue;
 			}
 
 			int x = PADDING + row.indent;
-			font.draw(matrices, row.text, x, y, HudConfig.applyTextAlpha(row.rgb));
+			graphics.text(font, row.text, x, y, HudConfig.applyTextAlpha(row.rgb));
 
 			if (row.checkbox >= 0) {
-				drawCheckbox(matrices, PADDING, y - 1, row.checkbox == 1);
+				drawCheckbox(graphics, PADDING, y - 1, row.checkbox == 1);
 			}
 
 			y += LINE;
@@ -363,17 +368,17 @@ public final class QuestHud extends DrawableHelper {
 	}
 
 	/** Small square, filled green once the objective is satisfied. */
-	private void drawCheckbox(MatrixStack matrices, int x, int y, boolean checked) {
+	private void drawCheckbox(GuiGraphicsExtractor graphics, int x, int y, boolean checked) {
 		int border = HudConfig.applyTextAlpha(checked ? RGB_TASK_DONE : RGB_BORDER);
 		int size = 9;
 
-		fill(matrices, x, y, x + size, y + 1, border);
-		fill(matrices, x, y + size - 1, x + size, y + size, border);
-		fill(matrices, x, y, x + 1, y + size, border);
-		fill(matrices, x + size - 1, y, x + size, y + size, border);
+		graphics.fill(x, y, x + size, y + 1, border);
+		graphics.fill(x, y + size - 1, x + size, y + size, border);
+		graphics.fill(x, y, x + 1, y + size, border);
+		graphics.fill(x + size - 1, y, x + size, y + size, border);
 
 		if (checked) {
-			fill(matrices, x + 2, y + 2, x + size - 2, y + size - 2,
+			graphics.fill(x + 2, y + 2, x + size - 2, y + size - 2,
 					HudConfig.applyTextAlpha(RGB_TASK_DONE));
 		}
 	}

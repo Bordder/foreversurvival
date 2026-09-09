@@ -3,6 +3,7 @@ package com.foreversurvival.client;
 import java.util.List;
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
@@ -27,8 +28,9 @@ public final class DurabilityTooltip {
 		ItemTooltipCallback.EVENT.register(DurabilityTooltip::appendDurability);
 	}
 
-	private static void appendDurability(ItemStack stack, TooltipFlag context, List<Component> lines) {
-		if (!HudConfig.showDurability || stack.isEmpty() || !stack.isDamageable()) {
+	private static void appendDurability(ItemStack stack, Item.TooltipContext tooltipContext,
+			TooltipFlag context, List<Component> lines) {
+		if (!HudConfig.showDurability || stack.isEmpty() || !stack.isDamageableItem()) {
 			return;
 		}
 
@@ -38,7 +40,7 @@ public final class DurabilityTooltip {
 		}
 
 		int max = stack.getMaxDamage();
-		int remaining = max - stack.getDamage();
+		int remaining = max - stack.getDamageValue();
 		if (max <= 0) {
 			return;
 		}
