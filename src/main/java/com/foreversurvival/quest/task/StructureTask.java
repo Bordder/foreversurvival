@@ -6,17 +6,17 @@ import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.level().level.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.level().level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.core.BlockPos;
 import java.util.function.Predicate;
 
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.minecraft.level().level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 /**
  * "Be somewhere" task, in two flavours.

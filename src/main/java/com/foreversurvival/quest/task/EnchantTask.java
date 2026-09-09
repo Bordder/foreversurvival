@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.minecraft.level().item.enchantment.Enchantment;
-import net.minecraft.level().item.enchantment.EnchantmentHelper;
-import net.minecraft.level().item.ItemStack;
-import net.minecraft.level().item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
@@ -61,13 +61,13 @@ public class EnchantTask extends QuestTask {
 		if (stack.isOf(Items.ENCHANTED_BOOK) && stack.hasNbt()) {
 			CompoundTag nbt = stack.getNbt();
 			if (nbt != null && nbt.contains("StoredEnchantments")) {
-				ListTag stored = nbt.getList("StoredEnchantments", Tag.COMPOUND_TYPE);
+				ListTag stored = nbt.getListOrEmpty("StoredEnchantments");
 				for (int i = 0; i < stored.size(); i++) {
-					CompoundTag entry = stored.getCompound(i);
-					int level = entry.getInt("lvl");
+					CompoundTag entry = stored.getCompoundOrEmpty(i);
+					int level = entry.getIntOr("lvl", 0);
 					for (Enchantment enchant : enchants) {
 						String id = String.valueOf(Registry.ENCHANTMENT.getId(enchant));
-						if (id.equals(entry.getString("id")) && level >= minLevel) {
+						if (id.equals(entry.getStringOr("id", "")) && level >= minLevel) {
 							return true;
 						}
 					}

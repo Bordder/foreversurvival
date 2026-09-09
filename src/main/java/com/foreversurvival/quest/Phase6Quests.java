@@ -12,10 +12,10 @@ import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.PositionTask;
 import com.foreversurvival.quest.task.StatTask;
 
-import net.minecraft.level().item.enchantment.Enchantments;
-import net.minecraft.level().entity.EntityType;
-import net.minecraft.level().entity.EntityTypes;
-import net.minecraft.level().item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
 
 /**

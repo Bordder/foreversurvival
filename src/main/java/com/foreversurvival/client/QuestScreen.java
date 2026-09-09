@@ -25,7 +25,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.level().item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
@@ -1119,8 +1119,8 @@ public class QuestScreen extends Screen {
 		}
 
 		for (int i = 0; i < list.size(); i++) {
-			CompoundTag entry = list.getCompound(i);
-			int slot = entry.getByte("Slot") & 255;
+			CompoundTag entry = list.getCompoundOrEmpty(i);
+			int slot = entry.getByteOr("Slot", (byte) 0) & 255;
 			ItemStack stack = ItemStack.fromNbt(entry);
 			if (stack.isEmpty()) {
 				continue;
@@ -1186,22 +1186,22 @@ public class QuestScreen extends Screen {
 		graphics.text(font, "This World", (int) (x), (int) (y), TEXT_TITLE);
 		y += 14;
 
-		y = stat(graphics, x, y, "Playtime", formatDuration(stats.getInt("PlayTime")));
+		y = stat(graphics, x, y, "Playtime", formatDuration(stats.getIntOr("PlayTime", 0)));
 		y = stat(graphics, x, y, "Quests completed", mainDone + " main, " + sideDone + " side");
-		y = stat(graphics, x, y, "Since last death", formatDuration(stats.getInt("SinceDeath")));
+		y = stat(graphics, x, y, "Since last death", formatDuration(stats.getIntOr("SinceDeath", 0)));
 		y += 6;
 
-		y = stat(graphics, x, y, "Deaths", Integer.toString(stats.getInt("Deaths")));
-		y = stat(graphics, x, y, "Mobs killed", Integer.toString(stats.getInt("MobKills")));
+		y = stat(graphics, x, y, "Deaths", Integer.toString(stats.getIntOr("Deaths", 0)));
+		y = stat(graphics, x, y, "Mobs killed", Integer.toString(stats.getIntOr("MobKills", 0)));
 		y = stat(graphics, x, y, "Damage taken",
-				String.format(Locale.ROOT, "%.1f hearts", stats.getInt("DamageTaken") / 20.0D));
+				String.format(Locale.ROOT, "%.1f hearts", stats.getIntOr("DamageTaken", 0) / 20.0D));
 		y += 6;
 
-		y = stat(graphics, x, y, "Distance walked", formatDistance(stats.getInt("WalkCm")));
-		y = stat(graphics, x, y, "Distance sprinted", formatDistance(stats.getInt("SprintCm")));
-		y = stat(graphics, x, y, "Distance flown", formatDistance(stats.getInt("FlyCm")));
-		y = stat(graphics, x, y, "Jumps", Integer.toString(stats.getInt("Jumps")));
-		y = stat(graphics, x, y, "Nights slept", Integer.toString(stats.getInt("Slept")));
+		y = stat(graphics, x, y, "Distance walked", formatDistance(stats.getIntOr("WalkCm", 0)));
+		y = stat(graphics, x, y, "Distance sprinted", formatDistance(stats.getIntOr("SprintCm", 0)));
+		y = stat(graphics, x, y, "Distance flown", formatDistance(stats.getIntOr("FlyCm", 0)));
+		y = stat(graphics, x, y, "Jumps", Integer.toString(stats.getIntOr("Jumps", 0)));
+		y = stat(graphics, x, y, "Nights slept", Integer.toString(stats.getIntOr("Slept", 0)));
 		y += 8;
 
 		// ---- Time per quest dropdown ----

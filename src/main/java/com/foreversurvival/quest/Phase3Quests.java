@@ -9,11 +9,11 @@ import com.foreversurvival.quest.task.ItemTask;
 import com.foreversurvival.quest.task.KillTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.level().level.block.Blocks;
-import net.minecraft.level().entity.EntityType;
-import net.minecraft.level().entity.EntityTypes;
-import net.minecraft.level().item.Items;
-import net.minecraft.level().level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 3 - THE EXPANSION (22 quests, MAJOR).

@@ -3,9 +3,9 @@ package com.foreversurvival.client;
 import java.util.List;
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.minecraft.level().item.Item;
-import net.minecraft.level().item.TooltipFlag;
-import net.minecraft.level().item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 

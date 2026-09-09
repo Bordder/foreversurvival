@@ -18,7 +18,7 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.TaskContext;
 
-import net.minecraft.level().level.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
@@ -237,7 +237,7 @@ public final class QuestManager {
 	 */
 	private Set<Block> scanNearbyBlocks(ServerPlayer player, Set<Block> wanted) {
 		Set<Block> found = new HashSet<>();
-		BlockPos origin = player.getBlockPos();
+		BlockPos origin = player.blockPosition();
 		BlockPos.Mutable cursor = new BlockPos.Mutable();
 
 		int minY = Math.max(player.level().getBottomY(), origin.getY() - SCAN_RADIUS_VERTICAL);
@@ -272,7 +272,7 @@ public final class QuestManager {
 
 		data.setCompleted(quest.getId());
 		data.setCompletionPlayTicks(quest.getId(),
-				player.getStats().getStat(Stats.CUSTOM.get(Stats.PLAY_TIME)));
+				player.getStats().getValue(Stats.CUSTOM.get(Stats.PLAY_TIME)));
 
 		// No items, no XP: the mod tells you what to do, vanilla does the rest.
 		player.sendSystemMessage(Component.literal("[ForeverSurvival] ").withStyle(ChatFormatting.DARK_AQUA)

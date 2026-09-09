@@ -14,15 +14,15 @@ import com.foreversurvival.quest.task.PositionTask;
 import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 
-import net.minecraft.level().level.block.Blocks;
-import net.minecraft.level().item.enchantment.Enchantments;
-import net.minecraft.level().entity.EntityType;
-import net.minecraft.level().entity.EntityTypes;
-import net.minecraft.level().item.DyeColor;
-import net.minecraft.level().item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
-import net.minecraft.level().level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 /**
  * SIDE CHALLENGES (30) - optional, unlocked from the start, never blocking.

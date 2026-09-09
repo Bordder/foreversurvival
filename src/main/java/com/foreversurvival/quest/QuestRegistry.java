@@ -1,8 +1,8 @@
 package com.foreversurvival.quest;
 
-import net.minecraft.level().item.Item;
-import net.minecraft.level().item.DyeColor;
-import net.minecraft.level().item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Items;
 
 /**
  * Shared plumbing for the quest tree. The quests themselves live in the

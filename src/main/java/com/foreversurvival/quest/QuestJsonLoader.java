@@ -23,10 +23,10 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.level().level.block.Block;
-import net.minecraft.level().entity.EntityType;
-import net.minecraft.level().item.Item;
-import net.minecraft.level().item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.Registry;
 
@@ -185,7 +185,7 @@ public final class QuestJsonLoader {
 				String dimension = json.has("dimension") ? json.get("dimension").getAsString() : null;
 
 				if (json.has("structure")) {
-					Identifier structureId = new Identifier(json.get("structure").getAsString());
+					Identifier structureId = Identifier.parse(json.get("structure").getAsString());
 					StructureFeature<?> feature = Registry.STRUCTURE_FEATURE.get(structureId);
 					if (feature == null) {
 						throw new IllegalArgumentException("unknown structure " + structureId);
@@ -209,7 +209,7 @@ public final class QuestJsonLoader {
 	}
 
 	private static Item parseItem(String id) {
-		Identifier identifier = new Identifier(id);
+		Identifier identifier = Identifier.parse(id);
 		Item item = Registry.ITEM.get(identifier);
 		if (item == Items.AIR) {
 			throw new IllegalArgumentException("unknown item " + identifier);
@@ -221,7 +221,7 @@ public final class QuestJsonLoader {
 		JsonArray array = required(json, "entities").getAsJsonArray();
 		EntityType<?>[] types = new EntityType<?>[array.size()];
 		for (int i = 0; i < array.size(); i++) {
-			Identifier identifier = new Identifier(array.get(i).getAsString());
+			Identifier identifier = Identifier.parse(array.get(i).getAsString());
 			types[i] = Registry.ENTITY_TYPE.get(identifier);
 		}
 		return types;
@@ -231,7 +231,7 @@ public final class QuestJsonLoader {
 		JsonArray array = required(json, "blocks").getAsJsonArray();
 		Block[] blocks = new Block[array.size()];
 		for (int i = 0; i < array.size(); i++) {
-			blocks[i] = Registry.BLOCK.get(new Identifier(array.get(i).getAsString()));
+			blocks[i] = Registry.BLOCK.get(Identifier.parse(array.get(i).getAsString()));
 		}
 		return blocks;
 	}

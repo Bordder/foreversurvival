@@ -17,10 +17,10 @@ import com.foreversurvival.quest.task.StatTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.UseTask;
 
-import net.minecraft.level().level.block.Blocks;
-import net.minecraft.level().entity.EntityType;
-import net.minecraft.level().entity.EntityTypes;
-import net.minecraft.level().item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
 

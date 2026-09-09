@@ -34,7 +34,7 @@ public class StatTask extends QuestTask {
 	@Override
 	public int computeProgress(TaskContext ctx) {
 		ServerPlayer player = ctx.getPlayer();
-		return player.getStats().getStat(Stats.CUSTOM.get(stat)) / divisor;
+		return player.getStats().getValue(Stats.CUSTOM.get(stat)) / divisor;
 	}
 
 	@Override

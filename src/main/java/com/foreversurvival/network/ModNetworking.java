@@ -68,16 +68,16 @@ public final class ModNetworking {
 		var handler = player.getStats();
 		CompoundTag stats = new CompoundTag();
 
-		stats.putInt("PlayTime", handler.getStat(Stats.CUSTOM.get(Stats.PLAY_TIME)));
-		stats.putInt("SinceDeath", handler.getStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH)));
-		stats.putInt("WalkCm", handler.getStat(Stats.CUSTOM.get(Stats.WALK_ONE_CM)));
-		stats.putInt("SprintCm", handler.getStat(Stats.CUSTOM.get(Stats.SPRINT_ONE_CM)));
-		stats.putInt("FlyCm", handler.getStat(Stats.CUSTOM.get(Stats.FLY_ONE_CM)));
-		stats.putInt("Deaths", handler.getStat(Stats.CUSTOM.get(Stats.DEATHS)));
-		stats.putInt("MobKills", handler.getStat(Stats.CUSTOM.get(Stats.MOB_KILLS)));
-		stats.putInt("Jumps", handler.getStat(Stats.CUSTOM.get(Stats.JUMP)));
-		stats.putInt("DamageTaken", handler.getStat(Stats.CUSTOM.get(Stats.DAMAGE_TAKEN)));
-		stats.putInt("Slept", handler.getStat(Stats.CUSTOM.get(Stats.SLEEP_IN_BED)));
+		stats.putInt("PlayTime", handler.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME)));
+		stats.putInt("SinceDeath", handler.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH)));
+		stats.putInt("WalkCm", handler.getValue(Stats.CUSTOM.get(Stats.WALK_ONE_CM)));
+		stats.putInt("SprintCm", handler.getValue(Stats.CUSTOM.get(Stats.SPRINT_ONE_CM)));
+		stats.putInt("FlyCm", handler.getValue(Stats.CUSTOM.get(Stats.FLY_ONE_CM)));
+		stats.putInt("Deaths", handler.getValue(Stats.CUSTOM.get(Stats.DEATHS)));
+		stats.putInt("MobKills", handler.getValue(Stats.CUSTOM.get(Stats.MOB_KILLS)));
+		stats.putInt("Jumps", handler.getValue(Stats.CUSTOM.get(Stats.JUMP)));
+		stats.putInt("DamageTaken", handler.getValue(Stats.CUSTOM.get(Stats.DAMAGE_TAKEN)));
+		stats.putInt("Slept", handler.getValue(Stats.CUSTOM.get(Stats.SLEEP_IN_BED)));
 
 		return stats;
 	}
