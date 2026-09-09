@@ -24,7 +24,7 @@ import net.minecraft.client.gui.components.toasts.ToastManager;
 @Mixin(ToastManager.class)
 public class ToastManagerMixin {
 
-	@Inject(method = "add", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "addToast", at = @At("HEAD"), cancellable = true)
 	private void foreversurvival$hideAdvancementToasts(Toast toast, CallbackInfo ci) {
 		if (HudConfig.hideAdvancementToasts && toast instanceof AdvancementToast) {
 			ci.cancel();

@@ -11,6 +11,8 @@ import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -29,15 +31,17 @@ public class ServerPlayerEntityMixin implements QuestDataHolder {
 		return foreversurvival$questData;
 	}
 
-	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-	private void foreversurvival$write(CompoundTag nbt, CallbackInfo ci) {
-		nbt.put(ForeverSurvival.NBT_ROOT_KEY, foreversurvival$questData.writeNbt());
+	// 26.2 saves through ValueOutput/ValueInput rather than a raw CompoundTag,
+	// so the tag goes through CompoundTag.CODEC. The stored shape is unchanged.
+	@Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
+	private void foreversurvival$write(ValueOutput output, CallbackInfo ci) {
+		output.store(ForeverSurvival.NBT_ROOT_KEY, CompoundTag.CODEC,
+				foreversurvival$questData.writeNbt());
 	}
 
-	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-	private void foreversurvival$read(CompoundTag nbt, CallbackInfo ci) {
-		if (nbt.contains(ForeverSurvival.NBT_ROOT_KEY)) {
-			foreversurvival$questData.readNbt(nbt.getCompoundOrEmpty(ForeverSurvival.NBT_ROOT_KEY));
-		}
+	@Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
+	private void foreversurvival$read(ValueInput input, CallbackInfo ci) {
+		input.read(ForeverSurvival.NBT_ROOT_KEY, CompoundTag.CODEC)
+				.ifPresent(foreversurvival$questData::readNbt);
 	}
 }

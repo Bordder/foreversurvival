@@ -12,14 +12,14 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.core.Registry;
 
 /**
  * Records how much damage the player deals to each mob type, for the Combat Log
  * in the Stats tab.
  *
- * The hook is on the victim's {@code damage} call: {@code this} is the mob being
+ * The hook is on the victim's {@code hurtServer} call: {@code this} is the mob being
  * hit and {@code source.getEntity()} is who hit it. Server side only, and only
  * when the attacker is a player. The raw incoming amount is stored (pre-armour),
  * which is the "hit for X" number players expect.
@@ -27,11 +27,12 @@ import net.minecraft.core.Registry;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-	@Inject(method = "damage", at = @At("HEAD"))
-	private void foreversurvival$recordDamage(DamageSource source, float amount,
+	@Inject(method = "hurtServer", at = @At("HEAD"))
+	private void foreversurvival$recordDamage(ServerLevel level, DamageSource source, float amount,
 			CallbackInfoReturnable<Boolean> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (self.level().isClientSide() || amount <= 0.0F) {
+		// hurtServer only runs server side, so the old isClientSide guard is gone.
+		if (amount <= 0.0F) {
 			return;
 		}
 
