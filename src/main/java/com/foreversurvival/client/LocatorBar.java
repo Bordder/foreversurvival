@@ -72,13 +72,12 @@ public final class LocatorBar {
 	private boolean hudUsable(Minecraft client) {
 		return HudConfig.locatorEnabled
 				&& client.player != null
-				&& !client.options.hudHidden
 				&& !client.options.debugEnabled;
 	}
 
 	/** True when at least one other player is in the same dimension as you. */
 	private boolean hasCompany(LocalPlayer self) {
-		String selfName = self.getGameProfile().getName();
+		String selfName = self.getName().getString();
 		String dimension = self.level().dimension().identifier().toString();
 
 		for (PlayerLocation other : ClientLocatorState.get()) {
@@ -192,7 +191,7 @@ public final class LocatorBar {
 		}
 
 		Font font = client.font;
-		String selfName = self.getGameProfile().getName();
+		String selfName = self.getName().getString();
 		String selfDimension = self.level().dimension().identifier().toString();
 
 		graphics.fill(x, y, x + width, y + height, HudConfig.backgroundColor(RGB_BAR));

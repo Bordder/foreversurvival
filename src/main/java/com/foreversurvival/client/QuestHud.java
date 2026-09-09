@@ -297,7 +297,7 @@ public final class QuestHud {
 		}
 
 		Minecraft client = Minecraft.getInstance();
-		if (client.player == null || client.options.hudHidden || client.options.debugEnabled) {
+		if (client.player == null || client.getDebugOverlay().showDebugScreen()) {
 			return;
 		}
 
@@ -344,7 +344,7 @@ public final class QuestHud {
 		}
 
 		if (HudConfig.showIcon && quest != null) {
-			client.getItemRenderer().renderInGuiWithOverrides(quest.getIconStack(), PADDING, PADDING + 1);
+			graphics.item(quest.getIconStack(), PADDING, PADDING + 1);
 		}
 
 		int y = PADDING;

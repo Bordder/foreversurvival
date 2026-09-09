@@ -52,7 +52,7 @@ public class ForeverSurvival implements ModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			QuestManager.get().tick(server);
 
-			if (server.getTicks() % LOCATION_SYNC_INTERVAL == 0) {
+			if (server.getTickCount() % LOCATION_SYNC_INTERVAL == 0) {
 				ModNetworking.syncPlayerLocations(server);
 			}
 		});

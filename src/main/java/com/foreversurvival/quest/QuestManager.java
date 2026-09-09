@@ -165,7 +165,7 @@ public final class QuestManager {
 			try {
 				evaluate(player);
 			} catch (Exception e) {
-				ForeverSurvival.LOGGER.error("Failed to evaluate quests for {}", player.getGameProfile().getName(), e);
+				ForeverSurvival.LOGGER.error("Failed to evaluate quests for {}", player.getName().getString(), e);
 			}
 
 			PlayerQuestData data = QuestDataHolder.get(player);
@@ -242,7 +242,7 @@ public final class QuestManager {
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
 		int minY = Math.max(player.level().getBottomY(), origin.getY() - SCAN_RADIUS_VERTICAL);
-		int maxY = Math.min(player.level().getTopY() - 1, origin.getY() + SCAN_RADIUS_VERTICAL);
+		int maxY = Math.min(player.level().getMaxY() - 1, origin.getY() + SCAN_RADIUS_VERTICAL);
 
 		for (int dx = -SCAN_RADIUS_HORIZONTAL; dx <= SCAN_RADIUS_HORIZONTAL; dx++) {
 			for (int dz = -SCAN_RADIUS_HORIZONTAL; dz <= SCAN_RADIUS_HORIZONTAL; dz++) {
@@ -325,7 +325,7 @@ public final class QuestManager {
 			return;
 		}
 
-		world.spawnParticles(ParticleTypes.HAPPY_VILLAGER,
+		world.sendParticles(ParticleTypes.HAPPY_VILLAGER,
 				player.getX(), player.getY() + 1.2D, player.getZ(),
 				12, 0.6D, 0.6D, 0.6D, 0.02D);
 	}
@@ -341,7 +341,7 @@ public final class QuestManager {
 
 		for (int burst = 0; burst < 4; burst++) {
 			double offsetY = 0.5D + burst * 0.6D;
-			world.spawnParticles(ParticleTypes.FIREWORK,
+			world.sendParticles(ParticleTypes.FIREWORK,
 					player.getX(), player.getY() + offsetY, player.getZ(),
 					60, 1.6D, 0.8D, 1.6D, 0.12D);
 		}

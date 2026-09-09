@@ -31,7 +31,7 @@ public abstract class LivingEntityMixin {
 	private void foreversurvival$recordDamage(DamageSource source, float amount,
 			CallbackInfoReturnable<Boolean> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (self.level().isClient || amount <= 0.0F) {
+		if (self.level().isClientSide() || amount <= 0.0F) {
 			return;
 		}
 

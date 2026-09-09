@@ -100,7 +100,7 @@ public final class ModNetworking {
 		List<ModPayloads.PlayerLocations.Entry> entries = new ArrayList<>(players.size());
 		for (ServerPlayer player : players) {
 			entries.add(new ModPayloads.PlayerLocations.Entry(
-					player.getGameProfile().getName(),
+					player.getName().getString(),
 					player.getX(), player.getY(), player.getZ(),
 					player.level().dimension().identifier().toString()));
 		}

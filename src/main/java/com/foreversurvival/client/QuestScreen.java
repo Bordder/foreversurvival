@@ -499,8 +499,7 @@ public class QuestScreen extends Screen {
 				graphics.fill(listLeft, rowTop, listRight, rowBottom, COLOR_ROW_HOVER);
 			}
 
-			Minecraft.getInstance().getItemRenderer()
-					.renderInGuiWithOverrides(quest.getIconStack(), listLeft + 3, rowTop + 2);
+			graphics.item(quest.getIconStack(), listLeft + 3, rowTop + 2);
 			if (!unlocked) {
 				graphics.fill(listLeft + 3, rowTop + 2, listLeft + 19, rowTop + 18, 0x99161620);
 			}
@@ -818,8 +817,7 @@ public class QuestScreen extends Screen {
 		graphics.fill(x + NODE - 1, y, x + NODE, y + NODE, border);
 
 		// 16px item icon centred in the 30px node.
-		Minecraft.getInstance().getItemRenderer()
-				.renderInGuiWithOverrides(quest.getIconStack(), x + 7, y + 7);
+		graphics.item(quest.getIconStack(), x + 7, y + 7);
 
 		if (!unlocked) {
 			graphics.fill(x + 1, y + 1, x + NODE - 1, y + NODE - 1, 0xAA12121A);
@@ -1163,7 +1161,7 @@ public class QuestScreen extends Screen {
 		}
 
 		Minecraft client = Minecraft.getInstance();
-		client.getItemRenderer().renderInGuiWithOverrides(stack, x, y);
+		graphics.item(stack, x, y);
 		client.getItemRenderer().renderGuiItemOverlay(font, stack, x, y);
 	}
 
@@ -2239,7 +2237,7 @@ public class QuestScreen extends Screen {
 		if (font.width(text) <= maxWidth) {
 			return text;
 		}
-		return font.trimToWidth(text, Math.max(0, maxWidth - font.width("..."))) + "...";
+		return font.plainSubstrByWidth(text, Math.max(0, maxWidth - font.width("..."))) + "...";
 	}
 
 	private double clampScroll(double scroll, int contentHeight, int viewHeight) {

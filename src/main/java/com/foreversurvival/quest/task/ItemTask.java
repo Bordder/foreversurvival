@@ -35,7 +35,7 @@ public class ItemTask extends QuestTask {
 		ServerPlayer player = ctx.getPlayer();
 
 		int carried = 0;
-		for (int slot = 0; slot < player.getInventory().size(); slot++) {
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
 			ItemStack stack = player.getInventory().getStack(slot);
 			if (!stack.isEmpty() && items.contains(stack.getItem())) {
 				carried += stack.getCount();
