@@ -1,29 +1,31 @@
 plugins {
-	// Loom 0.12 is the branch that targets Minecraft 1.18.x with Gradle 7.4.x.
-	id 'fabric-loom' version '0.12-SNAPSHOT'
+	// 26.1+ uses the new non-remapping Loom plugin: Minecraft ships
+	// unobfuscated, so there is nothing left to remap.
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
-archivesBaseName = project.archives_base_name
+base {
+	archivesName = project.archives_base_name
+}
 version = project.mod_version
 group = project.maven_group
 
 repositories {
-	// Only the default Fabric / Mojang / Maven Central repositories are used.
+	// Loom adds the Fabric and Mojang repositories automatically.
 	// No FTB, no CurseMaven, no KubeJS: this mod is fully self-contained.
 	mavenCentral()
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// No `mappings` line: 26.1+ is unobfuscated and carries parameter names.
+	// Plain `implementation`, not `modImplementation`, for the same reason.
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API is the ONLY mod dependency.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {
@@ -36,22 +38,31 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
-	it.options.release = 17
+	it.options.release = 25
 }
 
 java {
 	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+
+	// Only JDK 17 is installed on the dev machine; let Gradle provision 25
+	// itself via the foojay resolver configured in settings.gradle.
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
 }
 
 jar {
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}" }
+		rename { "${it}_${project.base.archivesName.get()}" }
 	}
 }
 
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
+		create("mavenJava", MavenPublication) {
 			from components.java
 		}
 	}

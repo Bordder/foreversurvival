@@ -3,7 +3,7 @@
 	"id": "foreversurvival",
 	"version": "${version}",
 	"name": "ForeverSurvival",
-	"description": "A completely self-contained, strictly-locked, months-long guided survival progression for Minecraft 1.18.2. Includes its own questing system, GUI, static guides, balanced rewards, optional side challenges and a death coordinate log. Requires no other questing mod.",
+	"description": "A completely self-contained, strictly-locked, months-long guided survival progression for Minecraft 26.2. Includes its own questing system, GUI, static guides, balanced rewards, optional side challenges and a death coordinate log. Requires no other questing mod.",
 	"authors": [
 		"ForeverSurvival"
 	],
@@ -26,9 +26,9 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.14.0",
-		"fabric": "*",
-		"minecraft": "1.18.2",
-		"java": ">=17"
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
 	}
 }
