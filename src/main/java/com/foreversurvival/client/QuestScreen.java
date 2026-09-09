@@ -25,6 +25,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -262,8 +264,9 @@ public class QuestScreen extends Screen {
 	// ------------------------------------------------------------------
 
 	@Override
-	public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-		this.renderBackground(graphics);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+			float delta) {
+		this.extractBackground(graphics, mouseX, mouseY, delta);
 
 		graphics.fill(left - 1, top - 1, left + panelWidth + 1, top + panelHeight + 1, COLOR_BORDER);
 		graphics.fill(left, top, left + panelWidth, top + panelHeight, COLOR_PANEL);
@@ -300,7 +303,7 @@ public class QuestScreen extends Screen {
 			case SETTINGS -> renderSettings(graphics, mouseX, mouseY);
 		}
 
-		super.render(graphics, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, delta);
 	}
 
 	private void renderTabs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -1537,7 +1540,7 @@ public class QuestScreen extends Screen {
 
 		settings.add(new Header("Layout"));
 		settings.add(new Action("Move and resize...",
-				() -> this.client.setScreenAndShow(new HudEditScreen(this))));
+				() -> this.minecraft.setScreenAndShow(new HudEditScreen(this))));
 		settings.add(new Action("Reset everything", HudConfig::resetToDefaults));
 
 		return settings;
@@ -1638,9 +1641,12 @@ public class QuestScreen extends Screen {
 	// ------------------------------------------------------------------
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (button != 0) {
-			return super.mouseClicked(mouseX, mouseY, button);
+			return super.mouseClicked(event, doubleClick);
 		}
 
 		// Scrollbars win over everything underneath them.
@@ -1807,7 +1813,7 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	private boolean handleTreeClick(double mouseX, double mouseY, boolean side) {
@@ -1887,7 +1893,10 @@ public class QuestScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (scrollDrag >= 0) {
 			dragScrollbar(scrollDrag, mouseY);
 			return true;
@@ -1901,11 +1910,14 @@ public class QuestScreen extends Screen {
 				return true;
 			}
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, deltaX, deltaY);
 	}
 
 	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+	public boolean mouseReleased(MouseButtonEvent event) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (scrollDrag >= 0) {
 			scrollDrag = -1;
 			return true;
@@ -1916,7 +1928,7 @@ public class QuestScreen extends Screen {
 			HudConfig.save();
 			return true;
 		}
-		return super.mouseReleased(mouseX, mouseY, button);
+		return super.mouseReleased(event);
 	}
 
 	@Override
@@ -1954,7 +1966,10 @@ public class QuestScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+	public boolean keyPressed(KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
+		int modifiers = event.modifiers();
 		if (searchActive) {
 			// 259 = backspace, 256 = escape, 257 = enter
 			if (keyCode == 259) {
@@ -1980,7 +1995,7 @@ public class QuestScreen extends Screen {
 			this.close();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	private void sendCheckmark(String questId, String taskId, boolean set) {

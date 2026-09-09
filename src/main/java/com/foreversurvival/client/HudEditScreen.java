@@ -5,6 +5,8 @@ import com.foreversurvival.quest.Quest;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 /**
  * Layout editor.
@@ -73,14 +75,12 @@ public class HudEditScreen extends Screen {
 	protected void init() {
 		int y = this.height - 26;
 
-		addDrawableChild(new Button(this.width / 2 - 180, y, 84, 20,
-				Component.literal("Auto height"), button -> {
+		addRenderableWidget(Button.builder(Component.literal("Auto height"), button -> {
 					HudConfig.hudHeight = 0;
 					HudConfig.save();
-				}));
+				}).bounds(this.width / 2 - 180, y, 84, 20).build());
 
-		addDrawableChild(new Button(this.width / 2 - 92, y, 84, 20,
-				Component.literal("Reset layout"), button -> {
+		addRenderableWidget(Button.builder(Component.literal("Reset layout"), button -> {
 					HudConfig.hudX = 0.72D;
 					HudConfig.hudY = 0.02D;
 					HudConfig.hudWidth = 150;
@@ -90,21 +90,18 @@ public class HudEditScreen extends Screen {
 					HudConfig.locatorWidth = 182;
 					HudConfig.locatorHeight = 9;
 					HudConfig.save();
-				}));
+				}).bounds(this.width / 2 - 92, y, 84, 20).build());
 
-		addDrawableChild(new Button(this.width / 2 - 4, y, 96, 20,
-				Component.literal(HudConfig.locatorXpBarMode ? "Bar: XP slot" : "Bar: free"),
-				button -> {
+		addRenderableWidget(Button.builder(Component.literal(HudConfig.locatorXpBarMode ? "Bar: XP slot" : "Bar: free"), button -> {
 					HudConfig.locatorXpBarMode = !HudConfig.locatorXpBarMode;
 					HudConfig.save();
-					this.client.setScreenAndShow(new HudEditScreen(parent));
-				}));
+					this.minecraft.setScreenAndShow(new HudEditScreen(parent));
+				}).bounds(this.width / 2 - 4, y, 96, 20).build());
 
-		addDrawableChild(new Button(this.width / 2 + 96, y, 84, 20,
-				Component.literal("Done"), button -> {
+		addRenderableWidget(Button.builder(Component.literal("Done"), button -> {
 					HudConfig.save();
-					this.client.setScreenAndShow(parent);
-				}));
+					this.minecraft.setScreenAndShow(parent);
+				}).bounds(this.width / 2 + 96, y, 84, 20).build());
 	}
 
 	@Override
@@ -251,8 +248,9 @@ public class HudEditScreen extends Screen {
 	// ------------------------------------------------------------------
 
 	@Override
-	public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-		this.renderBackground(graphics);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+			float delta) {
+		this.extractBackground(graphics, mouseX, mouseY, delta);
 
 		Quest quest = ClientQuestState.getCurrentMainQuest();
 		double[] questOrigin = originOf(Element.QUEST);
@@ -301,7 +299,7 @@ public class HudEditScreen extends Screen {
 			graphics.text(font, label, (int) (tipX + 4), (int) (tipY + 3), COLOR_HANDLE);
 		}
 
-		super.render(graphics, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, delta);
 	}
 
 	private void drawFrame(GuiGraphicsExtractor graphics, Element element, int mouseX, int mouseY) {
@@ -337,7 +335,10 @@ public class HudEditScreen extends Screen {
 	// ------------------------------------------------------------------
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (button == 0) {
 			Element[] order = locatorMovable()
 					? new Element[] { Element.LOCATOR, Element.QUEST }
@@ -366,17 +367,20 @@ public class HudEditScreen extends Screen {
 				return true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (active == null || mode == Mode.NONE) {
-			return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+			return super.mouseDragged(event, deltaX, deltaY);
 		}
 
 		// Shift is the usual "ignore snapping" modifier.
-		snapping = !hasShiftDown();
+		snapping = !event.hasShiftDown();
 
 		switch (mode) {
 			case MOVING -> setOrigin(active, mouseX - grabX, mouseY - grabY);
@@ -394,24 +398,30 @@ public class HudEditScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+	public boolean mouseReleased(MouseButtonEvent event) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (mode != Mode.NONE) {
 			mode = Mode.NONE;
 			active = null;
 			HudConfig.save();
 			return true;
 		}
-		return super.mouseReleased(mouseX, mouseY, button);
+		return super.mouseReleased(event);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+	public boolean keyPressed(KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
+		int modifiers = event.modifiers();
 		Element target = selected;
 		if (target == Element.LOCATOR && !locatorMovable()) {
 			target = Element.QUEST;
 		}
 
-		int step = hasShiftDown() ? 10 : 1;
+		int step = event.hasShiftDown() ? 10 : 1;
 		boolean moved = true;
 
 		// 263 left, 262 right, 265 up, 264 down
@@ -427,12 +437,12 @@ public class HudEditScreen extends Screen {
 			HudConfig.save();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
 	public void close() {
 		HudConfig.save();
-		this.client.setScreenAndShow(parent);
+		this.minecraft.setScreenAndShow(parent);
 	}
 }
