@@ -27,6 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.item.ItemStack;
@@ -257,7 +258,7 @@ public class QuestScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
+	public boolean isPauseScreen() {
 		return false;
 	}
 
@@ -452,7 +453,7 @@ public class QuestScreen extends Screen {
 		}
 		listScroll = clampScroll(listScroll, totalHeight, contentBottom - top);
 
-		enableScissor(listLeft, top + 1, listRight, contentBottom - 1);
+		graphics.enableScissor(listLeft, top + 1, listRight, contentBottom - 1);
 
 		int y = top - (int) listScroll;
 
@@ -525,7 +526,7 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		disableScissor();
+		graphics.disableScissor();
 		drawScrollbar(graphics, SB_LIST, listRight, top + 1, contentBottom - 1, totalHeight,
 				mouseX, mouseY);
 		drawBorder(graphics, listLeft, top, listRight, contentBottom);
@@ -690,7 +691,7 @@ public class QuestScreen extends Screen {
 		int contentHeight = rows * NODE_STEP + 6;
 		treeScroll = clampScroll(treeScroll, contentHeight, treeGridBottom() - treeGridTop());
 
-		enableScissor(panelLeft, treeGridTop() - 2, panelRight, treeGridBottom());
+		graphics.enableScissor(panelLeft, treeGridTop() - 2, panelRight, treeGridBottom());
 
 		// Connectors first so the nodes sit on top of them.
 		for (int i = 0; i + 1 < quests.size(); i++) {
@@ -729,7 +730,7 @@ public class QuestScreen extends Screen {
 			drawNode(graphics, pos[0], pos[1], quest, data, current, over, side);
 		}
 
-		disableScissor();
+		graphics.disableScissor();
 		drawScrollbar(graphics, SB_TREE, panelRight, treeGridTop(), treeGridBottom(), contentHeight,
 				mouseX, mouseY);
 
@@ -884,7 +885,7 @@ public class QuestScreen extends Screen {
 		int wrapWidth = detailRight - detailLeft - 12;
 		int bodyBottom = showFooter ? contentBottom - FOOTER_HEIGHT : contentBottom;
 
-		enableScissor(detailLeft, contentTop + 1, detailRight, bodyBottom - 1);
+		graphics.enableScissor(detailLeft, contentTop + 1, detailRight, bodyBottom - 1);
 
 		int y = contentTop + 5 - (int) detailScroll;
 		int startY = y;
@@ -970,7 +971,7 @@ public class QuestScreen extends Screen {
 			y += 8;
 		}
 
-		disableScissor();
+		graphics.disableScissor();
 
 		int documentHeight = y - startY + 6;
 		detailScroll = clampScroll(detailScroll, documentHeight, bodyBottom - contentTop);
@@ -1028,7 +1029,7 @@ public class QuestScreen extends Screen {
 		int totalHeight = headerHeight + deaths.size() * rowHeight + 6;
 		deathScroll = clampScroll(deathScroll, totalHeight, contentBottom - contentTop);
 
-		enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
+		graphics.enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
 
 		int y = contentTop + 5 - (int) deathScroll;
 		graphics.text(font, "Recorded deaths: " + deaths.size()
@@ -1058,7 +1059,7 @@ public class QuestScreen extends Screen {
 			y += rowHeight;
 		}
 
-		disableScissor();
+		graphics.disableScissor();
 		drawScrollbar(graphics, SB_DEATHS, panelRight, contentTop + 1, contentBottom - 1, totalHeight,
 				mouseX, mouseY);
 		drawBorder(graphics, panelLeft, contentTop, panelRight, contentBottom);
@@ -1195,7 +1196,7 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
+		graphics.enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
 
 		int x = panelLeft + 8;
 		int startY = contentTop + 7 - (int) statsScroll;
@@ -1287,7 +1288,7 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		disableScissor();
+		graphics.disableScissor();
 
 		int contentHeight = (y - startY) + 8;
 		statsScroll = clampScroll(statsScroll, contentHeight, contentBottom - contentTop);
@@ -1371,7 +1372,7 @@ public class QuestScreen extends Screen {
 
 		int percent = mainTotal == 0 ? 0 : (mainDone * 100 / mainTotal);
 
-		enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
+		graphics.enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
 
 		graphics.text(font, "ForeverSurvival - Progress Summary", (int) (x), (int) (y), TEXT_TITLE);
 		y += 15;
@@ -1418,7 +1419,7 @@ public class QuestScreen extends Screen {
 		y += 11;
 		graphics.text(font, current == null ? "All main quests complete." : current.getTitle(), (int) (x), (int) (y), TEXT_TITLE);
 
-		disableScissor();
+		graphics.disableScissor();
 		drawBorder(graphics, panelLeft, contentTop, panelRight, contentBottom);
 	}
 
@@ -1567,7 +1568,7 @@ public class QuestScreen extends Screen {
 		int totalHeight = settings.size() * SETTINGS_ROW_HEIGHT + 12;
 		settingsScroll = clampScroll(settingsScroll, totalHeight, contentBottom - contentTop);
 
-		enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
+		graphics.enableScissor(panelLeft, contentTop + 1, panelRight, contentBottom - 1);
 
 		for (int i = 0; i < settings.size(); i++) {
 			Setting setting = settings.get(i);
@@ -1621,7 +1622,7 @@ public class QuestScreen extends Screen {
 			}
 		}
 
-		disableScissor();
+		graphics.disableScissor();
 		drawScrollbar(graphics, SB_SETTINGS, panelRight, contentTop + 1, contentBottom - 1,
 				totalHeight, mouseX, mouseY);
 		drawBorder(graphics, panelLeft, contentTop, panelRight, contentBottom);
@@ -1932,7 +1933,7 @@ public class QuestScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double amount) {
 		double step = amount * 12.0D;
 
 		switch (tab) {
@@ -1956,13 +1957,14 @@ public class QuestScreen extends Screen {
 	}
 
 	@Override
-	public boolean charTyped(char chr, int modifiers) {
+	public boolean charTyped(CharacterEvent event) {
+		char chr = (char) event.codepoint();
 		if (searchActive && chr >= ' ' && searchQuery.length() < 40) {
 			searchQuery += chr;
 			listScroll = 0;
 			return true;
 		}
-		return super.charTyped(chr, modifiers);
+		return super.charTyped(event);
 	}
 
 	@Override
@@ -1992,7 +1994,7 @@ public class QuestScreen extends Screen {
 
 		if (ForeverSurvivalClient.openQuestsKey != null
 				&& ForeverSurvivalClient.openQuestsKey.matches(event)) {
-			this.close();
+			this.onClose();
 			return true;
 		}
 		return super.keyPressed(event);
@@ -2124,22 +2126,6 @@ public class QuestScreen extends Screen {
 		for (Bar bar : scrollBars) {
 			bar.active = false;
 		}
-	}
-
-	private void enableScissor(int x1, int y1, int x2, int y2) {
-		Window window = Minecraft.getInstance().getWindow();
-		double scale = window.getGuiScale();
-
-		int sx = (int) (x1 * scale);
-		int sy = (int) ((window.getGuiScaledHeight() - y2) * scale);
-		int sw = (int) ((x2 - x1) * scale);
-		int sh = (int) ((y2 - y1) * scale);
-
-		RenderSystem.enableScissor(sx, sy, Math.max(0, sw), Math.max(0, sh));
-	}
-
-	private void disableScissor() {
-		RenderSystem.disableScissor();
 	}
 
 	private void drawTick(GuiGraphicsExtractor graphics, int x, int y, int color) {

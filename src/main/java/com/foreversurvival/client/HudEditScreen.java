@@ -106,7 +106,7 @@ public class HudEditScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
+	public boolean isPauseScreen() {
 		return false;
 	}
 
@@ -442,7 +442,7 @@ public class HudEditScreen extends Screen {
 	}
 
 	@Override
-	public void close() {
+	public void onClose() {
 		HudConfig.save();
 		this.minecraft.setScreenAndShow(parent);
 	}

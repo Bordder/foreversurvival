@@ -23,6 +23,8 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.EntityType;
@@ -186,12 +188,12 @@ public final class QuestJsonLoader {
 				String dimension = json.has("dimension") ? json.get("dimension").getAsString() : null;
 
 				if (json.has("structure")) {
+					// Structures are data-driven in 26.2, so there is no registry
+					// to validate against at load time: the key is resolved
+					// against the world's registry when the task is evaluated.
 					Identifier structureId = Identifier.parse(json.get("structure").getAsString());
-					StructureFeature<?> feature = Registry.STRUCTURE_FEATURE.get(structureId);
-					if (feature == null) {
-						throw new IllegalArgumentException("unknown structure " + structureId);
-					}
-					return new StructureTask(id, description, dimension, feature);
+					return new StructureTask(id, description, dimension,
+							ResourceKey.create(Registries.STRUCTURE, structureId));
 				}
 				return new StructureTask(id, description, dimension, parseBlocks(json));
 			}
@@ -211,7 +213,7 @@ public final class QuestJsonLoader {
 
 	private static Item parseItem(String id) {
 		Identifier identifier = Identifier.parse(id);
-		Item item = BuiltInRegistries.ITEM.get(identifier);
+		Item item = BuiltInRegistries.ITEM.getValue(identifier);
 		if (item == Items.AIR) {
 			throw new IllegalArgumentException("unknown item " + identifier);
 		}
@@ -223,7 +225,7 @@ public final class QuestJsonLoader {
 		EntityType<?>[] types = new EntityType<?>[array.size()];
 		for (int i = 0; i < array.size(); i++) {
 			Identifier identifier = Identifier.parse(array.get(i).getAsString());
-			types[i] = BuiltInRegistries.ENTITY_TYPE.get(identifier);
+			types[i] = BuiltInRegistries.ENTITY_TYPE.getValue(identifier);
 		}
 		return types;
 	}
@@ -232,7 +234,7 @@ public final class QuestJsonLoader {
 		JsonArray array = required(json, "blocks").getAsJsonArray();
 		Block[] blocks = new Block[array.size()];
 		for (int i = 0; i < array.size(); i++) {
-			blocks[i] = BuiltInRegistries.BLOCK.get(Identifier.parse(array.get(i).getAsString()));
+			blocks[i] = BuiltInRegistries.BLOCK.getValue(Identifier.parse(array.get(i).getAsString()));
 		}
 		return blocks;
 	}

@@ -241,7 +241,7 @@ public final class QuestManager {
 		BlockPos origin = player.blockPosition();
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
-		int minY = Math.max(player.level().getBottomY(), origin.getY() - SCAN_RADIUS_VERTICAL);
+		int minY = Math.max(player.level().getMinY(), origin.getY() - SCAN_RADIUS_VERTICAL);
 		int maxY = Math.min(player.level().getMaxY() - 1, origin.getY() + SCAN_RADIUS_VERTICAL);
 
 		for (int dx = -SCAN_RADIUS_HORIZONTAL; dx <= SCAN_RADIUS_HORIZONTAL; dx++) {

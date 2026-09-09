@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.WeatheringCopper.WeatherState;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
 
@@ -184,8 +185,8 @@ final class Phase2Quests {
 						+ "your roof stops the base burning down.")
 				.tools("Stone Pickaxe or better")
 				.task(new ItemTask("raw_copper", "Collect Raw Copper", 40, Items.RAW_COPPER),
-						new CraftTask("copper_block", "Craft a Copper Block", 1, Items.COPPER_BLOCK),
-						new CraftTask("rod", "Craft a Lightning Rod", 1, Items.LIGHTNING_ROD)));
+						new CraftTask("copper_block", "Craft a Copper Block", 1, Items.COPPER_BLOCK.weathering().pick(WeatherState.UNAFFECTED)),
+						new CraftTask("rod", "Craft a Lightning Rod", 1, Items.LIGHTNING_ROD.weathering().pick(WeatherState.UNAFFECTED))));
 
 		addMain(Quest.builder("p2_14_below_zero", QuestPhase.PHASE_2)
 				.title("Below Zero")

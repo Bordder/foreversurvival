@@ -20,7 +20,7 @@ import net.minecraft.core.Registry;
  * in the Stats tab.
  *
  * The hook is on the victim's {@code damage} call: {@code this} is the mob being
- * hit and {@code source.getAttacker()} is who hit it. Server side only, and only
+ * hit and {@code source.getEntity()} is who hit it. Server side only, and only
  * when the attacker is a player. The raw incoming amount is stored (pre-armour),
  * which is the "hit for X" number players expect.
  */
@@ -35,7 +35,7 @@ public abstract class LivingEntityMixin {
 			return;
 		}
 
-		Entity attacker = source.getAttacker();
+		Entity attacker = source.getEntity();
 		if (!(attacker instanceof ServerPlayer player)) {
 			return;
 		}
