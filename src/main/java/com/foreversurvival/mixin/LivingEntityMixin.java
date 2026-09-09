@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.damagesource.DamageSource;
@@ -39,7 +40,7 @@ public abstract class LivingEntityMixin {
 			return;
 		}
 
-		String typeId = Registry.ENTITY_TYPE.getId(self.getType()).toString();
+		String typeId = BuiltInRegistries.ENTITY_TYPE.getKey(self.getType()).toString();
 		PlayerQuestData data = QuestDataHolder.get(player);
 		data.addDamageDealt(typeId, amount);
 	}

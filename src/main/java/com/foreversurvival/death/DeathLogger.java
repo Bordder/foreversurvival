@@ -5,6 +5,7 @@ import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -35,7 +36,7 @@ public final class DeathLogger {
 		// the death itself is never vetoed.
 		ServerPlayerEvents.ALLOW_DEATH.register((player, damageSource, damageAmount) -> {
 			BlockPos pos = player.blockPosition();
-			String dimension = player.level().dimension().location().toString();
+			String dimension = player.level().dimension().identifier().toString();
 
 			String cause;
 			try {

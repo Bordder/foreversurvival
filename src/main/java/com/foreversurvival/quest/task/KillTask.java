@@ -28,7 +28,7 @@ public class KillTask extends QuestTask {
 		int total = 0;
 
 		for (EntityType<?> type : types) {
-			total += player.getStats().getValue(Stats.KILLED.get(type));
+			total += player.getStats().getValue(Stats.ENTITY_KILLED.get(type));
 		}
 
 		return total;

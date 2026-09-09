@@ -48,7 +48,7 @@ public class ItemTask extends QuestTask {
 		// cumulative and never falls, so whichever is higher wins.
 		int gathered = 0;
 		for (Item item : items) {
-			gathered += player.getStats().getValue(Stats.PICKED_UP.get(item));
+			gathered += player.getStats().getValue(Stats.ITEM_PICKED_UP.get(item));
 		}
 
 		return Math.max(carried, gathered);

@@ -23,6 +23,7 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -210,7 +211,7 @@ public final class QuestJsonLoader {
 
 	private static Item parseItem(String id) {
 		Identifier identifier = Identifier.parse(id);
-		Item item = Registry.ITEM.get(identifier);
+		Item item = BuiltInRegistries.ITEM.get(identifier);
 		if (item == Items.AIR) {
 			throw new IllegalArgumentException("unknown item " + identifier);
 		}
@@ -222,7 +223,7 @@ public final class QuestJsonLoader {
 		EntityType<?>[] types = new EntityType<?>[array.size()];
 		for (int i = 0; i < array.size(); i++) {
 			Identifier identifier = Identifier.parse(array.get(i).getAsString());
-			types[i] = Registry.ENTITY_TYPE.get(identifier);
+			types[i] = BuiltInRegistries.ENTITY_TYPE.get(identifier);
 		}
 		return types;
 	}
@@ -231,7 +232,7 @@ public final class QuestJsonLoader {
 		JsonArray array = required(json, "blocks").getAsJsonArray();
 		Block[] blocks = new Block[array.size()];
 		for (int i = 0; i < array.size(); i++) {
-			blocks[i] = Registry.BLOCK.get(Identifier.parse(array.get(i).getAsString()));
+			blocks[i] = BuiltInRegistries.BLOCK.get(Identifier.parse(array.get(i).getAsString()));
 		}
 		return blocks;
 	}

@@ -102,7 +102,7 @@ public final class ModNetworking {
 			entries.add(new ModPayloads.PlayerLocations.Entry(
 					player.getGameProfile().getName(),
 					player.getX(), player.getY(), player.getZ(),
-					player.level().dimension().location().toString()));
+					player.level().dimension().identifier().toString()));
 		}
 
 		ModPayloads.PlayerLocations payload = new ModPayloads.PlayerLocations(entries);

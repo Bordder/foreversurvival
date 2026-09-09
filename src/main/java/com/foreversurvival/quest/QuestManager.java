@@ -18,6 +18,7 @@ import com.foreversurvival.quest.task.QuestTask;
 import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.TaskContext;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -238,7 +239,7 @@ public final class QuestManager {
 	private Set<Block> scanNearbyBlocks(ServerPlayer player, Set<Block> wanted) {
 		Set<Block> found = new HashSet<>();
 		BlockPos origin = player.blockPosition();
-		BlockPos.Mutable cursor = new BlockPos.Mutable();
+		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
 		int minY = Math.max(player.level().getBottomY(), origin.getY() - SCAN_RADIUS_VERTICAL);
 		int maxY = Math.min(player.level().getTopY() - 1, origin.getY() + SCAN_RADIUS_VERTICAL);

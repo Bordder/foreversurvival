@@ -79,7 +79,7 @@ public final class LocatorBar {
 	/** True when at least one other player is in the same dimension as you. */
 	private boolean hasCompany(LocalPlayer self) {
 		String selfName = self.getGameProfile().getName();
-		String dimension = self.level().dimension().location().toString();
+		String dimension = self.level().dimension().identifier().toString();
 
 		for (PlayerLocation other : ClientLocatorState.get()) {
 			if (!other.getName().equals(selfName) && other.getDimension().equals(dimension)) {
@@ -193,7 +193,7 @@ public final class LocatorBar {
 
 		Font font = client.font;
 		String selfName = self.getGameProfile().getName();
-		String selfDimension = self.level().dimension().location().toString();
+		String selfDimension = self.level().dimension().identifier().toString();
 
 		graphics.fill(x, y, x + width, y + height, HudConfig.backgroundColor(RGB_BAR));
 		int border = HudConfig.backgroundColor(RGB_BORDER);

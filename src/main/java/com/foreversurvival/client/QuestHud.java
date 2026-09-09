@@ -12,6 +12,7 @@ import com.foreversurvival.quest.QuestManager;
 import com.foreversurvival.quest.task.QuestTask;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

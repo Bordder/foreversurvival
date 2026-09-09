@@ -34,7 +34,7 @@ public class UseTask extends QuestTask {
 		int total = 0;
 
 		for (Item item : items) {
-			total += player.getStats().getValue(Stats.USED.get(item));
+			total += player.getStats().getValue(Stats.ITEM_USED.get(item));
 		}
 		return total;
 	}

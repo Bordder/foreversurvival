@@ -32,7 +32,7 @@ public class CraftTask extends QuestTask {
 		int total = 0;
 
 		for (Item item : items) {
-			total += player.getStats().getValue(Stats.CRAFTED.get(item));
+			total += player.getStats().getValue(Stats.ITEM_CRAFTED.get(item));
 		}
 
 		return total;

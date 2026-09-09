@@ -21,6 +21,7 @@ import com.foreversurvival.quest.QuestPhase;
 import com.foreversurvival.quest.task.QuestTask;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.Window;

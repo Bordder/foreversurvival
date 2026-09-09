@@ -77,7 +77,7 @@ public class StructureTask extends QuestTask {
 		ServerPlayer player = ctx.getPlayer();
 
 		if (dimension != null) {
-			String current = player.level().dimension().location().toString();
+			String current = player.level().dimension().identifier().toString();
 			if (!dimension.equals(current)) {
 				return 0;
 			}
