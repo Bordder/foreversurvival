@@ -251,7 +251,6 @@ public class HudEditScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
 			float delta) {
-		this.extractBackground(graphics, mouseX, mouseY, delta);
 
 		Quest quest = ClientQuestState.getCurrentMainQuest();
 		double[] questOrigin = originOf(Element.QUEST);

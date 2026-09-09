@@ -269,8 +269,6 @@ public class QuestScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
 			float delta) {
-		this.extractBackground(graphics, mouseX, mouseY, delta);
-
 		graphics.fill(left - 1, top - 1, left + panelWidth + 1, top + panelHeight + 1, COLOR_BORDER);
 		graphics.fill(left, top, left + panelWidth, top + panelHeight, COLOR_PANEL);
 
