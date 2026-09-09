@@ -31,7 +31,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.ChatFormatting;
 
@@ -223,7 +222,7 @@ public class QuestScreen extends Screen {
 	private String checkmarkTaskId;
 
 	public QuestScreen() {
-		super(new Component("ForeverSurvival"));
+		super(Component.literal("ForeverSurvival"));
 	}
 
 	@Override
@@ -2210,7 +2209,7 @@ public class QuestScreen extends Screen {
 			return y;
 		}
 
-		List<FormattedCharSequence> lines = textRenderer.wrapLines(new Component(text), width);
+		List<FormattedCharSequence> lines = textRenderer.wrapLines(Component.literal(text), width);
 		for (FormattedCharSequence line : lines) {
 			textRenderer.draw(matrices, line, x, y, color);
 			y += 9;

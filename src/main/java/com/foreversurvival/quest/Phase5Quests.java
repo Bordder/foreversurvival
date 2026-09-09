@@ -17,7 +17,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 5 - THE ENDGAME (18 quests, MAJOR).
@@ -59,7 +59,7 @@ final class Phase5Quests {
 						+ "it. Break the silverfish Monster Spawner immediately.")
 				.tools("Eyes of Ender", "Torches", "Pickaxe")
 				.task(new StructureTask("stronghold", "Find a Stronghold", OVERWORLD,
-								StructureFeature.STRONGHOLD),
+								BuiltinStructures.STRONGHOLD),
 						new CheckmarkTask("library", "Loot the stronghold library")));
 
 		addMain(Quest.builder("p5_04_into_the_end", QuestPhase.PHASE_5)
@@ -114,7 +114,7 @@ final class Phase5Quests {
 						+ "doorway and always carry a water bucket.")
 				.tools("Ender Pearls", "Water Bucket", "Building Blocks", "Bow")
 				.task(new StructureTask("city", "Find an End City", END,
-								StructureFeature.ENDCITY),
+								BuiltinStructures.END_CITY),
 						new ItemTask("rods", "Collect End Rods", 8, Items.END_ROD)));
 
 		addMain(Quest.builder("p5_09_chorus_harvest", QuestPhase.PHASE_5)

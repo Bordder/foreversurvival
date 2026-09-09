@@ -1,5 +1,6 @@
 package com.foreversurvival.network;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.foreversurvival.ForeverSurvival;
@@ -7,10 +8,9 @@ import com.foreversurvival.data.PlayerQuestData;
 import com.foreversurvival.data.QuestDataHolder;
 import com.foreversurvival.quest.QuestManager;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -24,23 +24,30 @@ import net.minecraft.resources.Identifier;
  */
 public final class ModNetworking {
 
-	public static final Identifier SYNC_DATA = new Identifier(ForeverSurvival.MOD_ID, "sync_data");
-	public static final Identifier PLAYER_LOCATIONS =
-			new Identifier(ForeverSurvival.MOD_ID, "player_locations");
-	public static final Identifier CHECKMARK = new Identifier(ForeverSurvival.MOD_ID, "checkmark");
-
 	private ModNetworking() {
 	}
 
-	public static void registerServerReceivers() {
-		ServerPlayNetworking.registerGlobalReceiver(CHECKMARK, (server, player, handler, buf, responseSender) -> {
-			String questId = buf.readString(128);
-			String taskId = buf.readString(128);
-			boolean set = buf.readBoolean();
+	/**
+	 * Payload types must be registered on both sides before any send, so this
+	 * runs from the common initialiser rather than the server one.
+	 */
+	public static void registerPayloads() {
+		PayloadTypeRegistry.playS2C().register(
+				ModPayloads.SyncData.TYPE, ModPayloads.SyncData.CODEC);
+		PayloadTypeRegistry.playS2C().register(
+				ModPayloads.PlayerLocations.TYPE, ModPayloads.PlayerLocations.CODEC);
+		PayloadTypeRegistry.playC2S().register(
+				ModPayloads.Checkmark.TYPE, ModPayloads.Checkmark.CODEC);
+	}
 
-			// Always bounce back onto the server thread before touching game state.
-			server.execute(() -> QuestManager.get().handleCheckmark(player, questId, taskId, set));
-		});
+	public static void registerServerReceivers() {
+		ServerPlayNetworking.registerGlobalReceiver(ModPayloads.Checkmark.TYPE,
+				(payload, context) ->
+						// The handler already runs on the server thread in 26.2,
+						// but the lock check inside handleCheckmark still applies.
+						context.server().execute(() -> QuestManager.get().handleCheckmark(
+								context.player(), payload.questId(), payload.taskId(),
+								payload.set())));
 	}
 
 	/** Pushes the full quest state to its owner. Progress stays per-player. */
@@ -53,10 +60,7 @@ public final class ModNetworking {
 		root.put("Data", data.writeNbt());
 		root.put("Stats", buildStats(player));
 
-		FriendlyByteBuf buf = PacketByteBufs.create();
-		buf.writeNbt(root);
-
-		ServerPlayNetworking.send(player, SYNC_DATA, buf);
+		ServerPlayNetworking.send(player, new ModPayloads.SyncData(root));
 		data.clearDirty();
 	}
 
@@ -85,27 +89,25 @@ public final class ModNetworking {
 	 * needs a direction, not a smooth interpolation.
 	 */
 	public static void syncPlayerLocations(MinecraftServer server) {
-		List<ServerPlayer> players = server.getPlayerManager().getPlayerList();
+		List<ServerPlayer> players = server.getPlayerList().getPlayers();
 		if (players.size() < 2) {
 			// Nothing worth drawing when you are the only one online.
 			return;
 		}
 
-		// A fresh buffer per recipient: a FriendlyByteBuf is released once sent,
-		// so the same instance must never be handed to two sends.
+		// One immutable payload now serves every recipient: unlike a byte buffer
+		// a record is not released on send, so it is safe to reuse.
+		List<ModPayloads.PlayerLocations.Entry> entries = new ArrayList<>(players.size());
+		for (ServerPlayer player : players) {
+			entries.add(new ModPayloads.PlayerLocations.Entry(
+					player.getGameProfile().getName(),
+					player.getX(), player.getY(), player.getZ(),
+					player.level().dimension().location().toString()));
+		}
+
+		ModPayloads.PlayerLocations payload = new ModPayloads.PlayerLocations(entries);
 		for (ServerPlayer recipient : players) {
-			FriendlyByteBuf buf = PacketByteBufs.create();
-			buf.writeVarInt(players.size());
-
-			for (ServerPlayer player : players) {
-				buf.writeString(player.getGameProfile().getName());
-				buf.writeDouble(player.getX());
-				buf.writeDouble(player.getY());
-				buf.writeDouble(player.getZ());
-				buf.writeString(player.world.getRegistryKey().getValue().toString());
-			}
-
-			ServerPlayNetworking.send(recipient, PLAYER_LOCATIONS, buf);
+			ServerPlayNetworking.send(recipient, payload);
 		}
 	}
 }

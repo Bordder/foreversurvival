@@ -11,10 +11,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.world.gen.StructureAccessor;
-import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.gen.feature.StructureFeature;
+import java.util.function.Predicate;
+
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 /**
  * "Be somewhere" task, in two flavours.
@@ -33,9 +35,13 @@ import net.minecraft.world.gen.feature.StructureFeature;
 public class StructureTask extends QuestTask {
 
 	private final Set<Block> blocks;
-	/** Non-null in structure mode. */
+	/**
+	 * Non-null in structure mode. 26.2 has no StructureFeature: structures are
+	 * data-driven, so a task matches either one structure by key or a whole
+	 * family by tag (VILLAGE covers all five village variants).
+	 */
 	@Nullable
-	private final StructureFeature<?> feature;
+	private final Predicate<Holder<Structure>> feature;
 	/** Full dimension id, e.g. "minecraft:the_nether". Null means any. */
 	@Nullable
 	private final String dimension;
@@ -48,13 +54,22 @@ public class StructureTask extends QuestTask {
 		this.feature = null;
 	}
 
-	/** Structure mode - the accurate one. Use this whenever a feature exists. */
+	/** Structure mode, one specific structure. */
 	public StructureTask(String id, String description, @Nullable String dimension,
-			StructureFeature<?> feature) {
+			ResourceKey<Structure> structure) {
 		super(id, description, 1);
 		this.dimension = dimension;
 		this.blocks = Set.of();
-		this.feature = feature;
+		this.feature = holder -> holder.is(structure);
+	}
+
+	/** Structure mode, a whole family - every village type, every mineshaft. */
+	public StructureTask(String id, String description, @Nullable String dimension,
+			TagKey<Structure> structures) {
+		super(id, description, 1);
+		this.dimension = dimension;
+		this.blocks = Set.of();
+		this.feature = holder -> holder.is(structures);
 	}
 
 	@Override
@@ -62,7 +77,7 @@ public class StructureTask extends QuestTask {
 		ServerPlayer player = ctx.getPlayer();
 
 		if (dimension != null) {
-			String current = player.world.getRegistryKey().getValue().toString();
+			String current = player.level().dimension().location().toString();
 			if (!dimension.equals(current)) {
 				return 0;
 			}
@@ -87,32 +102,18 @@ public class StructureTask extends QuestTask {
 	}
 
 	/**
-	 * A StructureFeature can have several configured variants - five village
-	 * types, several ruined portal types - and only the configured form can be
-	 * looked up, so every variant of the wanted feature is checked.
+	 * getStructureWithPieceAt is stricter than the old bounding-box check: it
+	 * requires the player to be inside an actual generated piece, so standing in
+	 * the empty air above a buried mineshaft no longer counts.
 	 */
 	private boolean isInsideStructure(ServerPlayer player) {
-		if (!(player.world instanceof ServerLevel world)) {
+		if (!(player.level() instanceof ServerLevel world)) {
 			return false;
 		}
 
-		StructureAccessor accessor = world.getStructureAccessor();
-		BlockPos pos = player.getBlockPos();
-
-		for (ConfiguredStructureFeature<?, ?> configured
-				: world.getRegistryManager().get(Registry.CONFIGURED_STRUCTURE_FEATURE_KEY)) {
-
-			if (configured.feature != feature) {
-				continue;
-			}
-
-			StructureStart start = accessor.getStructureAt(pos, configured);
-			if (start != null && start != StructureStart.DEFAULT && start.hasChildren()) {
-				return true;
-			}
-		}
-
-		return false;
+		BlockPos pos = player.blockPosition();
+		StructureStart start = world.structureManager().getStructureWithPieceAt(pos, feature);
+		return start != null && start.isValid();
 	}
 
 	/** Empty in structure mode - only block mode contributes to the world scan. */

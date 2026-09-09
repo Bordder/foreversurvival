@@ -60,7 +60,7 @@ public class EnchantTask extends QuestTask {
 		// EnchantmentHelper.getLevel does not read - check that list directly.
 		if (stack.isOf(Items.ENCHANTED_BOOK) && stack.hasNbt()) {
 			CompoundTag nbt = stack.getNbt();
-			if (nbt != null && nbt.contains("StoredEnchantments", Tag.LIST_TYPE)) {
+			if (nbt != null && nbt.contains("StoredEnchantments")) {
 				ListTag stored = nbt.getList("StoredEnchantments", Tag.COMPOUND_TYPE);
 				for (int i = 0; i < stored.size(); i++) {
 					CompoundTag entry = stored.getCompound(i);

@@ -5,7 +5,6 @@ import java.util.List;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 
@@ -56,7 +55,7 @@ public final class DurabilityTooltip {
 			colour = ChatFormatting.RED;
 		}
 
-		lines.add(new Component("Durability: ").formatted(ChatFormatting.GRAY)
-				.append(new Component(remaining + " / " + max).formatted(colour)));
+		lines.add(Component.literal("Durability: ").withStyle(ChatFormatting.GRAY)
+				.append(Component.literal(remaining + " / " + max).withStyle(colour)));
 	}
 }

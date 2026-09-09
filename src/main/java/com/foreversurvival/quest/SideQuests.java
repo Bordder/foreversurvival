@@ -19,7 +19,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 /**
  * SIDE CHALLENGES (30) - optional, unlocked from the start, never blocking.
@@ -273,7 +274,7 @@ final class SideQuests {
 						+ "zombie villager, a golden apple and a splash potion of weakness - "
 						+ "everything you need to cure it, laid out for you.")
 				.tools("Any Shovel", "Torches")
-				.task(new StructureTask("igloo", "Find an Igloo", OVERWORLD, StructureFeature.IGLOO),
+				.task(new StructureTask("igloo", "Find an Igloo", OVERWORLD, BuiltinStructures.IGLOO),
 						new ItemTask("snow", "Collect Snow Blocks", 16, Items.SNOW_BLOCK),
 						new CheckmarkTask("basement", "Find an igloo with a basement")));
 
@@ -286,7 +287,7 @@ final class SideQuests {
 						+ "apple. Crying obsidian only comes from these and from bartering.")
 				.tools("Diamond Pickaxe", "Shovel")
 				.task(new StructureTask("ruined", "Find a Ruined Portal in the Overworld", OVERWORLD,
-								StructureFeature.RUINED_PORTAL),
+								StructureTags.RUINED_PORTAL),
 						new ItemTask("crying", "Collect Crying Obsidian", 2, Items.CRYING_OBSIDIAN)));
 
 		addSide(Quest.builder("s21_librarian", QuestPhase.SIDE)

@@ -12,7 +12,7 @@ import com.foreversurvival.quest.task.StructureTask;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 3 - THE EXPANSION (22 quests, MAJOR).
@@ -121,7 +121,7 @@ final class Phase3Quests {
 						+ "one. Blazes spawn in fortresses only, never bastions.")
 				.tools("Diamond Armour", "Bow", "Shield")
 				.task(new StructureTask("fortress", "Find a Nether Fortress", NETHER,
-								StructureFeature.FORTRESS),
+								BuiltinStructures.FORTRESS),
 						new ItemTask("nether_brick", "Collect Nether Bricks", 16,
 								Items.NETHER_BRICKS)));
 
@@ -218,7 +218,7 @@ final class Phase3Quests {
 						+ "of a piglin - that aggros the entire structure anyway.")
 				.tools("Gold Armour", "Fire Resistance Potions", "Building Blocks")
 				.task(new StructureTask("bastion", "Find a Bastion Remnant", NETHER,
-								StructureFeature.BASTION_REMNANT),
+								BuiltinStructures.BASTION_REMNANT),
 						new ItemTask("gilded", "Collect Gilded Blackstone", 2,
 								Items.GILDED_BLACKSTONE)));
 

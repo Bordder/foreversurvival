@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.tags.StructureTags;
 
 /**
  * PHASE 2 - THE ESTABLISHMENT (25 quests).
@@ -149,7 +149,7 @@ final class Phase2Quests {
 						+ "villager's prices permanently.")
 				.tools("Crops to sell")
 				.task(new StructureTask("village", "Stand inside a Village", OVERWORLD,
-								StructureFeature.VILLAGE),
+								StructureTags.VILLAGE),
 						new StatTask("trade", "Trade with Villagers", 8, Stats.TRADED_WITH_VILLAGER),
 						new ItemTask("emeralds", "Collect Emeralds", 12, Items.EMERALD)));
 
@@ -217,7 +217,7 @@ final class Phase2Quests {
 						+ "behind the cobwebs - break the webs with a sword and torch the spawner fast.")
 				.tools("Iron Sword", "Torches", "Milk Bucket")
 				.task(new StructureTask("mineshaft", "Find an Abandoned Mineshaft", OVERWORLD,
-								StructureFeature.MINESHAFT),
+								StructureTags.MINESHAFT),
 						new ItemTask("string", "Collect String from cobwebs", 24, Items.STRING),
 						new KillTask("cave_spiders", "Kill Cave Spiders", 12, EntityType.CAVE_SPIDER)));
 

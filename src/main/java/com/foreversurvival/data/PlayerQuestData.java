@@ -209,7 +209,7 @@ public class PlayerQuestData {
 
 		ListTag completedList = new ListTag();
 		for (String id : completedQuests) {
-			completedList.add(StringTag.of(id));
+			completedList.add(StringTag.valueOf(id));
 		}
 		root.put("Completed", completedList);
 
@@ -225,7 +225,7 @@ public class PlayerQuestData {
 
 		ListTag celebratedList = new ListTag();
 		for (String id : celebratedPhases) {
-			celebratedList.add(StringTag.of(id));
+			celebratedList.add(StringTag.valueOf(id));
 		}
 		root.put("Celebrated", celebratedList);
 
@@ -258,39 +258,39 @@ public class PlayerQuestData {
 		completionPlayTicks.clear();
 		damageDealt.clear();
 
-		ListTag completedList = root.getList("Completed", Tag.STRING_TYPE);
+		ListTag completedList = root.getListOrEmpty("Completed");
 		for (int i = 0; i < completedList.size(); i++) {
-			completedQuests.add(completedList.getString(i));
+			completedQuests.add(completedList.getStringOr(i, ""));
 		}
 
-		CompoundTag progressNbt = root.getCompound("Progress");
-		for (String questId : progressNbt.getKeys()) {
-			CompoundTag taskNbt = progressNbt.getCompound(questId);
+		CompoundTag progressNbt = root.getCompoundOrEmpty("Progress");
+		for (String questId : progressNbt.keySet()) {
+			CompoundTag taskNbt = progressNbt.getCompoundOrEmpty(questId);
 			Map<String, Integer> tasks = new LinkedHashMap<>();
-			for (String taskId : taskNbt.getKeys()) {
-				tasks.put(taskId, taskNbt.getInt(taskId));
+			for (String taskId : taskNbt.keySet()) {
+				tasks.put(taskId, taskNbt.getIntOr(taskId, 0));
 			}
 			progress.put(questId, tasks);
 		}
 
-		ListTag celebratedList = root.getList("Celebrated", Tag.STRING_TYPE);
+		ListTag celebratedList = root.getListOrEmpty("Celebrated");
 		for (int i = 0; i < celebratedList.size(); i++) {
-			celebratedPhases.add(celebratedList.getString(i));
+			celebratedPhases.add(celebratedList.getStringOr(i, ""));
 		}
 
-		ListTag deathList = root.getList("Deaths", Tag.COMPOUND_TYPE);
+		ListTag deathList = root.getListOrEmpty("Deaths");
 		for (int i = 0; i < deathList.size(); i++) {
-			deaths.add(DeathRecord.fromNbt(deathList.getCompound(i)));
+			deaths.add(DeathRecord.fromNbt(deathList.getCompoundOrEmpty(i)));
 		}
 
-		CompoundTag timesNbt = root.getCompound("CompletionTimes");
-		for (String questId : timesNbt.getKeys()) {
-			completionPlayTicks.put(questId, timesNbt.getInt(questId));
+		CompoundTag timesNbt = root.getCompoundOrEmpty("CompletionTimes");
+		for (String questId : timesNbt.keySet()) {
+			completionPlayTicks.put(questId, timesNbt.getIntOr(questId, 0));
 		}
 
-		CompoundTag damageNbt = root.getCompound("DamageDealt");
-		for (String typeId : damageNbt.getKeys()) {
-			damageDealt.put(typeId, damageNbt.getFloat(typeId));
+		CompoundTag damageNbt = root.getCompoundOrEmpty("DamageDealt");
+		for (String typeId : damageNbt.keySet()) {
+			damageDealt.put(typeId, damageNbt.getFloatOr(typeId, 0.0F));
 		}
 
 		markDirty();

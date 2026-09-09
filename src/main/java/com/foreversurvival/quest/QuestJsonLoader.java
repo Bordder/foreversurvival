@@ -29,7 +29,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.Registry;
-import net.minecraft.world.gen.feature.StructureFeature;
 
 /**
  * Loads extra quests from {@code config/foreversurvival/quests/*.json}.

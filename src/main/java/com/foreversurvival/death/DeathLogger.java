@@ -6,7 +6,6 @@ import com.foreversurvival.data.QuestDataHolder;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.text.LiteralText;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 
@@ -49,10 +48,10 @@ public final class DeathLogger {
 			data.addDeath(record);
 
 			int index = data.getDeaths().size();
-			player.sendMessage(new Component("[ForeverSurvival] ").formatted(ChatFormatting.DARK_AQUA)
-					.append(new Component("Death #" + index + " logged: "
+			player.sendSystemMessage(Component.literal("[ForeverSurvival] ").withStyle(ChatFormatting.DARK_AQUA)
+					.append(Component.literal("Death #" + index + " logged: "
 							+ record.getX() + ", " + record.getY() + ", " + record.getZ()
-							+ " [" + record.getDimensionDisplayName() + "]").formatted(ChatFormatting.RED)), false);
+							+ " [" + record.getDimensionDisplayName() + "]").withStyle(ChatFormatting.RED)));
 
 			return true;
 		});

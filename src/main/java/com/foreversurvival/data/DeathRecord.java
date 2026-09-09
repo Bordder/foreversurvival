@@ -120,17 +120,17 @@ public class DeathRecord {
 
 	public static DeathRecord fromNbt(CompoundTag nbt) {
 		ListTag inventory = null;
-		if (nbt.contains("Inv", Tag.LIST_TYPE)) {
-			inventory = nbt.getList("Inv", Tag.COMPOUND_TYPE);
+		if (nbt.contains("Inv")) {
+			inventory = nbt.getListOrEmpty("Inv");
 		}
 
 		return new DeathRecord(
-				nbt.getInt("X"),
-				nbt.getInt("Y"),
-				nbt.getInt("Z"),
-				nbt.getString("Dim"),
-				nbt.getLong("Time"),
-				nbt.getString("Cause"),
+				nbt.getIntOr("X", 0),
+				nbt.getIntOr("Y", 0),
+				nbt.getIntOr("Z", 0),
+				nbt.getStringOr("Dim", ""),
+				nbt.getLongOr("Time", 0L),
+				nbt.getStringOr("Cause", ""),
 				inventory);
 	}
 }

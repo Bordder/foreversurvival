@@ -19,6 +19,7 @@ import com.foreversurvival.quest.task.StructureTask;
 import com.foreversurvival.quest.task.TaskContext;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
@@ -27,7 +28,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.text.LiteralText;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 
@@ -275,13 +275,15 @@ public final class QuestManager {
 				player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME)));
 
 		// No items, no XP: the mod tells you what to do, vanilla does the rest.
-		player.sendMessage(new Component("[ForeverSurvival] ").formatted(ChatFormatting.DARK_AQUA)
-				.append(new Component("Quest complete: ").formatted(ChatFormatting.GREEN))
-				.append(new Component(quest.getTitle()).formatted(ChatFormatting.YELLOW)), false);
+		player.sendSystemMessage(Component.literal("[ForeverSurvival] ").withStyle(ChatFormatting.DARK_AQUA)
+				.append(Component.literal("Quest complete: ").withStyle(ChatFormatting.GREEN))
+				.append(Component.literal(quest.getTitle()).withStyle(ChatFormatting.YELLOW)));
 
 		// Small celebration: action bar line plus a brief puff of sparks.
-		player.sendMessage(new Component("✔ ").formatted(ChatFormatting.GREEN)
-				.append(new Component(quest.getTitle()).formatted(ChatFormatting.WHITE)), true);
+		// 26.2 has no displayClientMessage, so the action bar is sent as a packet.
+		player.connection.send(new ClientboundSetActionBarTextPacket(
+				Component.literal("✔ ").withStyle(ChatFormatting.GREEN)
+						.append(Component.literal(quest.getTitle()).withStyle(ChatFormatting.WHITE))));
 		spawnSparks(player);
 
 		checkPhaseCompletion(player, data, quest.getPhase());
@@ -301,15 +303,15 @@ public final class QuestManager {
 
 		data.setCelebrated(phase.getId());
 
-		player.sendMessage(new Component("=== " + phase.getDisplayName() + " COMPLETE ===")
-				.formatted(phase.getColor(), ChatFormatting.BOLD), false);
+		player.sendSystemMessage(Component.literal("=== " + phase.getDisplayName() + " COMPLETE ===")
+				.withStyle(phase.getColor(), ChatFormatting.BOLD));
 
 		// Big celebration: a title card, and fireworks for the major phases.
-		player.networkHandler.sendPacket(new ClientboundSetTitlesAnimationPacket(10, 60, 20));
-		player.networkHandler.sendPacket(new ClientboundSetSubtitleTextPacket(
-				new Component(phase.getDisplayName()).formatted(phase.getColor())));
-		player.networkHandler.sendPacket(new ClientboundSetTitleTextPacket(
-				new Component("PHASE COMPLETE").formatted(ChatFormatting.GOLD, ChatFormatting.BOLD)));
+		player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 60, 20));
+		player.connection.send(new ClientboundSetSubtitleTextPacket(
+				Component.literal(phase.getDisplayName()).withStyle(phase.getColor())));
+		player.connection.send(new ClientboundSetTitleTextPacket(
+				Component.literal("PHASE COMPLETE").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
 
 		if (phase.isMajor()) {
 			spawnCelebration(player);

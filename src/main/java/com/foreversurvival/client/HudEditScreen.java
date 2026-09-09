@@ -5,7 +5,6 @@ import com.foreversurvival.quest.Quest;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
 
 /**
  * Layout editor.
@@ -66,7 +65,7 @@ public class HudEditScreen extends Screen {
 	private double grabY;
 
 	public HudEditScreen(Screen parent) {
-		super(new Component("Edit HUD Layout"));
+		super(Component.literal("Edit HUD Layout"));
 		this.parent = parent;
 	}
 
@@ -75,13 +74,13 @@ public class HudEditScreen extends Screen {
 		int y = this.height - 26;
 
 		addDrawableChild(new Button(this.width / 2 - 180, y, 84, 20,
-				new Component("Auto height"), button -> {
+				Component.literal("Auto height"), button -> {
 					HudConfig.hudHeight = 0;
 					HudConfig.save();
 				}));
 
 		addDrawableChild(new Button(this.width / 2 - 92, y, 84, 20,
-				new Component("Reset layout"), button -> {
+				Component.literal("Reset layout"), button -> {
 					HudConfig.hudX = 0.72D;
 					HudConfig.hudY = 0.02D;
 					HudConfig.hudWidth = 150;
@@ -94,7 +93,7 @@ public class HudEditScreen extends Screen {
 				}));
 
 		addDrawableChild(new Button(this.width / 2 - 4, y, 96, 20,
-				new Component(HudConfig.locatorXpBarMode ? "Bar: XP slot" : "Bar: free"),
+				Component.literal(HudConfig.locatorXpBarMode ? "Bar: XP slot" : "Bar: free"),
 				button -> {
 					HudConfig.locatorXpBarMode = !HudConfig.locatorXpBarMode;
 					HudConfig.save();
@@ -102,7 +101,7 @@ public class HudEditScreen extends Screen {
 				}));
 
 		addDrawableChild(new Button(this.width / 2 + 96, y, 84, 20,
-				new Component("Done"), button -> {
+				Component.literal("Done"), button -> {
 					HudConfig.save();
 					this.client.setScreen(parent);
 				}));

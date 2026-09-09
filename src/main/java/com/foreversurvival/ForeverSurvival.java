@@ -42,6 +42,8 @@ public class ForeverSurvival implements ModInitializer {
 				QuestManager.get().getMainQuests().size(),
 				QuestManager.get().getSideQuests().size());
 
+		// Payload types must be registered before anything can be sent.
+		ModNetworking.registerPayloads();
 		ModNetworking.registerServerReceivers();
 		DeathLogger.register();
 

@@ -15,7 +15,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 /**
  * PHASE 4 - THE MASTERY (24 quests, MAJOR).
@@ -38,7 +39,7 @@ final class Phase4Quests {
 						+ "sits on a stone pressure plate wired to nine TNT - never drop into the pit.")
 				.tools("Pickaxe", "Torches")
 				.task(new StructureTask("temple", "Find a Desert Temple", OVERWORLD,
-								StructureFeature.DESERT_PYRAMID),
+								BuiltinStructures.DESERT_PYRAMID),
 						new CheckmarkTask("looted", "Loot all four temple chests without triggering the TNT")));
 
 		addMain(Quest.builder("p4_02_jungle_temple", QuestPhase.PHASE_4)
@@ -49,7 +50,7 @@ final class Phase4Quests {
 						+ "arrows. The lever puzzle behind the stairs opens the second chest.")
 				.tools("Shears", "Pickaxe", "Torches")
 				.task(new StructureTask("jungle", "Find a Jungle Temple", OVERWORLD,
-								StructureFeature.JUNGLE_PYRAMID),
+								BuiltinStructures.JUNGLE_TEMPLE),
 						new ItemTask("hooks", "Collect Tripwire Hooks", 2, Items.TRIPWIRE_HOOK)));
 
 		addMain(Quest.builder("p4_03_shipwreck", QuestPhase.PHASE_4)
@@ -61,7 +62,7 @@ final class Phase4Quests {
 						+ "It is the ONLY source of a Heart of the Sea.")
 				.tools("Boat", "Shovel", "Water Breathing Potion")
 				.task(new StructureTask("shipwreck", "Find a Shipwreck", OVERWORLD,
-								StructureFeature.SHIPWRECK),
+								StructureTags.SHIPWRECK),
 						new ItemTask("heart", "Dig up a Heart of the Sea", 1, Items.HEART_OF_THE_SEA)));
 
 		addMain(Quest.builder("p4_04_ocean_monument", QuestPhase.PHASE_4)
@@ -73,7 +74,7 @@ final class Phase4Quests {
 				.tools("Water Breathing Potions", "Milk Buckets", "Doors")
 				.task(new KillTask("elder", "Kill Elder Guardians", 3, EntityType.ELDER_GUARDIAN),
 						new StructureTask("monument", "Find an Ocean Monument", OVERWORLD,
-								StructureFeature.MONUMENT),
+								BuiltinStructures.OCEAN_MONUMENT),
 						new ItemTask("sponge", "Collect a Sponge", 1, Items.SPONGE, Items.WET_SPONGE)));
 
 		addMain(Quest.builder("p4_05_conduit_power", QuestPhase.PHASE_4)
@@ -220,7 +221,7 @@ final class Phase4Quests {
 						+ "of redstone that does not involve mining.")
 				.tools("Bow", "Armour", "Milk Bucket")
 				.task(new StructureTask("hut", "Find a Swamp Hut", OVERWORLD,
-								StructureFeature.SWAMP_HUT),
+								BuiltinStructures.SWAMP_HUT),
 						new KillTask("witches", "Kill Witches", 15, EntityType.WITCH),
 						new ItemTask("glowstone_dust", "Collect Glowstone Dust", 16,
 								Items.GLOWSTONE_DUST)));
@@ -281,7 +282,7 @@ final class Phase4Quests {
 						+ "through walls. Fight in doorways.")
 				.tools("Woodland Explorer Map", "Diamond Armour", "Golden Apples", "Horse or Boat")
 				.task(new StructureTask("mansion", "Find a Woodland Mansion", OVERWORLD,
-								StructureFeature.MANSION),
+								BuiltinStructures.WOODLAND_MANSION),
 						new KillTask("vindicators", "Kill Vindicators", 10, EntityType.VINDICATOR),
 						new ItemTask("notch", "Loot an Enchanted Golden Apple", 1,
 								Items.ENCHANTED_GOLDEN_APPLE)));

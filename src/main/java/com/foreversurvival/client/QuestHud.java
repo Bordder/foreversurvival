@@ -15,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.FormattedCharSequence;
 
 /**
@@ -109,7 +108,7 @@ public final class QuestHud extends DrawableHelper {
 			return;
 		}
 
-		List<FormattedCharSequence> lines = font.wrapLines(new Component(text), Math.max(20, width));
+		List<FormattedCharSequence> lines = font.wrapLines(Component.literal(text), Math.max(20, width));
 		for (int i = 0; i < lines.size(); i++) {
 			// Only the first line of a block carries the checkbox.
 			out.add(new Row(lines.get(i), rgb, indent, i == 0 ? checkbox : -1));
