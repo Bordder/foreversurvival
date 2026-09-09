@@ -161,7 +161,7 @@ public final class QuestManager {
 			return;
 		}
 
-		for (ServerPlayer player : server.getPlayerManager().getPlayerList()) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			try {
 				evaluate(player);
 			} catch (Exception e) {

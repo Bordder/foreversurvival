@@ -22,6 +22,7 @@ import com.foreversurvival.quest.task.QuestTask;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import com.mojang.blaze3d.platform.Window;
@@ -1162,7 +1163,7 @@ public class QuestScreen extends Screen {
 
 		Minecraft client = Minecraft.getInstance();
 		graphics.item(stack, x, y);
-		client.getItemRenderer().renderGuiItemOverlay(font, stack, x, y);
+		graphics.itemDecorations(font, stack, x, y);
 	}
 
 	// ------------------------------------------------------------------
@@ -1990,7 +1991,7 @@ public class QuestScreen extends Screen {
 		}
 
 		if (ForeverSurvivalClient.openQuestsKey != null
-				&& ForeverSurvivalClient.openQuestsKey.matchesKey(keyCode, scanCode)) {
+				&& ForeverSurvivalClient.openQuestsKey.matches(event)) {
 			this.close();
 			return true;
 		}
@@ -2127,7 +2128,7 @@ public class QuestScreen extends Screen {
 
 	private void enableScissor(int x1, int y1, int x2, int y2) {
 		Window window = Minecraft.getInstance().getWindow();
-		double scale = window.getScaleFactor();
+		double scale = window.getGuiScale();
 
 		int sx = (int) (x1 * scale);
 		int sy = (int) ((window.getGuiScaledHeight() - y2) * scale);
@@ -2246,8 +2247,8 @@ public class QuestScreen extends Screen {
 	}
 
 	private static int colorOf(ChatFormatting formatting) {
-		Integer value = formatting.getColorValue();
-		return 0xFF000000 | (value == null ? 0xFFFFFF : value);
+		TextColor colour = TextColor.fromLegacyFormat(formatting);
+		return 0xFF000000 | (colour == null ? 0xFFFFFF : colour.getValue());
 	}
 
 	private static int questProgress(PlayerQuestData data, Quest quest) {

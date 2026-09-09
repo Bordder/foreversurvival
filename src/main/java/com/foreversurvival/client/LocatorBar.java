@@ -72,7 +72,7 @@ public final class LocatorBar {
 	private boolean hudUsable(Minecraft client) {
 		return HudConfig.locatorEnabled
 				&& client.player != null
-				&& !client.options.debugEnabled;
+				&& !client.getDebugOverlay().showDebugScreen();
 	}
 
 	/** True when at least one other player is in the same dimension as you. */

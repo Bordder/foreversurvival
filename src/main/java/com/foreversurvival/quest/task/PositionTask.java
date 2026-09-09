@@ -50,7 +50,7 @@ public class PositionTask extends QuestTask {
 		}
 
 		// Horizontal distance only - height should not count towards a journey.
-		BlockPos spawn = world.getSpawnPos();
+		BlockPos spawn = world.getRespawnData().pos();
 		double dx = player.getX() - spawn.getX();
 		double dz = player.getZ() - spawn.getZ();
 

@@ -36,7 +36,7 @@ public class ServerPlayerEntityMixin implements QuestDataHolder {
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
 	private void foreversurvival$read(CompoundTag nbt, CallbackInfo ci) {
-		if (nbt.contains(ForeverSurvival.NBT_ROOT_KEY, Tag.COMPOUND_TYPE)) {
+		if (nbt.contains(ForeverSurvival.NBT_ROOT_KEY, Tag.TAG_COMPOUND)) {
 			foreversurvival$questData.readNbt(nbt.getCompound(ForeverSurvival.NBT_ROOT_KEY));
 		}
 	}
