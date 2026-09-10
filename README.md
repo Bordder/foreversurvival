@@ -19,7 +19,7 @@ Two builds. Pick the one for your Minecraft version from
 
 The builds are feature-identical.
 
-Mod ID `foreversurvival`, group `com.foreversurvival`.
+Mod ID `foreversurvival`, group `com.foreversurvival`. MIT licensed.
 
 ---
 
