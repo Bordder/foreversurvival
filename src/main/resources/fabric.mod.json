@@ -12,7 +12,6 @@
 		"sources": "https://github.com/Bordder/foreversurvival",
 		"issues": "https://github.com/Bordder/foreversurvival/issues"
 	},
-	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
 		"main": [

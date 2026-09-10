@@ -58,12 +58,6 @@ java {
 	}
 }
 
-jar {
-	from("LICENSE") {
-		rename { "${it}_${project.base.archivesName.get()}" }
-	}
-}
-
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {

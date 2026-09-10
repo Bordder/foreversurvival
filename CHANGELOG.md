@@ -38,7 +38,7 @@ Fixed:
 
 Two mappings that are not what you would guess: `Identifier` kept its name and
 only moved package, to `net.minecraft.resources`, and `GuiGraphics` is not in
-26.2 at all. Full table in [PORTING-26.2.md](PORTING-26.2.md).
+26.2 at all.
 
 Not verified: the guides have not been played through on 26.2. Ore heights are
 still correct; nothing else world-generation specific has been re-checked.

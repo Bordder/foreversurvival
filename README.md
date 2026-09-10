@@ -17,10 +17,9 @@ Two builds. Pick the one for your Minecraft version from
 | 26.2 | 0.19.5 | 0.160.0+26.2 | 25 | `main` | `v1.0.0-mc26.2` |
 | 1.18.2 | 0.15.11 | 0.77.0+1.18.2 | 17 | `1.18.2` | `v1.0.0-mc1.18.2` |
 
-The builds are feature-identical. If you are porting something of your own,
-the verified mapping table is in [PORTING-26.2.md](PORTING-26.2.md).
+The builds are feature-identical.
 
-Mod ID `foreversurvival`, group `com.foreversurvival`, MIT licensed.
+Mod ID `foreversurvival`, group `com.foreversurvival`.
 
 ---
 
