@@ -250,7 +250,7 @@ elements hide with F1 and while the debug screen is open.
 | `ItemTask` | Scans the player's inventory, armour and offhand. Progress is **sticky** — spending the items never undoes the objective. |
 | `CraftTask` | Reads the vanilla `minecraft.crafted` statistic. |
 | `KillTask` | Reads the vanilla `minecraft.killed` statistic, so only kills credited to you count. |
-| `StructureTask` | Two modes. **Structure mode** asks the game directly whether you are inside a generated structure (`StructureAccessor`), checking every configured variant, so your own spruce base with a cauldron can never satisfy it. **Block mode** scans ±12 blocks horizontally / ±6 vertically for a set of blocks, used only for things the game does not model as a structure: a player-built shelter, a lit nether portal, an amethyst geode, a cave biome. |
+| `StructureTask` | Two modes. **Structure mode** asks the game directly whether you are inside a generated structure (`StructureManager`), checking every configured variant, so your own spruce base with a cauldron can never satisfy it. **Block mode** scans ±12 blocks horizontally / ±6 vertically for a set of blocks, used only for things the game does not model as a structure: a player-built shelter, a lit nether portal, an amethyst geode, a cave biome. |
 | `CheckmarkTask` | Manual. Click the checkbox in the detail pane to tick **or un-tick** it; the server re-validates that the quest is unlocked before accepting either. Once the whole quest is complete it is final. |
 
 Everything is evaluated on a **one-second poll** against your inventory and
@@ -263,7 +263,7 @@ counts.
 
 All state — completed quests, per-task progress, celebrated phases and the
 death log — is written into the vanilla player NBT via a mixin on
-`ServerPlayerEntity#writeCustomDataToNbt` / `readCustomDataFromNbt`, and copied
+`ServerPlayer#addAdditionalSaveData` / `readAdditionalSaveData`, and copied
 across on respawn with `ServerPlayerEvents.COPY_FROM`.
 
 ---
