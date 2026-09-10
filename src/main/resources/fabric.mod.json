@@ -3,7 +3,7 @@
 	"id": "foreversurvival",
 	"version": "${version}",
 	"name": "ForeverSurvival",
-	"description": "A months-long guided survival progression for Minecraft 26.2. Its own questing system, GUI, static guides, optional side challenges and a death coordinate log.",
+	"description": "A guided survival progression mod for Fabric Minecraft 26.2",
 	"authors": [
 		"ForeverSurvival"
 	],
