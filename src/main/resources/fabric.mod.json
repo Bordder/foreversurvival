@@ -3,11 +3,15 @@
 	"id": "foreversurvival",
 	"version": "${version}",
 	"name": "ForeverSurvival",
-	"description": "A completely self-contained, strictly-locked, months-long guided survival progression for Minecraft 1.18.2. Includes its own questing system, GUI, static guides, balanced rewards, optional side challenges and a death coordinate log. Requires no other questing mod.",
+	"description": "A guided survival progression mod for Fabric Minecraft 1.18.2",
 	"authors": [
 		"ForeverSurvival"
 	],
-	"contact": {},
+	"contact": {
+		"homepage": "https://github.com/Bordder/foreversurvival",
+		"sources": "https://github.com/Bordder/foreversurvival",
+		"issues": "https://github.com/Bordder/foreversurvival/issues"
+	},
 	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
