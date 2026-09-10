@@ -3,26 +3,25 @@
 A self-contained Fabric mod that turns a vanilla world into a strictly-locked,
 months-long guided survival campaign.
 
-No FTB Quests. No KubeJS. No FTB Teams. No questing library of any kind. The
-only dependency is Fabric API.
+No FTB Quests. No KubeJS. No FTB Teams. No questing library of any kind. Fabric
+API is the only dependency.
 
-156 quests, 455 objectives, zero rewards. The mod's whole job is to tell you
-what to do next; everything you get, you get from vanilla.
+156 quests and 455 objectives, and it gives you nothing for finishing them. The
+mod tells you what to do next. Vanilla gives you everything else.
 
 ## Downloads
 
-Two builds, same mod, different Minecraft versions. Grab the jar for your
-version from [Releases](../../releases) and drop it in `mods/` next to Fabric
-API.
+Two builds. Pick the one for your Minecraft version from
+[Releases](../../releases) and drop the jar in `mods/` alongside Fabric API.
 
 | Minecraft | Loader | Fabric API | Java | Branch | Release |
 |---|---|---|---|---|---|
 | 26.2 | 0.19.5 | 0.160.0+26.2 | 25 | `main` | `v1.0.0-mc26.2` |
 | 1.18.2 | 0.15.11 | 0.77.0+1.18.2 | 17 | `1.18.2` | `v1.0.0-mc1.18.2` |
 
-Both are feature-identical. The 26.2 build is a straight port — see
-[PORTING-26.2.md](PORTING-26.2.md) for the mapping table if you are porting
-something of your own and want the parts that are not obvious.
+They are feature-identical. The 26.2 build is a port and nothing more. If you
+are porting something of your own, the verified mapping table is in
+[PORTING-26.2.md](PORTING-26.2.md).
 
 Mod ID `foreversurvival`, group `com.foreversurvival`, MIT licensed.
 
@@ -287,31 +286,30 @@ across on respawn with `ServerPlayerEvents.COPY_FROM`.
 
 ## Building
 
-The `main` branch builds for 26.2 and needs **JDK 25**. The `1.18.2` branch
-needs **JDK 17**. You do not need Gradle installed; the wrapper fetches it.
+`main` builds for 26.2 and wants JDK 25. The `1.18.2` branch wants JDK 17. You
+do not need Gradle; the wrapper fetches it.
 
 ```bash
 gradlew build
 ```
 
-The jar carries its Minecraft version in the name, so the two builds can sit in
-`build/libs` side by side without clobbering each other:
+Output:
 
 ```
 build/libs/foreversurvival-mc26.2-1.0.0.jar
 build/libs/foreversurvival-mc1.18.2-1.0.0.jar
 ```
 
-Ignore the `-sources` jar next to it. The plain one is what goes in `mods/`.
+The Minecraft version is in the name so the two builds do not overwrite each
+other. Ignore the `-sources` jar; the plain one goes in `mods/`.
 
-One gotcha on the 26.2 branch. Loom 1.17 wants a JVM of 21 or newer to run
-Gradle. That is not the same thing as the JDK 25 it compiles against. If your
-`JAVA_HOME` is older than 21 the build dies before it reaches any of your code.
-Point `JAVA_HOME` at something newer, or set `org.gradle.java.home` in
-`gradle.properties`.
+There is one trap on the 26.2 branch. Loom 1.17 needs a JVM of 21 or newer to
+run Gradle, which is separate from the JDK 25 it compiles against. With an
+older `JAVA_HOME` the build fails before it reaches your code. Repoint
+`JAVA_HOME`, or uncomment `org.gradle.java.home` in `gradle.properties`.
 
-26.2 was built against Loom 1.17.20 with Microsoft OpenJDK 25.0.4. 1.18.2 was
-built against Loom 0.12.56 / Gradle 7.4.1 with Microsoft OpenJDK 17.0.20.
+Built against Loom 1.17.20 with Microsoft OpenJDK 25.0.4 (26.2), and Loom
+0.12.56 / Gradle 7.4.1 with Microsoft OpenJDK 17.0.20 (1.18.2).
 
 To launch a dev client:
 
