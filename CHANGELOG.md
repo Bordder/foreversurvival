@@ -51,13 +51,15 @@ First release. Fabric API is the only dependency.
 
 Quests:
 
-- 126 main quests, 6 phases, one strict linear chain. Parent is whatever was
-  declared before it, phase boundaries included.
+- 126 main quests, 6 phases, unlocking in a fixed order. Parent is whatever
+  was declared before it, phase boundaries included.
 - 30 side challenges, off the main chain.
 - 455 objectives.
 - No rewards.
 - Locked quests are readable, not completable. Server re-checks the lock on
-  every checkmark packet.
+  every checkmark packet. This gates the quest list only; nothing stops you
+  doing any of it early, and the chain ticks through behind you when it does
+  unlock.
 - Counts sized to what the next step eats, plus a buffer.
 - Static hand-written guides. Required-tools list per quest.
 

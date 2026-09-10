@@ -1,7 +1,7 @@
 # ForeverSurvival
 
-A self-contained Fabric mod that turns a vanilla world into a strictly-locked,
-months-long guided survival campaign.
+A Fabric mod that lays a months-long guided survival campaign over a vanilla
+world.
 
 Fabric API is the only dependency.
 
@@ -26,8 +26,8 @@ Mod ID `foreversurvival`, group `com.foreversurvival`, MIT licensed.
 
 ## What it does
 
-**126 main quests** across 6 phases, welded into one strict linear chain, plus
-**30 optional side challenges** that never block the main line. 455 individual
+**126 main quests** across 6 phases, unlocking in a fixed order, plus
+**30 optional side challenges** that sit outside that order. 455 individual
 objectives in total.
 
 | Phase | Name | Quests | Covers |
@@ -50,18 +50,25 @@ ender covers a 12-frame portal at the 20% shatter rate, 4 ancient debris makes
 exactly 1 netherite ingot. Length comes from the *number* of distinct
 objectives, never from inflated stack counts.
 
-### Strict locking, with previews
+### Unlock order, with previews
 
 A quest's parent is the quest declared immediately before it — across phase
-boundaries too.
+boundaries too. One main quest is active at a time: the first incomplete one.
+
+**This gates the quest list, not the world.** Nothing stops you mining
+netherite in your first hour. Locking decides which quest is on screen and
+being evaluated, and that is all it decides.
 
 Locked quests are **fully previewable**: you can click any quest ahead of you
 and read its title, description, required tools, static guide and objective
 list. They are drawn greyed with a padlock, and the "Mark objective complete"
-button is absent.
+button is absent. `QuestManager` re-validates the lock on every checkmark
+packet, so the button being absent is not the only thing stopping you.
 
-They are never **doable**. `QuestManager` only evaluates progress for unlocked
-quests, and re-validates the lock on every checkmark packet.
+Because detection reads your inventory and your lifetime vanilla statistics,
+work you did before a quest unlocked counts the moment it does. Play far ahead
+of the chain and it will tick through behind you, several quests at a time.
+The mod is a suggested order to follow, not a gate.
 
 Completed quests get a green tick in the list, on each finished objective, and
 next to each finished phase in the Summary tab.
@@ -130,7 +137,7 @@ working file.
 Task types are `item`, `craft`, `kill`, `structure` and `checkmark`. A
 `structure` task takes either a `structure` id (accurate) or a `blocks` list
 (scan). Overriding a **main** quest must declare its own `parent`, or the
-strict chain loses a link. A malformed file is logged and skipped.
+chain loses a link. A malformed file is logged and skipped.
 
 ---
 
@@ -247,8 +254,9 @@ elements hide with F1 and while the debug screen is open.
 | `StructureTask` | Two modes. **Structure mode** asks the game directly whether you are inside a generated structure (`StructureAccessor`), checking every configured variant, so your own spruce base with a cauldron can never satisfy it. **Block mode** scans ±12 blocks horizontally / ±6 vertically for a set of blocks, used only for things the game does not model as a structure: a player-built shelter, a lit nether portal, an amethyst geode, a cave biome. |
 | `CheckmarkTask` | Manual. Click the checkbox in the detail pane to tick **or un-tick** it; the server re-validates that the quest is unlocked before accepting either. Once the whole quest is complete it is final. |
 
-Everything is evaluated on a **one-second poll**, so progress you made before a
-quest unlocked still counts.
+Everything is evaluated on a **one-second poll** against your inventory and
+lifetime statistics, so progress you made before a quest unlocked still
+counts.
 
 ---
 
